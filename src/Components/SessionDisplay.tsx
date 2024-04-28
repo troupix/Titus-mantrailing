@@ -25,7 +25,7 @@ const SessionDisplay: React.FC<SessionDisplayProps> = ({ trailInfo }) => {
                 return 'Départ à l\'aveugle';
             case 'double blind':
                 return 'Double aveugle';
-            case 'knwowing':
+            case 'knowing':
                 return 'Départ à vue';
             default:
                 return 'Inconnu';
@@ -34,12 +34,12 @@ const SessionDisplay: React.FC<SessionDisplayProps> = ({ trailInfo }) => {
 
     React.useEffect(() => {
         if (mapRef.current) {
-          (mapRef.current as any).setView(trailInfo.locationCoordinate, 14);
+          (mapRef.current as any).setView(trailInfo.locationCoordinate, 16);
         }
       }, [trailInfo, mapRef]);
 
     return (
-        <Grid container spacing={2} >
+        <Grid container spacing={2} sx={{textAlign:'left'}}>
             <Grid item xs={12}>
                 <Header title={`Piste de ${trailInfo.dogName} du ${new Date(trailInfo.date).toLocaleDateString([], { dateStyle: 'long' })}`} trail_id={trailInfo._id} />
                 {/* <Typography variant="h5">Piste de {trailInfo.dogName} du {new Date(trailInfo.date).toLocaleDateString([], { dateStyle: 'long' })}</Typography> */}
@@ -91,7 +91,7 @@ const SessionDisplay: React.FC<SessionDisplayProps> = ({ trailInfo }) => {
             <Grid item xs={4} >
                 {/* <div id="map" style={{height:'100%', width:'100%'}}></div> */}
                 {trailInfo.locationCoordinate && trailInfo.locationCoordinate.length === 2 &&
-                <MapContainer   style={{ height: "100%", width: "100%" }} center={trailInfo.locationCoordinate} zoom={14} scrollWheelZoom={true} ref={mapRef}>
+                <MapContainer   style={{ height: "100%", width: "100%" }} center={trailInfo.locationCoordinate} zoom={16} scrollWheelZoom={true} ref={mapRef}>
                         <TileLayer
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

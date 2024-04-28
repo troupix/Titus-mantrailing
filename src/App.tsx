@@ -54,9 +54,8 @@ function App() {
           <SessionDrawer sx={{width:'100%', height: '100%' }} categories={categories} />
         </Grid>
         <Grid item xs={10}>
-          {location}
-          {location === 'newsession' &&
-            <SessionForm triggerGetTrails={triggerGetTrails} setTriggerGetTrails={setTriggerGetTrails} />}
+          {location.split('/')[0] === 'newsession' &&
+            <SessionForm edit_trail={allTrails.find(t => t._id === location.split('/')[1]) ? allTrails.find(t => t._id === location.split('/')[1]) as Trail : undefined } />}
           {allTrails.length !== 0 && allTrails.find((trail) => trail._id === location) && (
             <SessionDisplay trailInfo={allTrails.find((trail) => trail._id === location) as Trail} />
           )}

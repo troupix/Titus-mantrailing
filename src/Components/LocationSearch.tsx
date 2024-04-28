@@ -4,10 +4,11 @@ import { OpenStreetMapProvider } from 'leaflet-geosearch';
 
 interface LocationSearchProps {
     onLocationSelect: (lat: number|undefined, lng: number|undefined, label:string) => void;
+    defaultLocation?: string;
 }
 
-const LocationSearch: React.FC<LocationSearchProps> = ({onLocationSelect}) => {
-    const [searchText, setSearchText] = useState('');
+const LocationSearch: React.FC<LocationSearchProps> = ({onLocationSelect, defaultLocation}) => {
+    const [searchText, setSearchText] = useState(defaultLocation ? defaultLocation :'');
     const [results, setResults] = useState<any[]>([]);
     const provider = new OpenStreetMapProvider();
     // const results = provider.search({ query: searchText }).then((results:any) => {
@@ -43,14 +44,17 @@ return (
     <Autocomplete
         freeSolo
         options={results}
+        value={searchText}
+        defaultValue={defaultLocation ? defaultLocation : ''}
         onSelect={(e: any) => handleSelectChange(e)}
         renderInput={(params: any) => (
             <TextField
                 {...params}
                 label="Search Location"
                 value={searchText}
+                defaultValue={defaultLocation ? defaultLocation : ''}
                 onChange={(e) => setSearchText(e.target.value)}
-                o
+                
             />
         )}
     />

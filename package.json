@@ -16,6 +16,7 @@
     "@types/react": "^18.2.79",
     "@types/react-dom": "^18.2.25",
     "axios": "^1.6.8",
+    "gpx-parser-builder": "^1.1.0",
     "leaflet": "^1.9.4",
     "leaflet-geosearch": "^3.11.1",
     "mongoose": "^8.3.2",

@@ -103,7 +103,7 @@ export const Navigator: React.FC<NavProps> = (props) => {
       }
     }} >
       <List disablePadding sx={{backgroundColor:'#101F33'}}>
-        <ListItem sx={{ ...item, ...itemCategory }}>
+        <ListItem sx={{ ...item, ...itemCategory, textAlign:'center', alignItems:'center' }}>
             {setLocation && (
                 <NewSessionButton onClick={() => {setLocation('newsession')}} />
             )}

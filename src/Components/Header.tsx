@@ -41,9 +41,16 @@ const Header: React.FC<HeaderProps> = (props) => {
         }
     }
 
+    const editAction = () => {
+        if(trail_id)
+        {
+            setLocation('newsession/'+trail_id)
+        }
+    }
+
   return (
-    <React.Fragment>
-      <AppBar color="primary" position="sticky" elevation={0}>
+    <React.Fragment >
+      <AppBar color="primary" position="sticky" elevation={0} >
         <Toolbar>
           <Grid container spacing={1} alignItems="center">
             <Grid sx={{ display: { sm: 'none', xs: 'block' } }} item>
@@ -79,6 +86,7 @@ const Header: React.FC<HeaderProps> = (props) => {
             <Grid item>
             <IconButton
                 color="inherit"
+                onClick={editAction}
                 aria-label="open drawer"
                 edge="start"
                 sx={{ mr: 2 }}
@@ -96,7 +104,7 @@ const Header: React.FC<HeaderProps> = (props) => {
         color="primary"
         position="static"
         elevation={0}
-        sx={{ zIndex: 0 }}
+        sx={{ zIndex: 0, borderBottomLeftRadius: 15, borderBottomRightRadius: 15}}
       >
         <Toolbar>
           <Grid container alignItems="center" spacing={1}>

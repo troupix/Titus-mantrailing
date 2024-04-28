@@ -11,6 +11,8 @@ interface Trail {
     trailType?: string
     startType?: string
     date: Date
-    locationCoordinate?: [number, number]
+    locationCoordinate?: [number, number],
+    dogTrace?: any,
+    runnerTrace?: any,
 }
 export type {  Trail };
