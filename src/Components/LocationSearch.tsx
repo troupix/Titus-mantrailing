@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet';
-import { TextField, Button, Autocomplete } from '@mui/material';
+import { TextField,  Autocomplete } from '@mui/material';
 import { OpenStreetMapProvider } from 'leaflet-geosearch';
 
 interface LocationSearchProps {

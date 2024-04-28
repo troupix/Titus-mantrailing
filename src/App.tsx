@@ -29,6 +29,7 @@ function App() {
   const { location } = useContext(LocationContext) || {};
   const [categories, setCategories] = useState<category[]>([]);
   const [allTrails, setAllTrails] = useState<Trail[]>([]);
+  const {triggerGetTrails, setTriggerGetTrails} = useContext(LocationContext);
 
   useEffect(() => {
     getAllTrail().then((data) => {
@@ -43,7 +44,7 @@ function App() {
       });
       setCategories(newCategories);
     })
-  }, []);
+  }, [triggerGetTrails]);
 
   return (
     <div className="App">
@@ -51,7 +52,7 @@ function App() {
       <SessionDrawer sx={{ height: '100%' }} categories={categories} />
       {location}
       {location === 'newsession' &&
-        <SessionForm />}
+        <SessionForm triggerGetTrails={triggerGetTrails} setTriggerGetTrails={setTriggerGetTrails}/>}
       {allTrails.length !== 0 &&  allTrails.find((trail) => trail._id === location) && (
         <SessionDisplay trailInfo={allTrails.find((trail) => trail._id === location) as Trail} />
       )}

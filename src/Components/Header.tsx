@@ -13,15 +13,33 @@ import Tabs from '@mui/material/Tabs';
 import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
+import PrintIcon from '@mui/icons-material/Print';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import {deleteTrail} from '../Utils/api';
+import { LocationContext } from './Context/Location';
+
 
 const lightColor = 'rgba(255, 255, 255, 0.7)';
 
 interface HeaderProps {
     title?: string;
+    trail_id?: string;
+    
 }
 
 const Header: React.FC<HeaderProps> = (props) => {
-    const { title } = props;
+    const { title,trail_id } = props;
+    const {location, setLocation} = React.useContext(LocationContext);
+    const {triggerGetTrails, setTriggerGetTrails} = React.useContext(LocationContext);
+    const deleteAction = () => {
+        if(trail_id)
+        {
+            deleteTrail(trail_id);
+            setLocation('')
+            setTriggerGetTrails(!triggerGetTrails);
+        }
+    }
 
   return (
     <React.Fragment>
@@ -29,17 +47,46 @@ const Header: React.FC<HeaderProps> = (props) => {
         <Toolbar>
           <Grid container spacing={1} alignItems="center">
             <Grid sx={{ display: { sm: 'none', xs: 'block' } }} item>
-            
+
             </Grid>
             <Grid item xs />
             <Grid item>
-              
+            <IconButton
+                
+                color="inherit"
+                aria-label="open drawer"
+                edge="start"
+                sx={{ mr: 2 }}
+                >
+                    <Tooltip title="Imprimer">
+                    <PrintIcon />
+                    </Tooltip>
+                </IconButton>
             </Grid>
             <Grid item>
-              
+            <IconButton
+                onClick={deleteAction}
+                color="inherit"
+                aria-label="open drawer"
+                edge="start"
+                sx={{ mr: 2 }}
+                >
+                    <Tooltip title="Supprimer">
+                    <DeleteIcon />
+                    </Tooltip>
+                </IconButton>
             </Grid>
             <Grid item>
-              
+            <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                edge="start"
+                sx={{ mr: 2 }}
+                >
+                    <Tooltip title="Editer">
+                    <EditIcon />
+                    </Tooltip>
+                </IconButton>
             </Grid>
           </Grid>
         </Toolbar>

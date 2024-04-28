@@ -41,13 +41,13 @@ const SessionDisplay: React.FC<SessionDisplayProps> = ({ trailInfo }) => {
     return (
         <Grid container spacing={2} sx={{ textAlign: 'left', marginLeft: '13%', width: '86%' }}>
             <Grid item xs={12}>
-                <Header title={`Piste de ${trailInfo.dogName} du ${new Date(trailInfo.date).toLocaleDateString([], { dateStyle: 'long' })}`} />
+                <Header title={`Piste de ${trailInfo.dogName} du ${new Date(trailInfo.date).toLocaleDateString([], { dateStyle: 'long' })}`} trail_id={trailInfo._id} />
                 {/* <Typography variant="h5">Piste de {trailInfo.dogName} du {new Date(trailInfo.date).toLocaleDateString([], { dateStyle: 'long' })}</Typography> */}
             </Grid>
             <Grid item xs={6}>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
-                        <Typography variant="h5">Information sur la séssion</Typography>
+                        <Typography variant="h5">Informations sur la session</Typography>
                     </Grid>
                     <Grid item xs={12}>
                         <Typography variant="body1">Location: {trailInfo.location}</Typography>
@@ -65,7 +65,7 @@ const SessionDisplay: React.FC<SessionDisplayProps> = ({ trailInfo }) => {
                     )}
 
                     <Grid item xs={12}>
-                        <Typography variant="h5">Information sur la piste</Typography>
+                        <Typography variant="h5">Informations sur la piste</Typography>
                     </Grid>
                     <Grid item xs={12}>
                         <Typography variant="body1">Type de piste: {trailInfo.trailType}</Typography>
@@ -109,7 +109,7 @@ const SessionDisplay: React.FC<SessionDisplayProps> = ({ trailInfo }) => {
                     id="notes"
                     type="text"
                     label="Notes"
-                    value={trailInfo.notes}
+                    value={trailInfo.notes} 
                     // onChange={handleChange}
                     name="notes"
                     multiline

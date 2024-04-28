@@ -61,3 +61,8 @@ export const saveTrail = async (trail: Trail) => {
     const response = await api.post('/api/mantrailing/save', trail);
     return response.data;
 }
+
+export const deleteTrail = async (id: string) => {
+    const response = await api.post(`/api/mantrailing/delete`, {id});
+    return response.data;
+}
