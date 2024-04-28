@@ -38,7 +38,7 @@ import { Trail } from './types';
 //         type: String,
 //         required: false
 //     },
-//     blindStart: {
+//     startType: {
 //         type: Boolean,
 //         required: false
 //     }

@@ -3,6 +3,8 @@ import { Button, TextField, FormControl, InputLabel, Select, MenuItem, Grid, Che
 import { Trail } from '../Utils/types';
 import { saveTrail } from '../Utils/api';
 import { SelectChangeEvent } from '@mui/material';
+import Header from './Header';
+import LocationSearch from './LocationSearch';
 
 const SessionForm: React.FC = () => {
      const [checked, setChecked] = useState(false);
@@ -39,6 +41,21 @@ const SessionForm: React.FC = () => {
         });
     }
 
+    const handleLocationChange = (lat?: number, lng?: number, label?: string) => {
+        console.log(lat, lng, label);
+        setTrail({
+            ...trail,
+            location: label,
+            // locationCoordinate: '[' + lat + ',' + lng + ']',
+        });
+        if(lat && lng){
+            setTrail({
+                ...trail,
+                location: label,
+                locationCoordinate: [lat, lng]
+            });
+        }
+    }
 
 
     const handleSelectChange = (event: SelectChangeEvent<string>) => {
@@ -53,8 +70,20 @@ const SessionForm: React.FC = () => {
         console.log(trail);
     }, [trail]);
 
+    const handleStartType = (event: SelectChangeEvent<string>) => {
+        setTrail({
+            ...trail,
+            startType: event.target.value,
+        });
+    }
+    
+
     return (
         <Grid container spacing={3} sx={{marginLeft:'13%', width:'85%'}}>
+            
+            <Grid item xs={12} sx={{textAlign:'left'}}>
+                <Header title="Enregistrer une nouvelle piste" />
+            </Grid>
             <Grid item xs={12}>
                 <Typography variant="h4">Session Details</Typography>
             </Grid>
@@ -72,12 +101,7 @@ const SessionForm: React.FC = () => {
                 />
             </Grid>
             <Grid item xs={4}>
-                <TextField
-                    id="location"
-                    label="Location"
-                    type="text"
-                    onChange={handleChange}
-                    name="location" />
+            <LocationSearch onLocationSelect={handleLocationChange}/>
             </Grid>
             <Grid item xs={12}>
                 <Typography variant="h4">Handler Details</Typography>
@@ -151,22 +175,29 @@ const SessionForm: React.FC = () => {
                     fullWidth />
             </Grid>
             <Grid item xs={3}>
-                <FormControlLabel
-                    control={
-                        <Checkbox
-                            id="blindStart"
-                            onChange={handleCheckboxChange}
-                            name="blindStart"
-                            value={trail.blindStart}
-                        />
-                    }
-                    label="départ à l'aveugle"
-                />
+            <FormControl>
+                    <InputLabel id="startType-label">type de départ</InputLabel>
+                    <Select
+                        sx={{ minWidth: '200px' }}
+                        labelId="startType-label"
+                        id="startType"
+                        value={trail.startType}
+                        defaultValue='knowing'
+                        label="type de départ"
+                        onChange={handleStartType}
+                        name="startType"
+                    >
+                        <MenuItem value={"knowing"}>Départ à vue</MenuItem>
+                        <MenuItem value={"blind"}>Départ à l'aveugle</MenuItem>
+                        <MenuItem value={"double blind"}>Double aveugle</MenuItem>
+                    </Select>
+                </FormControl>
             </Grid>
            
             <Grid item xs={12}>
                 <Button type="submit" onClick={() => handleSave()}>Submit</Button>
             </Grid>
+
         </Grid>
     );
 };

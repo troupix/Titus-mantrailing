@@ -9,7 +9,8 @@ interface Trail {
     duration?: number
     notes?: string
     trailType?: string
-    blindStart?: boolean
+    startType?: string
     date: Date
+    locationCoordinate?: [number, number]
 }
 export type {  Trail };

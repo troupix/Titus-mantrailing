@@ -10,7 +10,7 @@ interface Trail {
     duration?: number;
     notes?: string;
     trailType?: string;
-    blindStart?: boolean;
+    startType?: string;
     trainer?: string;
 }
 
@@ -19,6 +19,19 @@ interface TrailDisplayProps {
 }
 
 const TrailDisplay: React.FC<TrailDisplayProps> = ({ trail }) => {
+    const trailTypeToFrench = (trailType:string) => {
+        switch(trailType){
+            case 'blind':
+                return 'Départ à l\'aveugle';
+            case 'double blind':
+                return 'Double aveugle';
+            case 'knwowing':
+                return 'Départ à vue';
+            default:
+                return 'Inconnu';
+        }
+    }
+
     return (
         <Card>
             <CardContent>
@@ -46,9 +59,9 @@ const TrailDisplay: React.FC<TrailDisplayProps> = ({ trail }) => {
                 <Typography color="textSecondary">
                     {trail.trailType}
                 </Typography>
-                <Typography color="textSecondary">
-                    {trail.blindStart ? 'Blind Start' : 'Not a Blind Start'}
-                </Typography>
+                {trail.startType && <Typography color="textSecondary">
+                    Type de départ: {trailTypeToFrench(trail.startType)}
+                </Typography>}
                 <Typography color="textSecondary">
                     {trail.trainer}
                 </Typography>

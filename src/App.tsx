@@ -34,7 +34,7 @@ function App() {
     getAllTrail().then((data) => {
       setAllTrails(data);
       const newCategories=[{id:'Trail',children:[]}]
-      newCategories[0].children = data.sort((a:any, b:any) => new Date(b.date).getTime() - new Date(a.date).getTime()  ).map((trail: any) => {
+      newCategories[0].children = data.sort((a:any, b:any) => new Date(b.date).getTime() - new Date(a.date).getTime() ).map((trail: any) => {
         return {
           id: new Date(trail.date).toLocaleDateString(),
           icon: <DnsRoundedIcon />,
