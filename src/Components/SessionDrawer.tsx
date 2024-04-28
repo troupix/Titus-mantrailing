@@ -97,7 +97,11 @@ export const Navigator: React.FC<NavProps> = (props) => {
     const [trails, setTrails] = React.useState<Trail[]>([]);
 
   return (
-    <Drawer variant="permanent" {...other} >
+    <Drawer variant="permanent" {...other} sx={{
+      '& .MuiDrawer-paperAnchorDockedLeft':{
+        position: 'relative',
+      }
+    }} >
       <List disablePadding sx={{backgroundColor:'#101F33'}}>
         <ListItem sx={{ ...item, ...itemCategory }}>
             {setLocation && (

@@ -116,7 +116,7 @@ const SessionForm: React.FC<SessionFormProps> = () => {
 
 
     return (
-        <Grid container spacing={3} sx={{ marginLeft: '13%', width: '85%' }}>
+        <Grid container spacing={3}>
 
             <Grid item xs={12} sx={{ textAlign: 'left' }}>
                 <Header title="Enregistrer une nouvelle piste" />

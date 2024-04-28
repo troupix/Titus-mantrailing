@@ -39,7 +39,7 @@ const SessionDisplay: React.FC<SessionDisplayProps> = ({ trailInfo }) => {
       }, [trailInfo, mapRef]);
 
     return (
-        <Grid container spacing={2} sx={{ textAlign: 'left', marginLeft: '13%', width: '86%' }}>
+        <Grid container spacing={2} >
             <Grid item xs={12}>
                 <Header title={`Piste de ${trailInfo.dogName} du ${new Date(trailInfo.date).toLocaleDateString([], { dateStyle: 'long' })}`} trail_id={trailInfo._id} />
                 {/* <Typography variant="h5">Piste de {trailInfo.dogName} du {new Date(trailInfo.date).toLocaleDateString([], { dateStyle: 'long' })}</Typography> */}
