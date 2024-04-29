@@ -43,6 +43,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({onLocationSelect, defaul
 return (
     <Autocomplete
         freeSolo
+        sx={{ width: '65%' }}
         options={results}
         value={searchText}
         defaultValue={defaultLocation ? defaultLocation : ''}

@@ -10,10 +10,12 @@ import markerIconPng from "leaflet/dist/images/marker-icon.png"
 import { Icon } from 'leaflet'
 import GPX from 'gpx-parser-builder';
 import SportsScoreIcon from '@mui/icons-material/SportsScore';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
 
 
 import { MapContainer, TileLayer, Marker, Popup, useMapEvent, useMapEvents, Polyline } from 'react-leaflet';
 import { LocationContext } from './Context/Location';
+import { Upload } from '@mui/icons-material';
 
 interface SessionFormProps {
     edit_trail?: Trail;
@@ -179,9 +181,9 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
     }
 
     return (
-        <Grid container spacing={3}>
+        <Grid container spacing={3} sx={{ textAlign: 'left' }}>
 
-            <Grid item xs={12} sx={{ textAlign: 'left' }}>
+            <Grid item xs={12} >
                 <Header title="Enregistrer une nouvelle piste" />
             </Grid>
 
@@ -193,6 +195,7 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                     </Grid>
                     <Grid item xs={6}>
                         <TextField
+                            sx={{width:'65%'}}
                             id="date"
                             label="Date"
                             type="date"
@@ -209,10 +212,11 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                         <LocationSearch onLocationSelect={handleLocationChange} defaultLocation={edit_trail?.location} />
                     </Grid>
                     <Grid item xs={6}>
-                        <FormControl>
+                        <FormControl sx={{width:'65%'}}>
                             <InputLabel id="dogName-label">Handler Name</InputLabel>
                             <Select
-                                sx={{ minWidth: '200px' }}
+                            
+                                // sx={{ minWidth: '200px' }}
                                 labelId="dogName-label"
                                 id="HandlerName"
 
@@ -229,6 +233,8 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                     </Grid>
                     <Grid item xs={6}>
                         <TextField
+                        sx={{width:'65%'}}
+                            // fullWidth
                             id="trainer"
                             label="Trainer"
                             value={trail.trainer}
@@ -245,6 +251,7 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                     </Grid>
                     <Grid item xs={6}>
                         <TextField
+                         sx={{ width: '65%' }}
                             id="trailType"
                             label="Trail Type"
                             value={trail.trailType}
@@ -253,10 +260,11 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                             name="trailType" />
                     </Grid>
                     <Grid item xs={6}>
-                        <FormControl>
+                        <FormControl  sx={{ width: '65%' }}>
                             <InputLabel id="startType-label">type de départ</InputLabel>
                             <Select
-                                sx={{ minWidth: '200px' }}
+                            //  sx={{ width: '65%' }}
+                                // sx={{ minWidth: '200px' }}
                                 labelId="startType-label"
                                 id="startType"
                                 value={trail.startType}
@@ -273,6 +281,7 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                     </Grid>
                     <Grid item xs={6}>
                         <TextField
+                         sx={{ width: '65%' }}
                             id="distance"
                             label="Distance (meters)"
                             defaultValue={0}
@@ -283,6 +292,7 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                     </Grid>
                     <Grid item xs={6}>
                         <TextField
+                         sx={{ width: '65%' }}
                             id="duration"
                             label="Duration (seconds)"
                             defaultValue={0}
@@ -317,8 +327,8 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                     onChange={(e) => handleFileUpload(e.target.files, 'runner')}
                 />
                 <label htmlFor="gpx-upload-runner">
-                    <Button component="span" variant="contained" color="error">
-                        Upload Runner GPX file
+                    <Button component="span" variant="contained" color="error"  sx={{ width: '80%' }} startIcon={<FileUploadIcon />}>
+                        Runner GPX file
                     </Button>
                 </label>
 
@@ -330,15 +340,15 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                     onChange={(e) => handleFileUpload(e.target.files, 'dog')}
                 />
                 <label htmlFor="gpx-upload-dog">
-                    <Button sx={{ marginTop: '20px' }} component="span" variant="contained" color="secondary">
-                        Upload Dog GPX file
+                    <Button sx={{ marginTop: '20px',width: '80%' }} component="span" variant="contained" color="secondary" startIcon={<FileUploadIcon />}>
+                        Dog GPX file
                     </Button>
                 </label>
             </Grid>
             <Grid item xs={12}>
                 <Typography variant="h4">Additional Information</Typography>
             </Grid>
-            <Grid item xs={7}>
+            <Grid item xs={12}>
                 <TextField
                     id="notes"
                     label="Notes"

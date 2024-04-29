@@ -8,7 +8,7 @@ interface NewSessionButtonProps {
 
 const NewSessionButton: React.FC<NewSessionButtonProps> = ({ onClick }) => {
     return (
-        <Button  sx={{marginLeft:'10%'}} variant="contained" color="primary" onClick={onClick} startIcon={<AddIcon />}>
+        <Button variant="contained" color="primary" onClick={onClick} startIcon={<AddIcon />}>
             Create new trail
         </Button>
     );
