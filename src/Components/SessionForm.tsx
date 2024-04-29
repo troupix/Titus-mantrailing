@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Button, TextField, FormControl, InputLabel, Select, MenuItem, Grid, Checkbox, FormControlLabel, Typography } from '@mui/material';
+import { Button, TextField, FormControl, InputLabel, Select, MenuItem, Grid, Typography } from '@mui/material';
 import { Trail } from '../Utils/types';
 import { saveTrail, updateTrail } from '../Utils/api';
 import { SelectChangeEvent } from '@mui/material';
@@ -9,13 +9,12 @@ import 'leaflet/dist/leaflet.css';
 import markerIconPng from "leaflet/dist/images/marker-icon.png"
 import { Icon } from 'leaflet'
 import GPX from 'gpx-parser-builder';
-import SportsScoreIcon from '@mui/icons-material/SportsScore';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 
 
-import { MapContainer, TileLayer, Marker, Popup, useMapEvent, useMapEvents, Polyline } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMapEvents, Polyline } from 'react-leaflet';
 import { LocationContext } from './Context/Location';
-import { Upload } from '@mui/icons-material';
+
 
 interface SessionFormProps {
     edit_trail?: Trail;
@@ -51,15 +50,12 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
         return null;
     }
 
-
     useEffect(() => {
         if (mapRef.current && trail.locationCoordinate) {
             (mapRef.current as any).flyTo(trail.locationCoordinate, 17);
             setMarkerLocation(trail.locationCoordinate);
         }
     }, [trail.locationCoordinate]);
-
-
 
     const handleSave = () => {
         if (edit_trail?._id) {
@@ -68,7 +64,6 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
         else {
             if (trail) {
                 saveTrail(trail);
-                
             }
         }
         setTriggerGetTrails(!triggerGetTrails);
@@ -81,6 +76,7 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
             [event.target.name]: event.target.value,
         });
     };
+
     const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         console.log(event.target.value);
         setTrail({
@@ -89,13 +85,11 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
         });
     };
 
-
     const handleLocationChange = (lat?: number, lng?: number, label?: string) => {
         console.log(lat, lng, label);
         setTrail({
             ...trail,
             location: label,
-            // locationCoordinate: '[' + lat + ',' + lng + ']',
         });
         if (lat && lng) {
             setTrail({
@@ -182,20 +176,17 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
 
     return (
         <Grid container spacing={3} sx={{ textAlign: 'left' }}>
-
             <Grid item xs={12} >
                 <Header title="Enregistrer une nouvelle piste" />
             </Grid>
-
             <Grid item xs={6}>
-
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
-                        <Typography variant="h4">Session Details</Typography>
+                        <Typography variant="h4">Informations sur la session</Typography>
                     </Grid>
                     <Grid item xs={6}>
                         <TextField
-                            sx={{width:'65%'}}
+                            sx={{ width: '65%' }}
                             id="date"
                             label="Date"
                             type="date"
@@ -212,14 +203,11 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                         <LocationSearch onLocationSelect={handleLocationChange} defaultLocation={edit_trail?.location} />
                     </Grid>
                     <Grid item xs={6}>
-                        <FormControl sx={{width:'65%'}}>
+                        <FormControl sx={{ width: '65%' }}>
                             <InputLabel id="dogName-label">Handler Name</InputLabel>
                             <Select
-                            
-                                // sx={{ minWidth: '200px' }}
                                 labelId="dogName-label"
                                 id="HandlerName"
-
                                 value={trail.handlerName}
                                 defaultValue='Malie'
                                 label="Handler Name"
@@ -233,8 +221,7 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                     </Grid>
                     <Grid item xs={6}>
                         <TextField
-                        sx={{width:'65%'}}
-                            // fullWidth
+                            sx={{ width: '65%' }}
                             id="trainer"
                             label="Trainer"
                             value={trail.trainer}
@@ -242,16 +229,12 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                             onChange={handleChange}
                             name="trainer" />
                     </Grid>
-
-
-
-
                     <Grid item xs={12}>
                         <Typography variant="h4">Trail Details</Typography>
                     </Grid>
                     <Grid item xs={6}>
                         <TextField
-                         sx={{ width: '65%' }}
+                            sx={{ width: '65%' }}
                             id="trailType"
                             label="Trail Type"
                             value={trail.trailType}
@@ -260,11 +243,9 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                             name="trailType" />
                     </Grid>
                     <Grid item xs={6}>
-                        <FormControl  sx={{ width: '65%' }}>
+                        <FormControl sx={{ width: '65%' }}>
                             <InputLabel id="startType-label">type de départ</InputLabel>
                             <Select
-                            //  sx={{ width: '65%' }}
-                                // sx={{ minWidth: '200px' }}
                                 labelId="startType-label"
                                 id="startType"
                                 value={trail.startType}
@@ -281,7 +262,7 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                     </Grid>
                     <Grid item xs={6}>
                         <TextField
-                         sx={{ width: '65%' }}
+                            sx={{ width: '65%' }}
                             id="distance"
                             label="Distance (meters)"
                             defaultValue={0}
@@ -292,7 +273,7 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                     </Grid>
                     <Grid item xs={6}>
                         <TextField
-                         sx={{ width: '65%' }}
+                            sx={{ width: '65%' }}
                             id="duration"
                             label="Duration (seconds)"
                             defaultValue={0}
@@ -301,7 +282,6 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                             onChange={handleChange}
                             name="duration" />
                     </Grid>
-
                 </Grid>
             </Grid>
             <Grid item xs={4}>
@@ -309,9 +289,7 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                     <TileLayer
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
-                    <Marker position={markerLocation} icon={new Icon({ iconUrl: markerIconPng, iconSize: [25, 41], iconAnchor: [12, 41] })}>
-
-                    </Marker>
+                    <Marker position={markerLocation} icon={new Icon({ iconUrl: markerIconPng, iconSize: [25, 41], iconAnchor: [12, 41] })} />
                     {dogTrace && <Polyline pathOptions={{ color: 'red' }} positions={dogTrace} />}
                     {runnerTrace && <Marker position={runnerTrace[runnerTrace.length - 1]} icon={new Icon({ iconUrl: require('../assets/flag.png'), iconAnchor: [8, 16] })} />}
                     {runnerTrace && <Polyline pathOptions={{ color: 'blue' }} positions={runnerTrace} />}
@@ -327,11 +305,10 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                     onChange={(e) => handleFileUpload(e.target.files, 'runner')}
                 />
                 <label htmlFor="gpx-upload-runner">
-                    <Button component="span" variant="contained" color="error"  sx={{ width: '80%' }} startIcon={<FileUploadIcon />}>
+                    <Button component="span" variant="contained" color="error" sx={{ width: '80%' }} startIcon={<FileUploadIcon />}>
                         Runner GPX file
                     </Button>
                 </label>
-
                 <input
                     accept=".gpx"
                     id="gpx-upload-dog"
@@ -340,7 +317,7 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                     onChange={(e) => handleFileUpload(e.target.files, 'dog')}
                 />
                 <label htmlFor="gpx-upload-dog">
-                    <Button sx={{ marginTop: '20px',width: '80%' }} component="span" variant="contained" color="secondary" startIcon={<FileUploadIcon />}>
+                    <Button sx={{ marginTop: '20px', width: '80%' }} component="span" variant="contained" color="secondary" startIcon={<FileUploadIcon />}>
                         Dog GPX file
                     </Button>
                 </label>
@@ -361,13 +338,9 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                     variant="outlined"
                     fullWidth />
             </Grid>
-
-
-
             <Grid item xs={12}>
                 <Button type="submit" onClick={() => handleSave()}>Submit</Button>
             </Grid>
-
         </Grid>
     );
 };

@@ -1,11 +1,11 @@
 import React from 'react';
-import { FormControl, Grid, InputLabel, TextField, Typography } from '@mui/material';
+import { Grid, TextField, Typography } from '@mui/material';
 import { Trail } from '../Utils/types';
 import Header from './Header';
-import { MapContainer, Marker, Popup, TileLayer, Polyline } from 'react-leaflet';
+import { MapContainer, Marker, TileLayer, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import markerIconPng from "leaflet/dist/images/marker-icon.png"
-import {Icon} from 'leaflet'
+import { Icon } from 'leaflet'
 
 interface SessionDisplayProps {
     trailInfo: Trail;
@@ -36,18 +36,17 @@ const SessionDisplay: React.FC<SessionDisplayProps> = ({ trailInfo }) => {
 
     React.useEffect(() => {
         if (mapRef.current) {
-          (mapRef.current as any).setView(trailInfo.locationCoordinate, 16);
+            (mapRef.current as any).setView(trailInfo.locationCoordinate, 16);
         }
-      }, [trailInfo, mapRef]);
-
+    }, [trailInfo, mapRef]);
+    
     return (
-        <Grid container spacing={2} sx={{textAlign:'left'}}>
+        <Grid container spacing={2} sx={{ textAlign: 'left' }}>
             <Grid item xs={12}>
                 <Header title={`Piste de ${trailInfo.dogName} du ${new Date(trailInfo.date).toLocaleDateString([], { dateStyle: 'long' })}`} trail_id={trailInfo._id} />
-                {/* <Typography variant="h5">Piste de {trailInfo.dogName} du {new Date(trailInfo.date).toLocaleDateString([], { dateStyle: 'long' })}</Typography> */}
             </Grid>
             <Grid item xs={6}>
-                <Grid container spacing={2}>
+                <Grid container spacing={2} sx={{ marginLeft: '1%' }}>
                     <Grid item xs={12}>
                         <Typography variant="h5">Informations sur la session</Typography>
                     </Grid>
@@ -65,7 +64,6 @@ const SessionDisplay: React.FC<SessionDisplayProps> = ({ trailInfo }) => {
                             <Typography variant="body1">Nom de l'entraineur: {trailInfo.trainer}</Typography>
                         </Grid>
                     )}
-
                     <Grid item xs={12}>
                         <Typography variant="h5">Informations sur la piste</Typography>
                     </Grid>
@@ -88,40 +86,33 @@ const SessionDisplay: React.FC<SessionDisplayProps> = ({ trailInfo }) => {
                         </Grid>
                     )}
                 </Grid>
-
             </Grid>
             <Grid item xs={4} >
-                {/* <div id="map" style={{height:'100%', width:'100%'}}></div> */}
                 {trailInfo.locationCoordinate && trailInfo.locationCoordinate.length === 2 &&
-                <MapContainer   style={{ height: "100%", width: "100%" }} center={trailInfo.locationCoordinate} zoom={16} scrollWheelZoom={true} ref={mapRef}>
+                    <MapContainer style={{ height: "100%", width: "100%" }} center={trailInfo.locationCoordinate} zoom={16} scrollWheelZoom={true} ref={mapRef}>
                         <TileLayer
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         />
-                                            {dogTrace && <Polyline pathOptions={{ color: 'red' }} positions={dogTrace} />}
-                    {runnerTrace && <Marker position={runnerTrace[runnerTrace.length - 1]} icon={new Icon({ iconUrl: require('../assets/flag.png'), iconAnchor: [8, 16] })} />}
-                    {runnerTrace && <Polyline pathOptions={{ color: 'blue' }} positions={runnerTrace} />}
-                        <Marker position={trailInfo.locationCoordinate} icon={new Icon({iconUrl: markerIconPng, iconSize: [25, 41], iconAnchor: [12, 41]})}>
+                        {dogTrace && <Polyline pathOptions={{ color: 'red' }} positions={dogTrace} />}
+                        {runnerTrace && <Marker position={runnerTrace[runnerTrace.length - 1]} icon={new Icon({ iconUrl: require('../assets/flag.png'), iconAnchor: [8, 16] })} />}
+                        {runnerTrace && <Polyline pathOptions={{ color: 'blue' }} positions={runnerTrace} />}
+                        <Marker position={trailInfo.locationCoordinate} icon={new Icon({ iconUrl: markerIconPng, iconSize: [25, 41], iconAnchor: [12, 41] })}>
                         </Marker>
-                    </MapContainer> }
-                {/* {/* <LocationSearch onLocationSelect={(lat, lng) => { }} /> */}
+                    </MapContainer>}
             </Grid>
-            <Grid item xs={12}>
-
-
+            <Grid item xs={12} sx={{ marginLeft: '1%' }}>
                 <TextField
                     id="notes"
                     type="text"
                     label="Notes"
-                    value={trailInfo.notes} 
-                    // onChange={handleChange}
+                    value={trailInfo.notes}
                     name="notes"
                     multiline
                     rows={5}
                     variant="outlined"
                     disabled
                     fullWidth
-
                     sx={{
                         '& .MuiOutlinedInput-root.Mui-disabled': {
                             '& fieldset': {
@@ -134,12 +125,8 @@ const SessionDisplay: React.FC<SessionDisplayProps> = ({ trailInfo }) => {
                         },
                     }}
                 />
-
             </Grid>
         </Grid>
     );
 };
-
 export default SessionDisplay;
-
-
