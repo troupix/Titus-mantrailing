@@ -1,17 +1,15 @@
 import React, { useContext, useEffect } from 'react';
-import logo from './logo.svg';
 import SessionDrawer from './Components/SessionDrawer';
 import './App.css';
 import { useState } from 'react';
 import { LocationContext } from './Components/Context/Location';
 import SessionForm from './Components/SessionForm';
 import { getAllTrail } from './Utils/api';
-import DnsRoundedIcon from '@mui/icons-material/DnsRounded';
 import SessionDisplay from './Components/SessionDisplay';
 import { Trail } from './Utils/types';
 import { Grid } from '@mui/material';
 import PointingDogIcon from './Components/PointingDogIcon';
-
+import BadgesIcon from './Components/BadgesIcon';
 
 interface category {
   id: string;
@@ -29,7 +27,7 @@ function App() {
   useEffect(() => {
     getAllTrail().then((data) => {
       setAllTrails(data);
-      const newCategories = [{ id: 'Statistiques', children: [{ id: 'Pistes', icon: <PointingDogIcon />, trail_id: 'Stats' },{ id: 'Badges', icon: <PointingDogIcon />, trail_id: 'Badges' } ] }, { id: 'Piste', children: [] }]
+      const newCategories = [{ id: 'Statistiques', children: [{ id: 'Pistes', icon: <BadgesIcon />, trail_id: 'Stats' },{ id: 'Badges', icon: <BadgesIcon />, trail_id: 'Badges' } ] }, { id: 'Piste', children: [] }]
       newCategories[1].children = data.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((trail: any) => {
         return {
           id: new Date(trail.date).toLocaleDateString(),
