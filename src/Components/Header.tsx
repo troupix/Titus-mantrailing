@@ -52,7 +52,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                   component="img"
                   sx={{ width: 100, height: 100 }}
                   alt="logo"
-                  src="/TitusLogo.png"
+                  src="/Titus-mantrailing/TitusLogo.png"
                   onClick={() => setLocation('')}
                 />
             </Grid>
