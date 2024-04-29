@@ -2,7 +2,7 @@ import React from 'react';
 import { FormControl, Grid, InputLabel, TextField, Typography } from '@mui/material';
 import { Trail } from '../Utils/types';
 import Header from './Header';
-import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
+import { MapContainer, Marker, Popup, TileLayer, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import markerIconPng from "leaflet/dist/images/marker-icon.png"
 import {Icon} from 'leaflet'
@@ -13,6 +13,8 @@ interface SessionDisplayProps {
 
 const SessionDisplay: React.FC<SessionDisplayProps> = ({ trailInfo }) => {
     const mapRef = React.useRef(null);
+    const runnerTrace = trailInfo.runnerTrace?.trk[0]?.trkseg[0]?.trkpt ? trailInfo.runnerTrace.trk[0].trkseg[0].trkpt.map((point: any) => [parseFloat(point.$.lat), parseFloat(point.$.lon)]) : undefined;
+    const dogTrace = trailInfo.dogTrace?.trk[0]?.trkseg[0]?.trkpt ? trailInfo.dogTrace.trk[0].trkseg[0].trkpt.map((point: any) => [parseFloat(point.$.lat), parseFloat(point.$.lon)]) : undefined;
     const durationInMinutesSeconds = (duration: number) => {
         const minutes = Math.floor(duration / 60);
         const seconds = duration % 60;
@@ -96,7 +98,9 @@ const SessionDisplay: React.FC<SessionDisplayProps> = ({ trailInfo }) => {
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         />
-                        
+                                            {dogTrace && <Polyline pathOptions={{ color: 'red' }} positions={dogTrace} />}
+                    {runnerTrace && <Marker position={runnerTrace[runnerTrace.length - 1]} icon={new Icon({ iconUrl: require('../assets/flag.png'), iconAnchor: [8, 16] })} />}
+                    {runnerTrace && <Polyline pathOptions={{ color: 'blue' }} positions={runnerTrace} />}
                         <Marker position={trailInfo.locationCoordinate} icon={new Icon({iconUrl: markerIconPng, iconSize: [25, 41], iconAnchor: [12, 41]})}>
                         </Marker>
                     </MapContainer> }

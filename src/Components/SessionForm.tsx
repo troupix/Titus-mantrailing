@@ -27,7 +27,7 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
     const mapRef = React.useRef(null);
     const [markerLocation, setMarkerLocation] = useState<[number, number]>(edit_trail?.locationCoordinate ? edit_trail.locationCoordinate : [45.7578137, 4.8320114]); // [lat, lng
     const [runnerTrace, setRunnerTrace] = useState<[]>(edit_trail?.runnerTrace?.trk[0]?.trkseg[0]?.trkpt ? edit_trail.runnerTrace.trk[0].trkseg[0].trkpt.map((point: any) => [parseFloat(point.$.lat), parseFloat(point.$.lon)]) : undefined);
-    const [dogTrace, setDogTrace] = useState<[]>(edit_trail?.dogTrace?.trk[0]?.trkseg[0]?.trkpt ? edit_trail.dogTrace.trk[0].trk[0].trkseg[0].trkpt.map((point: any) => [parseFloat(point.$.lat), parseFloat(point.$.lon)]) : undefined);
+    const [dogTrace, setDogTrace] = useState<[]>(edit_trail?.dogTrace?.trk[0]?.trkseg[0]?.trkpt ? edit_trail.dogTrace.trk[0].trkseg[0].trkpt.map((point: any) => [parseFloat(point.$.lat), parseFloat(point.$.lon)]) : undefined);
     const [trail, setTrail] = useState<Trail>(edit_trail ? edit_trail : {
         dogName: 'Titus',
         date: new Date(),
