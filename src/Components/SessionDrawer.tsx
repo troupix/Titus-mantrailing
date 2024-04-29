@@ -40,10 +40,10 @@ interface category {
 }
 
 interface trailSummary {
-  id: number;
+  id: string;
   date: string;
   trail_id: number;
-  icon: React.ReactNode;
+  icon: any;
   active: boolean;
 }
 
@@ -57,6 +57,8 @@ export const Navigator: React.FC<NavProps> = (props) => {
     <Drawer variant="permanent" {...other} sx={{
       '& .MuiDrawer-paperAnchorDockedLeft': {
         position: 'relative',
+        height: '100vh',
+        backgroundColor: '#101F33',
       }
     }} >
       <List disablePadding sx={{ backgroundColor: '#101F33' }}>
@@ -66,7 +68,7 @@ export const Navigator: React.FC<NavProps> = (props) => {
           )}
         </ListItem>
         {categories.map(({ id, children }) => (
-          <Box key={id} sx={{ bgcolor: '#101F33', height: '100vh' }}>
+          <Box key={id} sx={{ bgcolor: '#101F33' }}>
             <ListItem sx={{ py: 2, px: 3 }}>
               <ListItemText sx={{ color: '#fff' }}>{id}</ListItemText>
             </ListItem>
