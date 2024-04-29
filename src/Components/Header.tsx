@@ -42,7 +42,7 @@ const Header: React.FC<HeaderProps> = (props) => {
 
   return (
     <React.Fragment >
-      <AppBar color="primary" position="sticky" elevation={0} >
+      <AppBar color="primary" position="relative" elevation={0} >
         <Toolbar>
           <Grid container spacing={1} alignItems="center">
             <Grid sx={{ display: { sm: 'none', xs: 'block' } }} item>
@@ -50,7 +50,7 @@ const Header: React.FC<HeaderProps> = (props) => {
             <Grid item xs >
               <Box
                   component="img"
-                  sx={{ width: 100, height: 100 }}
+                  sx={{ width: 70, height: 70 }}
                   alt="logo"
                   src="/Titus-mantrailing/TitusLogo.png"
                   onClick={() => setLocation('')}
