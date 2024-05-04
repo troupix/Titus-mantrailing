@@ -44,7 +44,7 @@ const Header: React.FC<HeaderProps> = (props) => {
     <React.Fragment >
       <AppBar color="primary" position="relative" elevation={0} >
         <Toolbar>
-          <Grid container spacing={1} alignItems="center">
+          <Grid container spacing={1}  alignItems="center">
             <Grid sx={{ display: { sm: 'none', xs: 'block' } }} item>
             </Grid>
             <Grid item xs >
