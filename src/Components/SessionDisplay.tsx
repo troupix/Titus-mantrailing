@@ -7,6 +7,7 @@ import 'leaflet/dist/leaflet.css';
 import markerIconPng from "leaflet/dist/images/marker-icon.png"
 import { Icon } from 'leaflet'
 import { durationInMinutesSeconds } from '../Utils/utils';
+import { useMediaQuery } from '@mui/material';
 
 interface SessionDisplayProps {
     trailInfo: Trail;
@@ -16,7 +17,7 @@ const SessionDisplay: React.FC<SessionDisplayProps> = ({ trailInfo }) => {
     const mapRef = React.useRef(null);
     const runnerTrace = trailInfo.runnerTrace?.trk[0]?.trkseg[0]?.trkpt ? trailInfo.runnerTrace.trk[0].trkseg[0].trkpt.map((point: any) => [parseFloat(point.$.lat), parseFloat(point.$.lon)]) : undefined;
     const dogTrace = trailInfo.dogTrace?.trk[0]?.trkseg[0]?.trkpt ? trailInfo.dogTrace.trk[0].trkseg[0].trkpt.map((point: any) => [parseFloat(point.$.lat), parseFloat(point.$.lon)]) : undefined;
-
+    const isMobile = useMediaQuery('(max-width:600px)');
 
     const trailTypeToFrench = (startType: string) => {
         switch (startType) {
@@ -42,51 +43,51 @@ const SessionDisplay: React.FC<SessionDisplayProps> = ({ trailInfo }) => {
             <Grid item md={12} xs={12}>
                 <Header title={`Piste de ${trailInfo.dogName} du ${new Date(trailInfo.date).toLocaleDateString([], { dateStyle: 'long' })}`} trail_id={trailInfo._id} />
             </Grid>
-            <Grid item md={6} xs={12}>
+            <Grid item md={6} xs={11}>
                 <Grid container spacing={2} sx={{ marginLeft: '1%' }}>
                     <Grid item md={12}>
                         <Typography variant="h5">Informations sur la session</Typography>
                     </Grid>
-                    <Grid item md={12}>
-                        <Typography variant="body1">Location: {trailInfo.location}</Typography>
+                    <Grid item md={12}  xs={11}>
+                        <Typography variant="body1" sx={{textWrap:'balance'}}>Location: {trailInfo.location}</Typography>
                     </Grid>
 
                     {trailInfo.handlerName && (
-                        <Grid item md={4}>
+                        <Grid item md={4}  xs={11}>
                             <Typography variant="body1">Nom du conducteur: {trailInfo.handlerName}</Typography>
                         </Grid>
                     )}
                     {trailInfo.trainer && (
-                        <Grid item md={6}>
+                        <Grid item md={6}  xs={11}>
                             <Typography variant="body1">Nom de l'entraineur: {trailInfo.trainer}</Typography>
                         </Grid>
                     )}
-                    <Grid item md={12}>
+                    <Grid item md={12}  xs={11}>
                         <Typography variant="h5">Informations sur la piste</Typography>
                     </Grid>
-                    <Grid item md={12}>
+                    <Grid item md={12}  xs={11}>
                         <Typography variant="body1">Type de piste: {trailInfo.trailType}</Typography>
                     </Grid>
-                    <Grid item md={12}>
+                    <Grid item md={12}  xs={11}>
                         {trailInfo.startType &&
                             <Typography variant="body1">Type de départ: {trailTypeToFrench(trailInfo.startType)}</Typography>
                         }
                     </Grid>
                     {trailInfo.duration && (
-                        <Grid item md={4}>
+                        <Grid item md={4}  xs={11}>
                             <Typography variant="body1">Durée: {durationInMinutesSeconds(trailInfo.duration)}</Typography>
                         </Grid>
                     )}
                     {trailInfo.distance && (
-                        <Grid item md={6}>
+                        <Grid item md={6}  xs={11}>
                             <Typography variant="body1" >Distance: {trailInfo.distance} m</Typography>
                         </Grid>
                     )}
                 </Grid>
             </Grid>
-            <Grid item md={4} >
+            <Grid item md={4}  xs={11}>
                 {trailInfo.locationCoordinate && trailInfo.locationCoordinate.length === 2 &&
-                    <MapContainer style={{ height: "100%", width: "100%" }} center={trailInfo.locationCoordinate} zoom={16} scrollWheelZoom={true} ref={mapRef}>
+                    <MapContainer style={{ height: "100%", width: "100%", minHeight: isMobile ? '300px': '', marginLeft: isMobile ? '10px' : '' }} center={trailInfo.locationCoordinate} zoom={16} scrollWheelZoom={true} ref={mapRef}>
                         <TileLayer
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -98,7 +99,7 @@ const SessionDisplay: React.FC<SessionDisplayProps> = ({ trailInfo }) => {
                         </Marker>
                     </MapContainer>}
             </Grid>
-            <Grid item md={12} sx={{ marginLeft: '1%' }}>
+            <Grid item md={12} sx={{ marginLeft: isMobile ? '10px' :'1%', marginBottom: '10px' }}  xs={11}>
                 <TextField
                     id="notes"
                     type="text"

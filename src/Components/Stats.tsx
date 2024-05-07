@@ -67,47 +67,47 @@ const Stats: React.FC<StatsProps> = (props) => {
             <Grid item md={12} xs={12}>
                 <Header title='Statistiques' />
             </Grid>
-            <Grid item md={3}>
+            <Grid item md={3} xs={11}>
                 <StatsCard
                     title="Nombre de piste enregistrées"
                     value={allTrails.length.toString()}
                 />
             </Grid>
-            <Grid item md={3}>
+            <Grid item md={3} xs={11}>
                 <StatsCard
                     title="Distance totale enregistrée"
                     value={allTrails.reduce((acc, trail) => trail.distance ? acc + trail.distance : acc + 0, 0).toString()}
                     unit="m"
                 />
             </Grid>
-            <Grid item md={3}>
+            <Grid item md={3} xs={11}>
                 <StatsCard
                     title="Durée totale enregistrée"
                     value={durationInMinutesSeconds(allTrails.reduce((acc, trail) => trail.duration ? acc + trail.duration : acc + 0, 0))}
                 />
             </Grid>
-            <Grid item md={3}>
+            <Grid item md={3} xs={11}>
                 <StatsCard
                     title="Allure maximale enregistrée"
                     value={`${determinePaceMax(allTrails).paceMax.toFixed(1)} m/s`}
                     subtitle={`le ${new Date(determinePaceMax(allTrails).dateOfPaceMax).toLocaleDateString()}`}
                 />
             </Grid>
-            <Grid item md={3}>
+            <Grid item md={3} xs={11}>
                 <StatsCard
                     title="Allure minimale enregistrée"
                     value={`${determinePaceMin(allTrails).paceMin.toFixed(1)} m/s`}
                     subtitle={`le ${new Date(determinePaceMin(allTrails).dateOfPaceMin).toLocaleDateString()}`}
                 />
             </Grid>
-            <Grid item md={3}>
+            <Grid item md={3} xs={11}>
                 <StatsCard
                     title="Allure moyenne enregistrée"
                     value={`${determinePaceAverage(allTrails).toFixed(1)}`}
                     unit='m/s'
                 />
             </Grid>
-            <Grid item md={3}>
+            <Grid item md={3} xs={11}>
                 <StatsCard
                     title="Piste la plus longue enregistrée"
                     value={allTrails.reduce((acc, trail) => trail.distance ? acc > trail.distance ? acc : trail.distance : acc + 0, 0).toString()}

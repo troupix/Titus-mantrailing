@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, CardContent, Typography } from '@mui/material';
+import { useMediaQuery } from '@mui/material';
 
 interface StatsCardProps {
     title: string;
@@ -9,8 +10,10 @@ interface StatsCardProps {
 }
 
 const StatsCard: React.FC<StatsCardProps> = ({ title, subtitle, value, unit }) => {
+    const isMobile = useMediaQuery('(max-width:600px)');
+
     return (
-        <Card sx={{height:'100%'}}>
+        <Card sx={{height:'100%',marginLeft: isMobile ? '12px' : 0}} >
             <CardContent>
                 <Typography variant="h6" component="h2">
                     {title}
