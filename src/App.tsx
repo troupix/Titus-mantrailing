@@ -13,6 +13,7 @@ import BadgesIcon from './Components/BadgesIcon';
 import ScoreIcon from '@mui/icons-material/Score';
 import Stats from './Components/Stats';
 import { useMediaQuery, useTheme } from '@mui/material';
+import Level from './Components/Level';
 
 interface category {
   id: string;
@@ -60,6 +61,8 @@ function App() {
           {location === 'Stats' && (
             <Stats />
           )}
+          {location === 'Badges' && (
+            <Level />)}
         </Grid>
       </Grid>
     </div>

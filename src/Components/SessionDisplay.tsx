@@ -6,7 +6,7 @@ import { MapContainer, Marker, TileLayer, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import markerIconPng from "leaflet/dist/images/marker-icon.png"
 import { Icon } from 'leaflet'
-import { durationInMinutesSeconds } from '../Utils/utils';
+import { compareTraces, durationInMinutesSeconds } from '../Utils/utils';
 import { useMediaQuery } from '@mui/material';
 
 interface SessionDisplayProps {
@@ -82,6 +82,11 @@ const SessionDisplay: React.FC<SessionDisplayProps> = ({ trailInfo }) => {
                         <Grid item md={6}  xs={11}>
                             <Typography variant="body1" >Distance: {trailInfo.distance} m</Typography>
                         </Grid>
+                    )}
+                    {trailInfo.runnerTrace && trailInfo.dogTrace && (
+                        <Grid item md={6}  xs={11}>
+                            <Typography variant="body1">Deviation: {compareTraces(trailInfo.dogTrace.trk[0].trkseg[0].trkpt, trailInfo.runnerTrace.trk[0].trkseg[0].trkpt)} m</Typography>
+                            </Grid>
                     )}
                 </Grid>
             </Grid>

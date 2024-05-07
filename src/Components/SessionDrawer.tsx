@@ -102,7 +102,7 @@ export const Navigator: React.FC<NavProps> = (props) => {
                 <ListItemText sx={{ color: '#fff' }}>{id}</ListItemText>
               </ListItem>
               {children.map(({ id: childId, icon, active, trail_id }) => (
-                <ListItem disablePadding key={childId} onClick={() => setLocation(trail_id.toString())}>
+                <ListItem disablePadding key={trail_id} onClick={() => setLocation(trail_id.toString())}>
                   <ListItemButton selected={active} sx={item}>
                     <ListItemIcon>{icon}</ListItemIcon>
                     <ListItemText>{childId}</ListItemText>
@@ -137,7 +137,7 @@ export const Navigator: React.FC<NavProps> = (props) => {
             >
               {true || console.log(categories[0])}
               {categories[0].children.map(({ id: childId, icon, active, trail_id }) => (
-                <MenuItem key={childId} onClick={() => { handleCloseTrail(); setLocation(trail_id.toString()) }}>
+                <MenuItem key={trail_id} onClick={() => { handleClose(); setLocation(trail_id.toString()) }}>
                   {childId}
                 </MenuItem>
               ))}
@@ -162,7 +162,7 @@ export const Navigator: React.FC<NavProps> = (props) => {
               }}
             >
               {categories[1].children.map(({ id: childId, icon, active, trail_id }) => (
-                <MenuItem key={childId} onClick={() => { handleCloseTrail(); setLocation(trail_id.toString()) }}>
+                <MenuItem key={trail_id} onClick={() => { handleCloseTrail(); setLocation(trail_id.toString()) }}>
                   {childId}
                 </MenuItem>
               ))}

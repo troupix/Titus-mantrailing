@@ -1,3 +1,5 @@
+import { parse } from "path"
+
 interface GPXSegment {
     ele: string
     time: string
@@ -17,7 +19,7 @@ interface Coordinates {
 export const durationInMinutesSeconds = (duration: number) => {
     const minutes = Math.floor(duration / 60);
     const seconds = duration % 60;
-    return `${minutes} minutes ${seconds} seconds`;
+    return `${minutes} minutes ${seconds} secondes`;
 }
 
 /**
@@ -66,7 +68,6 @@ const calculateDistance = (points: [number, number][]) => {
 
 export const calculatePaceMax = (allTrails: GPXSegment[]) => {
     let paceMax = 0;
-    console.log(allTrails)
     allTrails.forEach((trail:GPXSegment, index) => {
         if(index === 0) return;
         const distance = calculateDistance([[parseFloat(trail.$.lat),parseFloat(trail.$.lon)], [parseFloat(allTrails[index - 1].$.lat),parseFloat(allTrails[index - 1].$.lon)]]);
@@ -98,10 +99,8 @@ export const calculatePaceMin = (allTrails: GPXSegment[]) => {
         const duration = new Date(trail.time).getTime()-  new Date(allTrails[index - 1].time).getTime();
         if (distance === 0 || duration === 0) return;
         const pace = distance / (duration /1000);
-        console.log(pace)
         if (pace < paceMin) {
             paceMin = pace;
-            console.log(paceMin)
         }
     });
     return paceMin;
@@ -126,4 +125,114 @@ export const calculatePaceAverage = (allTrails: GPXSegment[]) => {
         paceSum += pace;
     });
     return paceSum / allTrails.length;
+}
+
+/**
+ * Compare dog traces and runner traces to determine the deviation of the dog from the runner.
+ * @param dogTrace - The trace of the dog
+ * @param runnerTrace - The trace of the runner
+ * @returns The deviation in percentage.
+ * @example
+ * compareTraces(dogTrace, runnerTrace)
+ * // returns 10
+*/
+export const compareTraces = (dogTrace: GPXSegment[], runnerTrace: GPXSegment[]) => {
+    let deviation = 0;
+    // For each point of the runner, determine a circle with a radius equal to the distance to the next point
+    const runnerCircles = runnerTrace.map((point, index) => {
+        if (index === runnerTrace.length - 1) return;
+        const distance = calculateDistance([[parseFloat(point.$.lat), parseFloat(point.$.lon)], [parseFloat(runnerTrace[index + 1].$.lat), parseFloat(runnerTrace[index + 1].$.lon)]]);
+        return {
+            center: [parseFloat(point.$.lat), parseFloat(point.$.lon)] as [number, number],
+            radius: distance * 2
+        };
+    }).filter((circle) => circle !== undefined);
+
+    // For each point of the dog, determine if it is inside a runner's circle
+    dogTrace.forEach((point) => {
+        let isOutside = true;
+        let minDistance = Infinity;
+        runnerCircles.forEach((circle) => {
+            if (circle) {
+                const distance = calculateDistance([circle.center, [parseFloat(point.$.lat), parseFloat(point.$.lon)]]);
+                if (distance < circle.radius) {
+                    isOutside = false;
+                } else {
+                    const currentDeviation = distance - circle.radius;
+                    if (currentDeviation < minDistance) {
+                        minDistance = currentDeviation;
+                    }
+                }
+            }
+        });
+        if (isOutside) {
+            deviation += minDistance;
+        }
+    });
+
+    return deviation;
+};
+
+/**
+ * Determine if the runner trail contains a 90 degree change of direction.
+ * @param runnerTrace - The trace of the runner
+ * @returns True if the runner trail contains a 90 degree change of direction, false otherwise.
+ * @example
+ * changeOfDirection(runnerTrace)
+ * // returns true
+ */
+export const changeOfDirection = (runnerTrace: GPXSegment[]) => {
+    let changeOfDirection = false;
+    runnerTrace.forEach((point, index) => {
+        if (index >= runnerTrace.length - 3) return;
+        const angle = calculateAngle([parseFloat(point.$.lat), parseFloat(point.$.lon)], [parseFloat(runnerTrace[index + 1].$.lat), parseFloat(runnerTrace[index + 1].$.lon)], [parseFloat(runnerTrace[index + 2].$.lat), parseFloat(runnerTrace[index + 2].$.lon)]);
+        if (angle > 90 && angle < 270) {
+            changeOfDirection = true;
+        }
+    });
+    return changeOfDirection;
+}
+/**
+ * Calculates the angle between three points on the Earth's surface.
+ * @param point1 - The first point [latitude, longitude].
+ * @param point2 - The second point [latitude, longitude].
+ * @param point3 - The third point [latitude, longitude].
+ * @returns The angle in degrees.
+ */
+function calculateAngle(point1: [number, number], point2: [number, number], point3: [number, number]) {
+    const [lat1, lon1] = point1;
+    const [lat2, lon2] = point2;
+    const [lat3, lon3] = point3;
+
+    const dLat1 = deg2rad(lat2 - lat1);
+    const dLon1 = deg2rad(lon2 - lon1);
+    const dLat2 = deg2rad(lat3 - lat2);
+    const dLon2 = deg2rad(lon3 - lon2);
+
+    const angle1 = Math.atan2(dLon1, dLat1);
+    const angle2 = Math.atan2(dLon2, dLat2);
+
+    let angle = angle2 - angle1;
+    if (angle < 0) {
+        angle += 2 * Math.PI;
+    }
+
+    return angle * (180 / Math.PI);
+}
+
+/**
+ * Determine the difference of time between the start of the runner trace and the start of the dog trace.
+ * @param dogTrace - The trace of the dog
+ * @param runnerTrace - The trace of the runner
+ * @returns The difference in seconds.
+ * @example
+ * compareTime(dogTrace, runnerTrace)
+ * // returns 10
+ */
+
+export const compareTime = (dogTrace: GPXSegment[], runnerTrace: GPXSegment[]) => {
+    const dogStartTime = new Date(dogTrace[0].time).getTime();
+    const runnerStartTime = new Date(runnerTrace[0].time).getTime();
+    console.log(dogStartTime, runnerStartTime, (dogStartTime - runnerStartTime) / 1000)
+    return (dogStartTime - runnerStartTime) / 1000;
 }

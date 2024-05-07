@@ -37,7 +37,7 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
     const isMobile = useMediaQuery('(max-width:600px)');
 
     const OnClickMap = (e: any) => {
-        const map = useMapEvents(
+        useMapEvents(
             {
                 click: (e) => {
                     setMarkerLocation([e.latlng.lat, e.latlng.lng])

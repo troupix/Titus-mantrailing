@@ -1,11 +1,11 @@
 import React, { useContext } from 'react';
-import { Grid } from '@mui/material';
-import { Card, CardContent, Typography } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
 import Header from './Header';
 import { LocationContext } from './Context/Location';
 import StatsCard from './StatsCard';
 import { durationInMinutesSeconds } from '../Utils/utils';
 import { calculatePaceMax, calculatePaceAverage, calculatePaceMin } from '../Utils/utils';
+import { all } from 'axios';
 
 
 
@@ -67,6 +67,9 @@ const Stats: React.FC<StatsProps> = (props) => {
             <Grid item md={12} xs={12}>
                 <Header title='Statistiques' />
             </Grid>
+            <Grid item md={11} xs={11}>
+                <Typography variant="h5">Globales</Typography>    
+            </Grid>
             <Grid item md={3} xs={11}>
                 <StatsCard
                     title="Nombre de piste enregistrées"
@@ -86,26 +89,8 @@ const Stats: React.FC<StatsProps> = (props) => {
                     value={durationInMinutesSeconds(allTrails.reduce((acc, trail) => trail.duration ? acc + trail.duration : acc + 0, 0))}
                 />
             </Grid>
-            <Grid item md={3} xs={11}>
-                <StatsCard
-                    title="Allure maximale enregistrée"
-                    value={`${determinePaceMax(allTrails).paceMax.toFixed(1)} m/s`}
-                    subtitle={`le ${new Date(determinePaceMax(allTrails).dateOfPaceMax).toLocaleDateString()}`}
-                />
-            </Grid>
-            <Grid item md={3} xs={11}>
-                <StatsCard
-                    title="Allure minimale enregistrée"
-                    value={`${determinePaceMin(allTrails).paceMin.toFixed(1)} m/s`}
-                    subtitle={`le ${new Date(determinePaceMin(allTrails).dateOfPaceMin).toLocaleDateString()}`}
-                />
-            </Grid>
-            <Grid item md={3} xs={11}>
-                <StatsCard
-                    title="Allure moyenne enregistrée"
-                    value={`${determinePaceAverage(allTrails).toFixed(1)}`}
-                    unit='m/s'
-                />
+            <Grid item md={11} xs={11}>
+                <Typography variant="h5">Piste</Typography>
             </Grid>
             <Grid item md={3} xs={11}>
                 <StatsCard
@@ -115,6 +100,39 @@ const Stats: React.FC<StatsProps> = (props) => {
                     subtitle={`le ${new Date(allTrails.find(trail => trail.distance === allTrails.reduce((acc, trail) => trail.distance ? acc > trail.distance ? acc : trail.distance : acc + 0, 0))?.date.toString() || '').toLocaleDateString() || ''}`}
                 />
             </Grid>
+            <Grid item md={3} xs={11}>
+                <StatsCard
+                    title="Durée la plus courte enregistrée"
+                    value={`${durationInMinutesSeconds(allTrails.reduce((acc, trail) => trail.duration ? acc > trail.duration ? acc : trail.duration : acc + 0, 0))}`}
+                    // unit='s'
+                    subtitle={`le ${new Date(allTrails.find(t => t.duration === allTrails.reduce((acc,trail) => trail.duration ? acc > trail.duration ? acc : trail.duration : acc + 0, 0))?.date ?? 0).toLocaleDateString()}`}
+                />
+            </Grid>
+            <Grid item md={11} xs={11}>
+                <Typography variant="h5">Vitesse</Typography>
+            </Grid>
+            <Grid item md={3} xs={11}>
+                <StatsCard
+                    title="Vitesse maximale enregistrée"
+                    value={`${determinePaceMax(allTrails).paceMax.toFixed(1)} m/s`}
+                    subtitle={`le ${new Date(determinePaceMax(allTrails).dateOfPaceMax).toLocaleDateString()}`}
+                />
+            </Grid>
+            <Grid item md={3} xs={11}>
+                <StatsCard
+                    title="Vitesse minimale enregistrée"
+                    value={`${determinePaceMin(allTrails).paceMin.toFixed(1)} m/s`}
+                    subtitle={`le ${new Date(determinePaceMin(allTrails).dateOfPaceMin).toLocaleDateString()}`}
+                />
+            </Grid>
+            <Grid item md={3} xs={11}>
+                <StatsCard
+                    title="Vitesse moyenne enregistrée"
+                    value={`${determinePaceAverage(allTrails).toFixed(1)}`}
+                    unit='m/s'
+                />
+            </Grid>
+           
         </Grid>
     );
 };
