@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Button, TextField, FormControl, InputLabel, Select, MenuItem, Grid, Typography } from '@mui/material';
+import { Button, TextField, FormControl, InputLabel, Select, MenuItem, Grid, Typography, useMediaQuery } from '@mui/material';
 import { Trail } from '../Utils/types';
 import { saveTrail, updateTrail } from '../Utils/api';
 import { SelectChangeEvent } from '@mui/material';
@@ -34,6 +34,7 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
         date: new Date(),
         handlerName: 'Malie',
     } as Trail);
+    const isMobile = useMediaQuery('(max-width:600px)');
 
     const OnClickMap = (e: any) => {
         const map = useMapEvents(
@@ -177,18 +178,18 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
     }
 
     return (
-        <Grid container spacing={3} sx={{ textAlign: 'left' }}>
-            <Grid item md={12} >
+        <Grid container spacing={3} sx={{ textAlign: 'left'}}>
+            <Grid item md={12} xs={12}>
                 <Header title="Enregistrer une nouvelle piste" />
             </Grid>
-            <Grid item md={6}>
-                <Grid container spacing={2}>
-                    <Grid item md={12}>
-                        <Typography variant="h4">Informations sur la session</Typography>
+            <Grid item md={6} xs={11}>
+                <Grid container spacing={2} sx={{ textAlign: 'left', marginLeft: isMobile ? '9px' : '' }}>
+                    <Grid item md={12} xs={12}>
+                        <Typography variant="h5">Informations sur la session</Typography>
                     </Grid>
-                    <Grid item md={6}>
+                    <Grid item md={6} xs={11}>
                         <TextField
-                            sx={{ width: '65%' }}
+                            sx={{ width:  isMobile ? '100%' :'65%' }}
                             id="date"
                             label="Date"
                             type="date"
@@ -201,11 +202,11 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                             }}
                         />
                     </Grid>
-                    <Grid item md={6}>
+                    <Grid item md={6} xs={11}>
                         <LocationSearch onLocationSelect={handleLocationChange} defaultLocation={edit_trail?.location} />
                     </Grid>
-                    <Grid item md={6}>
-                        <FormControl sx={{ width: '65%' }}>
+                    <Grid item md={6} xs={11}>
+                        <FormControl sx={{ width:  isMobile ? '100%' :'65%' }}>
                             <InputLabel id="dogName-label">Handler Name</InputLabel>
                             <Select
                                 labelId="dogName-label"
@@ -221,9 +222,9 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                             </Select>
                         </FormControl>
                     </Grid>
-                    <Grid item md={6}>
+                    <Grid item md={6} xs={11}>
                         <TextField
-                            sx={{ width: '65%' }}
+                            sx={{ width:  isMobile ? '100%' :'65%' }}
                             id="trainer"
                             label="Trainer"
                             value={trail.trainer}
@@ -231,12 +232,12 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                             onChange={handleChange}
                             name="trainer" />
                     </Grid>
-                    <Grid item md={12}>
+                    <Grid item md={12} xs={11}>
                         <Typography variant="h4">Trail Details</Typography>
                     </Grid>
-                    <Grid item md={6}>
+                    <Grid item md={6} xs={12}>
                         <TextField
-                            sx={{ width: '65%' }}
+                            sx={{ width:  isMobile ? '91%' :'65%' }}
                             id="trailType"
                             label="Trail Type"
                             value={trail.trailType}
@@ -244,8 +245,8 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                             onChange={handleChange}
                             name="trailType" />
                     </Grid>
-                    <Grid item md={6}>
-                        <FormControl sx={{ width: '65%' }}>
+                    <Grid item md={6} xs={11}>
+                        <FormControl sx={{ width:  isMobile ? '100%' :'65%' }}>
                             <InputLabel id="startType-label">type de départ</InputLabel>
                             <Select
                                 labelId="startType-label"
@@ -262,9 +263,9 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                             </Select>
                         </FormControl>
                     </Grid>
-                    <Grid item md={6}>
+                    <Grid item md={6} xs={11}>
                         <TextField
-                            sx={{ width: '65%' }}
+                            sx={{ width: isMobile ? '100%' : '65%' }}
                             id="distance"
                             label="Distance (meters)"
                             defaultValue={0}
@@ -273,9 +274,9 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                             onChange={handleChange}
                             name="distance" />
                     </Grid>
-                    <Grid item md={6}>
+                    <Grid item md={6} xs={11}>
                         <TextField
-                            sx={{ width: '65%' }}
+                            sx={{ width: isMobile ? '100%' : '65%' }}
                             id="duration"
                             label="Duration (seconds)"
                             defaultValue={0}
@@ -286,8 +287,8 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                     </Grid>
                 </Grid>
             </Grid>
-            <Grid item md={4}>
-                <MapContainer style={{ height: "100%", width: "100%" }} center={edit_trail?.locationCoordinate ? edit_trail.locationCoordinate : [45.7578137, 4.8320114]} zoom={16} scrollWheelZoom={true} ref={mapRef}  >
+            <Grid item md={4} xs={11}>
+                <MapContainer style={{ height: "100%", width: "100%", minHeight: isMobile ? '300px' : '' , marginLeft: isMobile ? '10px' : ''}} center={edit_trail?.locationCoordinate ? edit_trail.locationCoordinate : [45.7578137, 4.8320114]} zoom={16} scrollWheelZoom={true} ref={mapRef}  >
                     <TileLayer
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
@@ -298,7 +299,7 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                     <OnClickMap />
                 </MapContainer>
             </Grid>
-            <Grid item md={2} sx={{ alignContent: 'center' }}>
+            <Grid item md={2} sx={{ alignContent: 'center', textAlign:'center' }} xs={11}>
                 <input
                     accept=".gpx"
                     id="gpx-upload-runner"
@@ -324,10 +325,10 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                     </Button>
                 </label>
             </Grid>
-            <Grid item md={12}>
+            <Grid item md={12} xs={11} sx={{textAlign:'left', marginLeft: isMobile? '10px' : ''}}>
                 <Typography variant="h4">Additional Information</Typography>
             </Grid>
-            <Grid item md={12}>
+            <Grid item md={12} xs={11}  sx={{textAlign:'left', marginLeft: isMobile? '10px' : ''}}>
                 <TextField
                     id="notes"
                     label="Notes"
@@ -340,8 +341,8 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                     variant="outlined"
                     fullWidth />
             </Grid>
-            <Grid item md={12}>
-                <Button type="submit" onClick={() => handleSave()}>Submit</Button>
+            <Grid item md={12} xs={11}  sx={{textAlign:'center', marginLeft: isMobile? '10px' : ''}}>
+                <Button type="submit" onClick={() => handleSave()}>Save</Button>
             </Grid>
         </Grid>
     );

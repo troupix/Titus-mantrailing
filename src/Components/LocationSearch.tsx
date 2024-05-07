@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { TextField, Autocomplete } from '@mui/material';
+import { TextField, Autocomplete, useMediaQuery } from '@mui/material';
 import { OpenStreetMapProvider } from 'leaflet-geosearch';
 
 interface LocationSearchProps {
@@ -11,6 +11,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect, defau
     const [searchText, setSearchText] = useState(defaultLocation ? defaultLocation : '');
     const [results, setResults] = useState<any[]>([]);
     const provider = new OpenStreetMapProvider();
+    const isMobile = useMediaQuery('(max-width:600px)');
     
     const handleSelectChange = (event: any) => {
         console.log(results.find(r => r.label === event.target.value));
@@ -33,7 +34,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect, defau
     return (
         <Autocomplete
             freeSolo
-            sx={{ width: '65%' }}
+            sx={{ width: isMobile ? '100%' :'65%' }}
             options={results}
             value={searchText}
             defaultValue={defaultLocation ? defaultLocation : ''}
