@@ -14,6 +14,7 @@ import ScoreIcon from '@mui/icons-material/Score';
 import Stats from './Components/Stats';
 import { useMediaQuery, useTheme } from '@mui/material';
 import Level from './Components/Level';
+import Accueil from './Components/Accueil';
 
 interface category {
   id: string;
@@ -26,7 +27,7 @@ function App() {
   const { location } = useContext(LocationContext) || {};
   const [categories, setCategories] = useState<category[]>([]);
   const {allTrails, setAllTrails} = useContext(LocationContext);
-  const { triggerGetTrails, setTriggerGetTrails } = useContext(LocationContext);
+  const { triggerGetTrails } = useContext(LocationContext);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -44,6 +45,7 @@ function App() {
       });
       setCategories(newCategories);
     })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [triggerGetTrails]);
 
   return (
@@ -63,6 +65,8 @@ function App() {
           )}
           {location === 'Badges' && (
             <Level />)}
+          {location === '' && (
+            <Accueil />)}
         </Grid>
       </Grid>
     </div>

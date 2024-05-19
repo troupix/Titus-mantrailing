@@ -1,4 +1,3 @@
-import { parse } from "path"
 
 interface GPXSegment {
     ele: string
@@ -140,6 +139,7 @@ export const compareTraces = (dogTrace: GPXSegment[], runnerTrace: GPXSegment[])
     let deviation = 0;
     // For each point of the runner, determine a circle with a radius equal to the distance to the next point
     const runnerCircles = runnerTrace.map((point, index) => {
+        // eslint-disable-next-line array-callback-return
         if (index === runnerTrace.length - 1) return;
         const distance = calculateDistance([[parseFloat(point.$.lat), parseFloat(point.$.lon)], [parseFloat(runnerTrace[index + 1].$.lat), parseFloat(runnerTrace[index + 1].$.lon)]]);
         return {

@@ -5,7 +5,6 @@ import { LocationContext } from './Context/Location';
 import StatsCard from './StatsCard';
 import { durationInMinutesSeconds } from '../Utils/utils';
 import { calculatePaceMax, calculatePaceAverage, calculatePaceMin } from '../Utils/utils';
-import { all } from 'axios';
 
 
 
