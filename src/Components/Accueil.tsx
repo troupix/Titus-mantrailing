@@ -21,7 +21,7 @@ const Accueil: React.FC = () => {
             </Grid>
             <Grid item xs={6}>
                 <img
-                    src="/Photos Titus retouchées -1.jpg"
+                    src="/Titus-mantrailing/Photos Titus retouchées -1.jpg"
                     alt="Titus"
                     style={{ width: '100%', height: 'auto' }}
                 />
