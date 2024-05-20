@@ -12,7 +12,7 @@ import { useContext } from 'react';
 import { LocationContext } from './Context/Location';
 import { Grid, Menu, MenuItem, useMediaQuery, useTheme } from '@mui/material';
 import Bouton from '@mui/material/Button';
-
+import ConnectionModal from './ConnectionModal';
 
 const item = {
   py: '2px',
@@ -61,6 +61,8 @@ export const Navigator: React.FC<NavProps> = (props) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const open = Boolean(anchorEl);
   const openTrail = Boolean(anchorElTrail);
+  const [isConnected, setIsConnected] = React.useState<Boolean>(localStorage.getItem('isAllowedToCreate') === 'true');
+  const [openConnection, setOpenConnection] = React.useState(false);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -96,6 +98,11 @@ export const Navigator: React.FC<NavProps> = (props) => {
               <NewSessionButton onClick={() => { setLocation('newsession') }} />
             )}
           </ListItem>
+          {!isConnected && (
+            <ListItem sx={{ ...item, ...itemCategory, textAlign: 'center', alignItems: 'center' }}>
+              <Bouton variant="contained" onClick={() => { setOpenConnection(true) }} fullWidth sx={{ paddingRight: isMobile ? '5%' : '' }}>Se Connecter</Bouton>
+            </ListItem>)
+          }
           {categories.map(({ id, children }) => (
             <Box key={id} sx={{ bgcolor: '#101F33' }}>
               <ListItem sx={{ py: 2, px: 3 }} >
@@ -116,16 +123,19 @@ export const Navigator: React.FC<NavProps> = (props) => {
       {isMobile &&
         <Grid container spacing={2} sx={{ textAlign: 'center', marginTop: '5px' }}>
           <Grid item xs={3}>
-            <NewSessionButton onClick={() => { setLocation('newsession') }} />
+            {isConnected && <NewSessionButton onClick={() => { setLocation('newsession') }} />}
+            {!isConnected && (
+              <Bouton variant="contained" onClick={() => { setOpenConnection(true) }} fullWidth sx={{ paddingRight: isMobile ? '5%' : '' }}>Co</Bouton>
+            )}
           </Grid>
-         {categories[0] &&  <Grid item xs={4}>
+          {categories[0] && <Grid item xs={4}>
             <Bouton
               id="basic-button"
               aria-controls={open ? 'basic-menu' : undefined}
               aria-haspopup="true"
               aria-expanded={open ? 'true' : undefined}
               onClick={handleClick}
-            >{categories[0].id }</Bouton>
+            >{categories[0].id}</Bouton>
             <Menu
               id="basic-menu"
               anchorEl={anchorEl}
@@ -144,15 +154,15 @@ export const Navigator: React.FC<NavProps> = (props) => {
             </Menu>
           </Grid>}
           {categories[1] && <Grid item xs={4}>
-            <Bouton 
-            id='basic-button-trail'
-            aria-controls={openTrail ? 'basic-menu-trail' : undefined}
-            aria-haspopup="true"
-            aria-expanded={openTrail ? 'true' : undefined}
-            onClick={handleClickTrail}
+            <Bouton
+              id='basic-button-trail'
+              aria-controls={openTrail ? 'basic-menu-trail' : undefined}
+              aria-haspopup="true"
+              aria-expanded={openTrail ? 'true' : undefined}
+              onClick={handleClickTrail}
             >{categories[1].id}</Bouton>
 
-            <Menu 
+            <Menu
               id="basic-menu-trail"
               anchorEl={anchorElTrail}
               open={openTrail}
@@ -168,6 +178,7 @@ export const Navigator: React.FC<NavProps> = (props) => {
               ))}
             </Menu>
           </Grid>}
+          <ConnectionModal open={openConnection} onClose={() => setOpenConnection(false)} setConnection={setIsConnected} />
         </Grid>
       }
     </Drawer>

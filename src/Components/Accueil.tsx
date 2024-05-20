@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Container, Grid } from '@mui/material';
+import { Typography, Grid } from '@mui/material';
 import Header from './Header';
 
 const Accueil: React.FC = () => {
@@ -23,8 +23,9 @@ const Accueil: React.FC = () => {
                 <img
                     src="/Titus-mantrailing/Photos Titus retouchées -1.jpg"
                     alt="Titus"
-                    style={{ width: '100%', height: 'auto' }}
+                    style={{ width: 'auto', height: '400px' }}
                 />
+                  <figcaption><i>Credits photo par Claudia</i></figcaption>
             </Grid>
             <Grid item xs={12}>
                 <Typography variant="h4" align="center" gutterBottom>

@@ -5,7 +5,7 @@ import { LocationContext } from './Context/Location';
 import { changeOfDirection, compareTime } from '../Utils/utils';
 import { Assessment } from '@mui/icons-material';
 
-interface AssessmentCriteria {
+interface AssessmentCriteriaMantrailingGlobal {
     [key: string]: Level;
 }
 
@@ -20,10 +20,23 @@ interface Criteria {
     pass: boolean;
 }
 
+interface CriteriaLyonK9 {
+    id: string;
+    criteria: string;
+}
+
+interface LevelLyonK9 {
+    name: string;
+    criteria: CriteriaLyonK9[];
+    terrain: string;
+    pass: boolean;
+    passedAt?: Date
+}
+
 
 const Level = () => {
     const { allTrails } = useContext(LocationContext);
-    const assessmentCriteria: AssessmentCriteria = {
+    const assessmentCriteriaMantrailingGlobal: AssessmentCriteriaMantrailingGlobal = {
         entryLevel: {
             name: 'Niveau d\'entrée',
             criteria: [
@@ -50,18 +63,19 @@ const Level = () => {
         },
     };
 
+
     return (
         <Grid container spacing={2} >
             <Grid item xs={12} sx={{ textAlign: 'left' }}>
-                <Header title="Niveau" />
+                <Header title="Niveau (En Construction)" />
             </Grid>
-            {Object.keys(assessmentCriteria).map((level) => {
+            {Object.keys(assessmentCriteriaMantrailingGlobal).map((level) => {
                 return (
                     <>
                         <Grid item xs={12} key={level}>
-                            <Typography variant="h5">{assessmentCriteria[level].name}</Typography>
+                            <Typography variant="h5">{assessmentCriteriaMantrailingGlobal[level].name}</Typography>
                         </Grid>
-                        {assessmentCriteria[level].criteria.map((item) => (
+                        {assessmentCriteriaMantrailingGlobal[level].criteria.map((item) => (
                             <Grid item xs={12} md={6} key={item.id}>
                                 <Box display="flex" alignItems="center">
                                     <Checkbox checked={item.pass} disabled sx={{

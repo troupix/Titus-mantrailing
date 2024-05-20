@@ -41,7 +41,7 @@ const SessionDisplay: React.FC<SessionDisplayProps> = ({ trailInfo }) => {
     return (
         <Grid container spacing={2} sx={{ textAlign: 'left' }}>
             <Grid item md={12} xs={12}>
-                <Header title={`Piste de ${trailInfo.dogName} du ${new Date(trailInfo.date).toLocaleDateString([], { dateStyle: 'long' })}`} trail_id={trailInfo._id} />
+                <Header title={`Piste de ${trailInfo.dogName} du ${new Date(trailInfo.date).toLocaleDateString([], { dateStyle: 'long' })}`} trail_id={trailInfo._id} allowEdit={localStorage.getItem('isAllowedToCreate') === 'true'} allowDelete={localStorage.getItem('isAllowedToCreate') === 'true'} />
             </Grid>
             <Grid item md={6} xs={11}>
                 <Grid container spacing={2} sx={{ marginLeft: '1%' }}>

@@ -10,7 +10,7 @@ import markerIconPng from "leaflet/dist/images/marker-icon.png"
 import { Icon } from 'leaflet'
 import GPX from 'gpx-parser-builder';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
-
+import ConnectionModal from './ConnectionModal';
 
 import { MapContainer, TileLayer, Marker, useMapEvents, Polyline } from 'react-leaflet';
 import { LocationContext } from './Context/Location';
@@ -26,6 +26,7 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
     const { edit_trail } = props;
     const { setLocation ,triggerGetTrails, setTriggerGetTrails } = useContext(LocationContext);
     const mapRef = React.useRef(null);
+    const [isAllowedToCreate, setIsAllowedToCreate] = useState<boolean>(localStorage.getItem('isAllowedToCreate') === 'true');
     const [markerLocation, setMarkerLocation] = useState<[number, number]>(edit_trail?.locationCoordinate ? edit_trail.locationCoordinate : [45.7578137, 4.8320114]); // [lat, lng
     const [runnerTrace, setRunnerTrace] = useState<[]>(edit_trail?.runnerTrace?.trk[0]?.trkseg[0]?.trkpt ? edit_trail.runnerTrace.trk[0].trkseg[0].trkpt.map((point: any) => [parseFloat(point.$.lat), parseFloat(point.$.lon)]) : undefined);
     const [dogTrace, setDogTrace] = useState<[]>(edit_trail?.dogTrace?.trk[0]?.trkseg[0]?.trkpt ? edit_trail.dogTrace.trk[0].trkseg[0].trkpt.map((point: any) => [parseFloat(point.$.lat), parseFloat(point.$.lon)]) : undefined);
@@ -34,6 +35,7 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
         date: new Date(),
         handlerName: 'Malie',
     } as Trail);
+    const [openModal, setOpenModal] = useState<boolean>(false);
     const isMobile = useMediaQuery('(max-width:600px)');
 
     const OnClickMap = (e: any) => {
@@ -179,9 +181,12 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
 
     return (
         <Grid container spacing={3} sx={{ textAlign: 'left'}}>
+           
             <Grid item md={12} xs={12}>
-                <Header title="Enregistrer une nouvelle piste" />
+                <Header title="Enregistrer une nouvelle piste" allowSave={isAllowedToCreate} onSaveAction={handleSave}/>
             </Grid>
+            {isAllowedToCreate && 
+            <>
             <Grid item md={6} xs={11}>
                 <Grid container spacing={2} sx={{ textAlign: 'left', marginLeft: isMobile ? '9px' : '' }}>
                     <Grid item md={12} xs={12}>
@@ -344,6 +349,12 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
             <Grid item md={12} xs={11}  sx={{textAlign:'center', marginLeft: isMobile? '10px' : ''}}>
                 <Button type="submit" onClick={() => handleSave()}>Save</Button>
             </Grid>
+            </>}
+            {!isAllowedToCreate && <Grid item md={12} xs={12}>
+                <Typography variant="h5">Vous n'êtes pas autorisé à créer une nouvelle session</Typography>
+                <Button onClick={() => setOpenModal(true)}>Enregistrer l'appareil</Button>
+                <ConnectionModal open={openModal} onClose={() => setOpenModal(false)} setConnection={setIsAllowedToCreate}/>
+            </Grid>}
         </Grid>
     );
 };

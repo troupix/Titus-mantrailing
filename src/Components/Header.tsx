@@ -11,17 +11,22 @@ import EditIcon from '@mui/icons-material/Edit';
 import {deleteTrail} from '../Utils/api';
 import { LocationContext } from './Context/Location';
 import { Box } from '@mui/material';
+import SaveIcon from '@mui/icons-material/Save';
 
 
 
 interface HeaderProps {
     title?: string;
     trail_id?: string;
+    allowEdit?: boolean;
+    allowDelete?: boolean;
+    allowSave?: boolean;
+    onSaveAction?: () => void;
     
 }
 
 const Header: React.FC<HeaderProps> = (props) => {
-    const { title,trail_id } = props;
+    const { title,trail_id, allowDelete, allowEdit, allowSave, onSaveAction } = props;
     const { setLocation} = React.useContext(LocationContext);
     const {triggerGetTrails, setTriggerGetTrails} = React.useContext(LocationContext);
     const deleteAction = () => {
@@ -69,7 +74,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                     </Tooltip>
                 </IconButton>
             </Grid>
-            <Grid item>
+            {allowDelete && <Grid item>
             <IconButton
                 onClick={deleteAction}
                 color="inherit"
@@ -81,8 +86,8 @@ const Header: React.FC<HeaderProps> = (props) => {
                     <DeleteIcon />
                     </Tooltip>
                 </IconButton>
-            </Grid>
-            <Grid item>
+            </Grid>}
+            {allowEdit &&  <Grid item>
             <IconButton
                 color="inherit"
                 onClick={editAction}
@@ -94,7 +99,21 @@ const Header: React.FC<HeaderProps> = (props) => {
                     <EditIcon />
                     </Tooltip>
                 </IconButton>
-            </Grid>
+            </Grid>}
+            {allowSave &&  <Grid item>
+              <IconButton
+                  color="inherit"
+                  onClick={onSaveAction}
+                  aria-label="open drawer"
+                  edge="start"
+                  sx={{ mr: 2 }}
+                  >
+                      <Tooltip title="Sauvegarder">
+                      <SaveIcon />
+                      </Tooltip>
+                  </IconButton>
+              </Grid>  
+              }
           </Grid>
         </Toolbar>
       </AppBar>
