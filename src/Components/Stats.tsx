@@ -102,7 +102,7 @@ const Stats: React.FC<StatsProps> = (props) => {
             <Grid item md={3} xs={11}>
                 <StatsCard
                     title="Durée la plus courte enregistrée"
-                    value={`${durationInMinutesSeconds(allTrails.reduce((acc, trail) => trail.duration ? acc > trail.duration ? acc : trail.duration : acc + 0, 0))}`}
+                    value={`${durationInMinutesSeconds(allTrails.reduce((acc, trail) => trail.duration ? acc < trail.duration && acc !==  0 ? acc : trail.duration : acc + 0, 0))}`}
                     // unit='s'
                     subtitle={`le ${new Date(allTrails.find(t => t.duration === allTrails.reduce((acc,trail) => trail.duration ? acc > trail.duration ? acc : trail.duration : acc + 0, 0))?.date ?? 0).toLocaleDateString()}`}
                 />

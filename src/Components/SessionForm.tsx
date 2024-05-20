@@ -24,7 +24,7 @@ interface SessionFormProps {
 
 const SessionForm: React.FC<SessionFormProps> = (props) => {
     const { edit_trail } = props;
-    const { setLocation ,triggerGetTrails, setTriggerGetTrails } = useContext(LocationContext);
+    const { setLocation, triggerGetTrails, setTriggerGetTrails } = useContext(LocationContext);
     const mapRef = React.useRef(null);
     const [isAllowedToCreate, setIsAllowedToCreate] = useState<boolean>(localStorage.getItem('isAllowedToCreate') === 'true');
     const [markerLocation, setMarkerLocation] = useState<[number, number]>(edit_trail?.locationCoordinate ? edit_trail.locationCoordinate : [45.7578137, 4.8320114]); // [lat, lng
@@ -67,11 +67,14 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
         }
         else {
             if (trail) {
-                saveTrail(trail);
-                setLocation('stats')
+                saveTrail(trail).then((data) => {
+                    setTriggerGetTrails(!triggerGetTrails);
+                    setLocation(data._id)
+                }
+                );
             }
         }
-        setTriggerGetTrails(!triggerGetTrails);
+
     }
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -180,180 +183,180 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
     }
 
     return (
-        <Grid container spacing={3} sx={{ textAlign: 'left'}}>
-           
+        <Grid container spacing={3} sx={{ textAlign: 'left' }}>
+
             <Grid item md={12} xs={12}>
-                <Header title="Enregistrer une nouvelle piste" allowSave={isAllowedToCreate} onSaveAction={handleSave}/>
+                <Header title="Enregistrer une nouvelle piste" allowSave={isAllowedToCreate} onSaveAction={handleSave} />
             </Grid>
-            {isAllowedToCreate && 
-            <>
-            <Grid item md={6} xs={11}>
-                <Grid container spacing={2} sx={{ textAlign: 'left', marginLeft: isMobile ? '9px' : '' }}>
-                    <Grid item md={12} xs={12}>
-                        <Typography variant="h5">Informations sur la session</Typography>
-                    </Grid>
+            {isAllowedToCreate &&
+                <>
                     <Grid item md={6} xs={11}>
-                        <TextField
-                            sx={{ width:  isMobile ? '100%' :'65%' }}
-                            id="date"
-                            label="Date"
-                            type="date"
-                            value={new Date(trail.date).toISOString().split('T')[0]}
-                            defaultValue={new Date().toISOString().split('T')[0]}
-                            onChange={handleDateChange}
-                            name="date"
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
+                        <Grid container spacing={2} sx={{ textAlign: 'left', marginLeft: isMobile ? '9px' : '' }}>
+                            <Grid item md={12} xs={12}>
+                                <Typography variant="h5">Informations sur la session</Typography>
+                            </Grid>
+                            <Grid item md={6} xs={11}>
+                                <TextField
+                                    sx={{ width: isMobile ? '100%' : '65%' }}
+                                    id="date"
+                                    label="Date"
+                                    type="date"
+                                    value={new Date(trail.date).toISOString().split('T')[0]}
+                                    defaultValue={new Date().toISOString().split('T')[0]}
+                                    onChange={handleDateChange}
+                                    name="date"
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item md={6} xs={11}>
+                                <LocationSearch onLocationSelect={handleLocationChange} defaultLocation={edit_trail?.location} />
+                            </Grid>
+                            <Grid item md={6} xs={11}>
+                                <FormControl sx={{ width: isMobile ? '100%' : '65%' }}>
+                                    <InputLabel id="dogName-label">Handler Name</InputLabel>
+                                    <Select
+                                        labelId="dogName-label"
+                                        id="HandlerName"
+                                        value={trail.handlerName}
+                                        defaultValue='Malie'
+                                        label="Handler Name"
+                                        onChange={handleSelectChange}
+                                        name="handlerName"
+                                    >
+                                        <MenuItem value={"Malie"}>Malie</MenuItem>
+                                        <MenuItem value={"Max"}>Max</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            <Grid item md={6} xs={11}>
+                                <TextField
+                                    sx={{ width: isMobile ? '100%' : '65%' }}
+                                    id="trainer"
+                                    label="Trainer"
+                                    value={trail.trainer}
+                                    type="text"
+                                    onChange={handleChange}
+                                    name="trainer" />
+                            </Grid>
+                            <Grid item md={12} xs={11}>
+                                <Typography variant="h4">Trail Details</Typography>
+                            </Grid>
+                            <Grid item md={6} xs={12}>
+                                <TextField
+                                    sx={{ width: isMobile ? '91%' : '65%' }}
+                                    id="trailType"
+                                    label="Trail Type"
+                                    value={trail.trailType}
+                                    type="text"
+                                    onChange={handleChange}
+                                    name="trailType" />
+                            </Grid>
+                            <Grid item md={6} xs={11}>
+                                <FormControl sx={{ width: isMobile ? '100%' : '65%' }}>
+                                    <InputLabel id="startType-label">type de départ</InputLabel>
+                                    <Select
+                                        labelId="startType-label"
+                                        id="startType"
+                                        value={trail.startType}
+                                        defaultValue='knowing'
+                                        label="type de départ"
+                                        onChange={handleStartType}
+                                        name="startType"
+                                    >
+                                        <MenuItem value={"knowing"}>Départ à vue</MenuItem>
+                                        <MenuItem value={"blind"}>Départ à l'aveugle</MenuItem>
+                                        <MenuItem value={"double blind"}>Double aveugle</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            <Grid item md={6} xs={11}>
+                                <TextField
+                                    sx={{ width: isMobile ? '100%' : '65%' }}
+                                    id="distance"
+                                    label="Distance (meters)"
+                                    defaultValue={0}
+                                    type="number"
+                                    value={trail.distance}
+                                    onChange={handleChange}
+                                    name="distance" />
+                            </Grid>
+                            <Grid item md={6} xs={11}>
+                                <TextField
+                                    sx={{ width: isMobile ? '100%' : '65%' }}
+                                    id="duration"
+                                    label="Duration (seconds)"
+                                    defaultValue={0}
+                                    value={trail.duration}
+                                    type="number"
+                                    onChange={handleChange}
+                                    name="duration" />
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                    <Grid item md={4} xs={11}>
+                        <MapContainer style={{ height: "100%", width: "100%", minHeight: isMobile ? '300px' : '', marginLeft: isMobile ? '10px' : '' }} center={edit_trail?.locationCoordinate ? edit_trail.locationCoordinate : [45.7578137, 4.8320114]} zoom={16} scrollWheelZoom={true} ref={mapRef}  >
+                            <TileLayer
+                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            />
+                            <Marker position={markerLocation} icon={new Icon({ iconUrl: markerIconPng, iconSize: [25, 41], iconAnchor: [12, 41] })} />
+                            {dogTrace && <Polyline pathOptions={{ color: 'red' }} positions={dogTrace} />}
+                            {runnerTrace && <Marker position={runnerTrace[runnerTrace.length - 1]} icon={new Icon({ iconUrl: require('../assets/flag.png'), iconAnchor: [8, 16] })} />}
+                            {runnerTrace && <Polyline pathOptions={{ color: 'blue' }} positions={runnerTrace} />}
+                            <OnClickMap />
+                        </MapContainer>
+                    </Grid>
+                    <Grid item md={2} sx={{ alignContent: 'center', textAlign: 'center' }} xs={11}>
+                        <input
+                            accept=".gpx"
+                            id="gpx-upload-runner"
+                            type="file"
+                            style={{ display: 'none' }}
+                            onChange={(e) => handleFileUpload(e.target.files, 'runner')}
                         />
+                        <label htmlFor="gpx-upload-runner">
+                            <Button component="span" variant="contained" color="error" sx={{ width: '80%' }} startIcon={<FileUploadIcon />}>
+                                Runner GPX file
+                            </Button>
+                        </label>
+                        <input
+                            accept=".gpx"
+                            id="gpx-upload-dog"
+                            type="file"
+                            style={{ display: 'none' }}
+                            onChange={(e) => handleFileUpload(e.target.files, 'dog')}
+                        />
+                        <label htmlFor="gpx-upload-dog">
+                            <Button sx={{ marginTop: '20px', width: '80%' }} component="span" variant="contained" color="secondary" startIcon={<FileUploadIcon />}>
+                                Dog GPX file
+                            </Button>
+                        </label>
                     </Grid>
-                    <Grid item md={6} xs={11}>
-                        <LocationSearch onLocationSelect={handleLocationChange} defaultLocation={edit_trail?.location} />
+                    <Grid item md={12} xs={11} sx={{ textAlign: 'left', marginLeft: isMobile ? '10px' : '' }}>
+                        <Typography variant="h4">Additional Information</Typography>
                     </Grid>
-                    <Grid item md={6} xs={11}>
-                        <FormControl sx={{ width:  isMobile ? '100%' :'65%' }}>
-                            <InputLabel id="dogName-label">Handler Name</InputLabel>
-                            <Select
-                                labelId="dogName-label"
-                                id="HandlerName"
-                                value={trail.handlerName}
-                                defaultValue='Malie'
-                                label="Handler Name"
-                                onChange={handleSelectChange}
-                                name="handlerName"
-                            >
-                                <MenuItem value={"Malie"}>Malie</MenuItem>
-                                <MenuItem value={"Max"}>Max</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                    <Grid item md={6} xs={11}>
+                    <Grid item md={12} xs={11} sx={{ textAlign: 'left', marginLeft: isMobile ? '10px' : '' }}>
                         <TextField
-                            sx={{ width:  isMobile ? '100%' :'65%' }}
-                            id="trainer"
-                            label="Trainer"
-                            value={trail.trainer}
+                            id="notes"
+                            label="Notes"
                             type="text"
+                            value={trail.notes}
                             onChange={handleChange}
-                            name="trainer" />
+                            name="notes"
+                            multiline
+                            rows={4}
+                            variant="outlined"
+                            fullWidth />
                     </Grid>
-                    <Grid item md={12} xs={11}>
-                        <Typography variant="h4">Trail Details</Typography>
+                    <Grid item md={12} xs={11} sx={{ textAlign: 'center', marginLeft: isMobile ? '10px' : '' }}>
+                        <Button type="submit" onClick={() => handleSave()}>Save</Button>
                     </Grid>
-                    <Grid item md={6} xs={12}>
-                        <TextField
-                            sx={{ width:  isMobile ? '91%' :'65%' }}
-                            id="trailType"
-                            label="Trail Type"
-                            value={trail.trailType}
-                            type="text"
-                            onChange={handleChange}
-                            name="trailType" />
-                    </Grid>
-                    <Grid item md={6} xs={11}>
-                        <FormControl sx={{ width:  isMobile ? '100%' :'65%' }}>
-                            <InputLabel id="startType-label">type de départ</InputLabel>
-                            <Select
-                                labelId="startType-label"
-                                id="startType"
-                                value={trail.startType}
-                                defaultValue='knowing'
-                                label="type de départ"
-                                onChange={handleStartType}
-                                name="startType"
-                            >
-                                <MenuItem value={"knowing"}>Départ à vue</MenuItem>
-                                <MenuItem value={"blind"}>Départ à l'aveugle</MenuItem>
-                                <MenuItem value={"double blind"}>Double aveugle</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                    <Grid item md={6} xs={11}>
-                        <TextField
-                            sx={{ width: isMobile ? '100%' : '65%' }}
-                            id="distance"
-                            label="Distance (meters)"
-                            defaultValue={0}
-                            type="number"
-                            value={trail.distance}
-                            onChange={handleChange}
-                            name="distance" />
-                    </Grid>
-                    <Grid item md={6} xs={11}>
-                        <TextField
-                            sx={{ width: isMobile ? '100%' : '65%' }}
-                            id="duration"
-                            label="Duration (seconds)"
-                            defaultValue={0}
-                            value={trail.duration}
-                            type="number"
-                            onChange={handleChange}
-                            name="duration" />
-                    </Grid>
-                </Grid>
-            </Grid>
-            <Grid item md={4} xs={11}>
-                <MapContainer style={{ height: "100%", width: "100%", minHeight: isMobile ? '300px' : '' , marginLeft: isMobile ? '10px' : ''}} center={edit_trail?.locationCoordinate ? edit_trail.locationCoordinate : [45.7578137, 4.8320114]} zoom={16} scrollWheelZoom={true} ref={mapRef}  >
-                    <TileLayer
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    />
-                    <Marker position={markerLocation} icon={new Icon({ iconUrl: markerIconPng, iconSize: [25, 41], iconAnchor: [12, 41] })} />
-                    {dogTrace && <Polyline pathOptions={{ color: 'red' }} positions={dogTrace} />}
-                    {runnerTrace && <Marker position={runnerTrace[runnerTrace.length - 1]} icon={new Icon({ iconUrl: require('../assets/flag.png'), iconAnchor: [8, 16] })} />}
-                    {runnerTrace && <Polyline pathOptions={{ color: 'blue' }} positions={runnerTrace} />}
-                    <OnClickMap />
-                </MapContainer>
-            </Grid>
-            <Grid item md={2} sx={{ alignContent: 'center', textAlign:'center' }} xs={11}>
-                <input
-                    accept=".gpx"
-                    id="gpx-upload-runner"
-                    type="file"
-                    style={{ display: 'none' }}
-                    onChange={(e) => handleFileUpload(e.target.files, 'runner')}
-                />
-                <label htmlFor="gpx-upload-runner">
-                    <Button component="span" variant="contained" color="error" sx={{ width: '80%' }} startIcon={<FileUploadIcon />}>
-                        Runner GPX file
-                    </Button>
-                </label>
-                <input
-                    accept=".gpx"
-                    id="gpx-upload-dog"
-                    type="file"
-                    style={{ display: 'none' }}
-                    onChange={(e) => handleFileUpload(e.target.files, 'dog')}
-                />
-                <label htmlFor="gpx-upload-dog">
-                    <Button sx={{ marginTop: '20px', width: '80%' }} component="span" variant="contained" color="secondary" startIcon={<FileUploadIcon />}>
-                        Dog GPX file
-                    </Button>
-                </label>
-            </Grid>
-            <Grid item md={12} xs={11} sx={{textAlign:'left', marginLeft: isMobile? '10px' : ''}}>
-                <Typography variant="h4">Additional Information</Typography>
-            </Grid>
-            <Grid item md={12} xs={11}  sx={{textAlign:'left', marginLeft: isMobile? '10px' : ''}}>
-                <TextField
-                    id="notes"
-                    label="Notes"
-                    type="text"
-                    value={trail.notes}
-                    onChange={handleChange}
-                    name="notes"
-                    multiline
-                    rows={4}
-                    variant="outlined"
-                    fullWidth />
-            </Grid>
-            <Grid item md={12} xs={11}  sx={{textAlign:'center', marginLeft: isMobile? '10px' : ''}}>
-                <Button type="submit" onClick={() => handleSave()}>Save</Button>
-            </Grid>
-            </>}
+                </>}
             {!isAllowedToCreate && <Grid item md={12} xs={12}>
                 <Typography variant="h5">Vous n'êtes pas autorisé à créer une nouvelle session</Typography>
                 <Button onClick={() => setOpenModal(true)}>Enregistrer l'appareil</Button>
-                <ConnectionModal open={openModal} onClose={() => setOpenModal(false)} setConnection={setIsAllowedToCreate}/>
+                <ConnectionModal open={openModal} onClose={() => setOpenModal(false)} setConnection={setIsAllowedToCreate} />
             </Grid>}
         </Grid>
     );
