@@ -16,7 +16,7 @@ const Accueil: React.FC = () => {
             </Grid>
             <Grid item xs={6}>
                 <Typography variant="body1" align="left">
-                    Titus est note épagneul breton né le 02/05/2021. Il adore travaillé avec son nez et donc nous l'avons inscrit au Mantrailing avec <a href="https://www.lyonk9.fr/"> LyonL9</a>
+                    Titus est notre épagneul breton né le 02/05/2021. Il adore travailler avec son nez et donc nous l'avons inscrit au Mantrailing avec <a href="https://www.lyonk9.fr/"> LyonK9</a>
                 </Typography>
             </Grid>
             <Grid item xs={6}>
@@ -25,7 +25,7 @@ const Accueil: React.FC = () => {
                     alt="Titus"
                     style={{ width: 'auto', height: '400px' }}
                 />
-                  <figcaption><i>Credits photo par Claudia</i></figcaption>
+                  <figcaption><i>Credits photo: Claudia</i></figcaption>
             </Grid>
             <Grid item xs={12}>
                 <Typography variant="h4" align="center" gutterBottom>
