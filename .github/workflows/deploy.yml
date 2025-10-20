@@ -1,0 +1,63 @@
+name: Deploy and Release
+
+on:
+  push:
+    branches: ["master"]
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: deploy using ssh
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: |
+            echo '--> Set env variable...'
+            export ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}
+            export PORT=${{ vars.PORT }}
+            export DB_NAME=${{ vars.DB_NAME }}
+            export MONGODB_URI=${{ secrets.MONGODB_URI }}
+            export CORS_ORIGIN=${{ vars.CORS_ORIGIN }}
+            echo '--> Git pull...'
+            cd maximilien
+            git pull origin master
+            echo '--> Install dependencies...'
+            npm i
+            echo '--> Restarting application with PM2...'
+            pm2 startOrRestart ecosystem.config.js --env production
+            echo '--> done.'
+            exit
+
+  release:
+    name: Release
+    needs: deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Generate version
+        id: version
+        uses: paulhatch/semantic-version@v5.4.0
+        with:
+          major_pattern: '${{vars.GIT_SEMANTIC_VERSION_MAJOR_PATTERN}}'
+          minor_pattern: '${{vars.GIT_SEMANTIC_VERSION_MINOR_PATTERN}}'
+          version_format: '${major}.${minor}.${patch}'
+          tag_prefix: ''
+      - name: git tag ${{steps.version.outputs.version}}
+        run: |
+          git tag ${{steps.version.outputs.version}}
+          git push origin ${{steps.version.outputs.version}}
+      - name: create a new release and push
+        run: |
+          gh release create ${{steps.version.outputs.version}} -t ${{steps.version.outputs.version}} -n ${{steps.version.outputs.version}}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
