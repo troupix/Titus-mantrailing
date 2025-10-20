@@ -26,6 +26,14 @@ const hikeSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  location: {
+    type: String,
+    required: false
+  },
+  locationCoordinate: {
+    type: Array,
+    required: false
+  },
   // Location where the hike starts. Useful for map markers.
   startLocation: {
     type: pointSchema,

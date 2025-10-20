@@ -68,8 +68,9 @@ router.put('/:id', async (req, res) => {
   try {
     // Crée un objet avec uniquement les champs autorisés à être mis à jour
     const allowedUpdates = [
-      'name', 'description', 'startLocation', 'distance', 'duration',
-      'elevationGain', 'difficulty', 'photos', 'userTrack', 'dogTrack'
+      'name', 'description', 'startLocation', 'distance', 'duration', 'elevationGain',
+      'difficulty', 'photos', 'userTrack', 'dogTrack', 'location',
+      'locationCoordinate', 'date'
     ];
     const updates = {};
     Object.keys(req.body).forEach((key) => {
