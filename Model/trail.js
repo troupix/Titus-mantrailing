@@ -33,6 +33,11 @@ const TrailSchema = new mongoose.Schema({
         type: Number,
         required: false
     },
+    delay: {
+        type: Number,
+        required: false,
+        default: 0
+    },
     notes: {
         type: String,
         default: '',

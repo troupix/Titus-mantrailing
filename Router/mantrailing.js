@@ -49,7 +49,8 @@ router.post('/save', (req, res) => {
         trainer: req.body.trainer,
         locationCoordinate: req.body.locationCoordinate,
         runnerTrace: req.body.runnerTrace,
-        dogTrace: req.body.dogTrace
+        dogTrace: req.body.dogTrace,
+        delay: req.body.delay
     });
     newTrail.save()
         .then(trail => res.json(trail))
@@ -97,7 +98,8 @@ router.post('/update', (req, res) => {
         trainer: req.body.trail.trainer,
         locationCoordinate: req.body.trail.locationCoordinate,
         runnerTrace: req.body.trail.runnerTrace,
-        dogTrace: req.body.trail.dogTrace
+        dogTrace: req.body.trail.dogTrace,
+        delay: req.body.trail.delay
     }).then(() => res.json({ success: true }))
         .catch(() => res.status(404).json({ success: false }));
 });

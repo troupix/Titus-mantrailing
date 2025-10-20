@@ -13,10 +13,9 @@ const pointSchema = new mongoose.Schema({
 });
 
 const hikeSchema = new mongoose.Schema({
-  userId: {
+  _id: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+    auto: true
   },
   name: {
     type: String,
@@ -61,6 +60,10 @@ const hikeSchema = new mongoose.Schema({
     default: ''
   },
   createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  date:{
     type: Date,
     default: Date.now
   }
