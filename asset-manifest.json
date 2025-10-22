@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/Titus-mantrailing/static/css/main.cefbecf9.css",
-    "main.js": "/Titus-mantrailing/static/js/main.6a1b228c.js",
+    "main.js": "/Titus-mantrailing/static/js/main.6a51b7d0.js",
     "static/js/453.c3db55c9.chunk.js": "/Titus-mantrailing/static/js/453.c3db55c9.chunk.js",
     "index.html": "/Titus-mantrailing/index.html",
     "main.cefbecf9.css.map": "/Titus-mantrailing/static/css/main.cefbecf9.css.map",
-    "main.6a1b228c.js.map": "/Titus-mantrailing/static/js/main.6a1b228c.js.map",
+    "main.6a51b7d0.js.map": "/Titus-mantrailing/static/js/main.6a51b7d0.js.map",
     "453.c3db55c9.chunk.js.map": "/Titus-mantrailing/static/js/453.c3db55c9.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.cefbecf9.css",
-    "static/js/main.6a1b228c.js"
+    "static/js/main.6a51b7d0.js"
   ]
 }
