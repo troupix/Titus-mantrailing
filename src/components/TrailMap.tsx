@@ -14,6 +14,8 @@ interface TrailMapProps {
 export function TrailMap({ mapData }: TrailMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
+  const dogPathLayerRef = useRef<any>(null);
+  const victimPathLayerRef = useRef<any>(null);
 
   const showLegend = (mapData.dogPath && mapData.dogPath.length > 0) || (mapData.victimPath && mapData.victimPath.length > 0);
 
@@ -31,15 +33,10 @@ export function TrailMap({ mapData }: TrailMapProps) {
         await new Promise(resolve => { script.onload = resolve; });
       }
 
-      // Small delay to ensure Leaflet is fully available on the window object
-      await new Promise(resolve => setTimeout(resolve, 50));
-
       const L = (window as any).L;
-      if (!L || !mapRef.current) return;
-
-      // If a map instance already exists, remove it before creating a new one
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
+      if (!L || !mapRef.current || mapInstanceRef.current) {
+        // If Leaflet is not loaded, mapRef is null, or map already exists, do nothing.
+        return;
       }
 
       map = L.map(mapRef.current).setView(mapData.center, mapData.zoom);
@@ -48,40 +45,60 @@ export function TrailMap({ mapData }: TrailMapProps) {
       }).addTo(map);
 
       mapInstanceRef.current = map;
-
-      // --- Path drawing logic moved here ---
-      const layers: any[] = [];
-
-      if (mapData.dogPath && mapData.dogPath.length > 0) {
-        const dogPolyline = L.polyline(mapData.dogPath, { color: '#3b82f6', weight: 3, opacity: 0.8 }).addTo(map);
-        layers.push(dogPolyline);
-      }
-
-      if (mapData.victimPath && mapData.victimPath.length > 0) {
-        const victimPolyline = L.polyline(mapData.victimPath, { color: '#f97316', weight: 3, opacity: 0.8, dashArray: '10, 10' }).addTo(map);
-        layers.push(victimPolyline);
-      }
-
-      if (layers.length > 0) {
-        const group = L.featureGroup(layers);
-        map.fitBounds(group.getBounds(), { padding: [50, 50] });
-      } else {
-        map.setView(mapData.center, mapData.zoom);
-      }
-
-      // Force map to re-evaluate its size
-      setTimeout(() => map.invalidateSize(), 100);
     };
 
     loadLeaflet();
 
     return () => {
       if (mapInstanceRef.current) {
+        // Clean up map instance on component unmount
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
     };
-  }, [mapData]); // Re-run this entire effect when mapData changes
+  }, []); // Run only once on mount to initialize the map
+
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+    const L = (window as any).L;
+    if (!L) return;
+
+    // Clear existing path layers
+    if (dogPathLayerRef.current) {
+      mapInstanceRef.current.removeLayer(dogPathLayerRef.current);
+      dogPathLayerRef.current = null;
+    }
+    if (victimPathLayerRef.current) {
+      mapInstanceRef.current.removeLayer(victimPathLayerRef.current);
+      victimPathLayerRef.current = null;
+    }
+
+    const layers: any[] = [];
+
+    // Add dog path
+    if (mapData.dogPath && mapData.dogPath.length > 0) {
+      dogPathLayerRef.current = L.polyline(mapData.dogPath, { color: '#3b82f6', weight: 3, opacity: 0.8 }).addTo(mapInstanceRef.current);
+      layers.push(dogPathLayerRef.current);
+    }
+
+    // Add victim path
+    if (mapData.victimPath && mapData.victimPath.length > 0) {
+      victimPathLayerRef.current = L.polyline(mapData.victimPath, { color: '#f97316', weight: 3, opacity: 0.8, dashArray: '10, 10' }).addTo(mapInstanceRef.current);
+      layers.push(victimPathLayerRef.current);
+    }
+
+    // Adjust map view to fit paths or set to center/zoom
+    if (layers.length > 0) {
+      const group = L.featureGroup(layers);
+      mapInstanceRef.current.fitBounds(group.getBounds(), { padding: [50, 50] });
+    } else {
+      mapInstanceRef.current.setView(mapData.center, mapData.zoom);
+    }
+
+    // Invalidate size after updates to ensure correct rendering, especially if container size changes
+    // This is safer here as it operates on an existing map instance.
+    mapInstanceRef.current.invalidateSize();
+  }, [mapData, mapInstanceRef.current]); // Re-run when mapData changes or map instance becomes available
 
   return (
     <div className="relative">

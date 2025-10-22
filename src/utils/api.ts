@@ -38,7 +38,6 @@ export const getAllTrail = async (): Promise<Trail[]> => {
     const mantrailingTrails = trailResponse.map(t => ({ ...t, category: 'mantrailing' as const }));
     const hikingTrails = hikeResponse.map(h => ({ ...h, category: 'hiking' as const }));
     const response = [...mantrailingTrails, ...hikingTrails];
-    console.log(response);
     return response;
 }
 

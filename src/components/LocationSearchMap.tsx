@@ -36,6 +36,11 @@ export function LocationSearchMap({
     onLocationChangeRef.current = onLocationChange;
   });
 
+  const locationTextRef = useRef(locationText);
+  useEffect(() => {
+    locationTextRef.current = locationText;
+  });
+
   const onLocationChangeRef = useRef(onLocationChange);
 
   useEffect(() => {
@@ -53,7 +58,7 @@ export function LocationSearchMap({
   }, [locationValue]);
 
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current || mapInstanceRef.current) return;
 
     const loadLeaflet = async () => {
       // Load CSS
@@ -76,8 +81,6 @@ export function LocationSearchMap({
           script.onload = resolve;
         });
       }
-
-      await new Promise((resolve) => setTimeout(resolve, 100));
 
       if (!isMounted.current) return;
 
@@ -108,7 +111,7 @@ export function LocationSearchMap({
 
         // Update location
         if (onLocationChangeRef.current) {
-          onLocationChangeRef.current(locationText, coordinates);
+          onLocationChangeRef.current(locationTextRef.current, coordinates);
         }
       });
 
@@ -123,9 +126,10 @@ export function LocationSearchMap({
         mapInstanceRef.current = null;
       }
     };
-  }, []);
+  }, []); // Run only once on mount
 
   useEffect(() => {
+    // Effect to update map view when center or zoom props change
     if (mapInstanceRef.current) {
       mapInstanceRef.current.setView(center, zoom);
     }
