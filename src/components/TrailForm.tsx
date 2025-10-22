@@ -829,6 +829,7 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
                   <div className="mt-4">
                     <GpxTraceEditor
                       path={dogGpxData.path}
+                      timestamps={dogGpxData.timestamps}
                       label="Trace du chien"
                       color="#3b82f6"
                       onUpdate={handleUpdateDogPath}
@@ -841,6 +842,7 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
                   <div className="mt-4">
                     <GpxTraceEditor
                       path={userGpxData.path}
+                      timestamps={userGpxData.timestamps}
                       label="Votre trace"
                       color="#22c55e"
                       onUpdate={handleUpdateUserPath}
@@ -853,6 +855,7 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
                   <div className="mt-4">
                     <GpxTraceEditor
                       path={userGpxData.path}
+                      timestamps={userGpxData.timestamps}
                       label="Trace de la victime"
                       color="#f97316"
                       onUpdate={handleUpdateUserPath}
@@ -865,6 +868,7 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
                   <div className="mt-4">
                     <GpxTraceEditor
                       path={dogGpxData.path}
+                      timestamps={dogGpxData.timestamps}
                       label="Trace du chien"
                       color="#3b82f6"
                       onUpdate={handleUpdateDogPath}
