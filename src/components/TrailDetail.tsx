@@ -212,7 +212,7 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
             : "from-green-600 to-green-700"
         } text-white border-0 shadow-xl`}>
           <CardHeader>
-            <div className="flex items-start justify-between">
+            <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
               <div className="space-y-2 flex-1">
                 <div className="flex items-center gap-3 flex-wrap">
                   <CardTitle className="text-3xl">{getTitle()}</CardTitle>
@@ -247,24 +247,24 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
                 </div>
               </div>
               {isAllowedToCreate && (
-                <div className="flex gap-2">
+                <div className="flex gap-2 self-start sm:self-auto">
                   <Button
                     variant="secondary"
                     size="sm"
                     onClick={() => onEdit(trail)}
-                    className="gap-2"
+                    className="gap-2 flex-shrink-0"
                   >
                     <Edit className="h-4 w-4" />
-                    Modifier
+                    <span className="hidden xs:inline">Modifier</span>
                   </Button>
                   <Button
                     variant="destructive"
                     size="sm"
                     onClick={handleDelete}
-                    className="gap-2"
+                    className="gap-2 flex-shrink-0"
                   >
                     <Trash2 className="h-4 w-4" />
-                    Supprimer
+                    <span className="hidden xs:inline">Supprimer</span>
                   </Button>
                 </div>
               )}
