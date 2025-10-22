@@ -3,8 +3,6 @@ import { Badge } from "./ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Trail, isMantrailingTrail, isHikingTrail } from "../types/trail";
 import { 
-  Dog, 
-  Mountain, 
   TrendingUp, 
   Award, 
   Calendar,
@@ -29,7 +27,6 @@ import {
   Legend, 
   ResponsiveContainer 
 } from "recharts";
-import DogHomePageIcon from "./DogHomePageIcon";
 import TrailIcon from "./TrailIcon";
 import HikeIcon from "./HikeIcon";
 

@@ -1,7 +1,7 @@
-import { Dog, Mountain, Plus } from "lucide-react";
+import {  Plus } from "lucide-react";
 import { Button } from "./ui/button";
-import DogHomePageIcon from "./DogHomePageIcon";
 import TrailIcon from "./TrailIcon";
+import HikeIcon from "./HikeIcon";
 
 interface EmptyStateProps {
   onCreateNew: () => void;
@@ -16,7 +16,7 @@ export function EmptyState({ onCreateNew }: EmptyStateProps) {
             <TrailIcon className="h-16 w-16 text-blue-600" />
           </div>
           <div className="bg-green-100 p-6 rounded-full">
-            <Mountain className="h-16 w-16 text-green-600" />
+            <HikeIcon className="h-16 w-16 text-green-600" />
           </div>
         </div>
         <h2 className="mb-3 text-blue-900">Bienvenue dans votre carnet de pistes</h2>

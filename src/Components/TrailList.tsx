@@ -3,11 +3,9 @@ import { ScrollArea } from "./ui/scroll-area";
 import { Button } from "./ui/button";
 import {
   Plus,
-  Dog,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  Mountain,
 } from "lucide-react";
 import { Trail, isMantrailingTrail } from "../types/trail";
 import {
@@ -21,7 +19,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "./ui/collapsible";
-import DogHomePageIcon from "./DogHomePageIcon";
 import TrailIcon from "./TrailIcon";
 import HikeIcon from "./HikeIcon";
 

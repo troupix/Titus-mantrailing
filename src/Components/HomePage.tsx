@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { Trail, isMantrailingTrail, isHikingTrail } from "../types/trail";
-import { Dog, Mountain, MapPin, Calendar, Award, TrendingUp, Clock, Ruler, BarChart3 } from "lucide-react";
+import { Trail, isMantrailingTrail } from "../types/trail";
+import { Calendar, Award, TrendingUp, Ruler, BarChart3 } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import DogHomePageIcon from "./DogHomePageIcon";
 import TrailIcon from "./TrailIcon";
@@ -22,7 +22,6 @@ export function HomePage({ trails, onViewTrails, onCreateNew, onViewStatistics, 
   const mantrailingCount = trails.filter(t => t.category === "mantrailing").length;
   const hikingCount = trails.filter(t => t.category === "hiking").length;
   const totalDistance = trails.reduce((sum, t) => sum + (t.distance || 0), 0);
-  const totalDuration = trails.reduce((sum, t) => sum + (t.duration || 0), 0);
   
   // Get recent trails
   const recentTrails = [...trails]

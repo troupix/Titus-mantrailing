@@ -7,7 +7,7 @@ import {
   isMantrailingTrail,
   isHikingTrail,
 } from "../types/trail";
-import { parseGPXFile, gpxToGeoJSON } from "../utils/gpxParser";
+import { parseGPXFile } from "../utils/gpxParser";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -21,9 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { X, Dog, Mountain, Upload, FileText, Trash2, Info } from "lucide-react";
+import { X, Upload, FileText, Trash2, Info } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
-import { TrailMap } from "./TrailMap";
 import { GpxTraceEditor } from "./GpxTraceEditor";
 import { createHike, updateHike, saveTrail, updateTrail } from "../utils/api";
 import { LocationSearchMap } from "./LocationSearchMap";
@@ -67,10 +66,10 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
   const [notes, setNotes] = useState(trail?.notes || "");
 
   // Mantrailing specific fields
-  const [dogName, setDogName] = useState(
+  const [dogName, ] = useState(
     trail && isMantrailingTrail(trail) ? trail.dogName : ""
   );
-  const [handlerName, setHandlerName] = useState(
+  const [handlerName,] = useState(
     trail && isMantrailingTrail(trail) ? trail.handlerName : ""
   );
   const [trainer, setTrainer] = useState(

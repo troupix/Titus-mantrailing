@@ -3,7 +3,7 @@ import { Trail, isMantrailingTrail, isHikingTrail } from "../types/trail";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { Edit, MapPin, Clock, Ruler, Dog, Mountain, User, TrendingUp, Award, Calendar, FileText, Trash2 } from "lucide-react";
+import { Edit, MapPin, Clock, Ruler, User, TrendingUp, Award, Calendar, FileText, Trash2 } from "lucide-react";
 import { TrailMap } from "./TrailMap";
 import { deleteTrail, deleteHike } from "../utils/api";
 
