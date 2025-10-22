@@ -16,7 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # Action to set up Node.js environment
         with:
-          node-version: '18' # Specify the Node.js version your project uses
+          node-version: '16' # Specify the Node.js version your project uses
 
       - name: Install dependencies
         run: npm install # Install your project's dependencies
