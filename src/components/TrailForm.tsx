@@ -66,11 +66,11 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
   const [notes, setNotes] = useState(trail?.notes || "");
 
   // Mantrailing specific fields
-  const [dogName, ] = useState(
-    trail && isMantrailingTrail(trail) ? trail.dogName : ""
+  const [dogName, setDogName] = useState(
+    (trail && isMantrailingTrail(trail) ? trail.dogName : "Titus") || "Titus"
   );
-  const [handlerName,] = useState(
-    trail && isMantrailingTrail(trail) ? trail.handlerName : ""
+  const [handlerName, setHandlerName] = useState(
+    (trail && isMantrailingTrail(trail) ? trail.handlerName : "") || ""
   );
   const [trainer, setTrainer] = useState(
     trail && isMantrailingTrail(trail) ? trail.trainer || "" : ""
@@ -515,8 +515,38 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
                 </div>
 
                 {category === "mantrailing" && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="dogName">Nom du chien *</Label>
+                      <Input
+                        id="dogName"
+                        value={dogName}
+                        onChange={(e) => setDogName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="handlerName">Nom du maître *</Label>
+                      <Select
+                        value={handlerName}
+                        onValueChange={setHandlerName}
+                        required
+                      >
+                        <SelectTrigger id="handlerName">
+                          <SelectValue placeholder="Sélectionner un maître" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Malie">Malie</SelectItem>
+                          <SelectItem value="Max">Max</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
+
+                {category === "mantrailing" && (
                   <div className="space-y-2">
-                    <Label htmlFor="trainer">Maître / Formateur</Label>
+                    <Label htmlFor="trainer">Formateur</Label>
                     <Input
                       id="trainer"
                       value={trainer}
