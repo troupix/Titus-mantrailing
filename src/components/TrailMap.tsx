@@ -56,6 +56,7 @@ export function TrailMap({ mapData }: TrailMapProps) {
         mapInstanceRef.current = null;
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run only once on mount to initialize the map
 
   useEffect(() => {
@@ -98,6 +99,7 @@ export function TrailMap({ mapData }: TrailMapProps) {
     // Invalidate size after updates to ensure correct rendering, especially if container size changes
     // This is safer here as it operates on an existing map instance.
     mapInstanceRef.current.invalidateSize();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapData, mapInstanceRef.current]); // Re-run when mapData changes or map instance becomes available
 
   return (
