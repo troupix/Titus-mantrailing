@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { Typography, Box, Grid, Checkbox } from '@mui/material';
 import Header from './Header';
 import { LocationContext } from './Context/Location';
-import { changeOfDirection, compareTime } from '../Utils/utils';
+import { changeOfDirection, compareTime } from '../utils/utils';
 import { Assessment } from '@mui/icons-material';
 
 interface AssessmentCriteriaMantrailingGlobal {
@@ -35,17 +35,17 @@ interface LevelLyonK9 {
 
 
 const Level = () => {
-    const { allTrails } = useContext(LocationContext);
+    const { trails } = useContext(LocationContext);
     const assessmentCriteriaMantrailingGlobal: AssessmentCriteriaMantrailingGlobal = {
         entryLevel: {
             name: 'Niveau d\'entrée',
             criteria: [
-                { id: 'Single blind', criteria: 'Départ à l\'aveugle', pass: allTrails.find((trail: any) => trail.startType === 'blind') ? true : false },
-                { id: 'trailLength', criteria: 'longueur de piste: 200-400m', pass: allTrails.find((trail: any) => trail.distance >= 200) ? true : false },
-                { id: 'changeofdirection', criteria: '1 changement de direction (90 degrées)', pass: allTrails.find((trail: any) => trail.runnerTrace && changeOfDirection(trail.runnerTrace?.trk[0]?.trkseg[0]?.trkpt) === true) ? true : false },
-                { id: 'Age of trail', criteria: 'Age de la piste: 30 min - 1hr Max.', pass: allTrails.find((trail: any) => trail.dogTrace && trail.runnerTrace && compareTime(trail.dogTrace?.trk[0]?.trkseg[0]?.trkpt, trail.runnerTrace?.trk[0]?.trkseg[0]?.trkpt) > 1800) ? true : false },
-                { id: 'Trail duration', criteria: 'Max. 30 min pour trouver la victime', pass: allTrails.find((trail: any) => trail.duration < 1800) ? true : false },
-                { id: 'Terrain', criteria: ' Terrain: Rural', pass: allTrails.find((trail: any) => trail.trailType.toLowerCase().includes('verdure') || trail.trailType.toLowerCase().includes('sable') || trail.trailType.toLowerCase().includes('gravier')) ? true : false },
+                { id: 'Single blind', criteria: 'Départ à l\'aveugle', pass: trails.find((trail: any) => trail.startType === 'blind') ? true : false },
+                { id: 'trailLength', criteria: 'longueur de piste: 200-400m', pass: trails.find((trail: any) => trail.distance >= 200) ? true : false },
+                { id: 'changeofdirection', criteria: '1 changement de direction (90 degrées)', pass: trails.find((trail: any) => trail.runnerTrace && changeOfDirection(trail.runnerTrace?.trk[0]?.trkseg[0]?.trkpt) === true) ? true : false },
+                { id: 'Age of trail', criteria: 'Age de la piste: 30 min - 1hr Max.', pass: trails.find((trail: any) => trail.dogTrace && trail.runnerTrace && compareTime(trail.dogTrace?.trk[0]?.trkseg[0]?.trkpt, trail.runnerTrace?.trk[0]?.trkseg[0]?.trkpt) > 1800) ? true : false },
+                { id: 'Trail duration', criteria: 'Max. 30 min pour trouver la victime', pass: trails.find((trail: any) => trail.duration < 1800) ? true : false },
+                { id: 'Terrain', criteria: ' Terrain: Rural', pass: trails.find((trail: any) => trail.trailType.toLowerCase().includes('verdure') || trail.trailType.toLowerCase().includes('sable') || trail.trailType.toLowerCase().includes('gravier')) ? true : false },
                 { id: 'Trail layer position', criteria: 'position de la victime - assis/couché/debout', pass: true },
                 { id: 'Indication', criteria: ' Pas d\'indication de piste de la part du conducteur', pass: true },
                 { id: 'Flankers', criteria: '1 assistant autorisé', pass: true },

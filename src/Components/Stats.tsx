@@ -1,10 +1,10 @@
 import React, { useContext } from 'react';
 import { Grid, Typography } from '@mui/material';
 import Header from './Header';
-import { LocationContext } from './Context/Location';
-import StatsCard from './StatsCard';
-import { durationInMinutesSeconds } from '../Utils/utils';
-import { calculatePaceMax, calculatePaceAverage, calculatePaceMin } from '../Utils/utils';
+import { LocationContext } from '../components/Context/Location';
+import StatsCard from './StatsCard'; // Corrected casing
+import { durationInMinutesSeconds } from '../utils/utils';
+import { calculatePaceMax, calculatePaceAverage, calculatePaceMin } from '../utils/utils';
 
 
 
@@ -15,7 +15,7 @@ interface StatsProps {
 
 const Stats: React.FC<StatsProps> = (props) => {
     // const { title, value } = props;
-    const { allTrails } = useContext(LocationContext);
+    const { trails } = useContext(LocationContext);
     const determinePaceMax = (trails: any) => {
         let paceMax = 0;
         let dateOfPaceMax = '';
@@ -72,20 +72,20 @@ const Stats: React.FC<StatsProps> = (props) => {
             <Grid item md={3} xs={11}>
                 <StatsCard
                     title="Nombre de piste enregistrées"
-                    value={allTrails.length.toString()}
+                    value={trails.length.toString()}
                 />
             </Grid>
             <Grid item md={3} xs={11}>
                 <StatsCard
                     title="Distance totale enregistrée"
-                    value={allTrails.reduce((acc, trail) => trail.distance ? acc + trail.distance : acc + 0, 0).toString()}
+                    value={trails.reduce((acc, trail) => trail.distance ? acc + trail.distance : acc + 0, 0).toString()}
                     unit="m"
                 />
             </Grid>
             <Grid item md={3} xs={11}>
                 <StatsCard
                     title="Durée totale enregistrée"
-                    value={durationInMinutesSeconds(allTrails.reduce((acc, trail) => trail.duration ? acc + trail.duration : acc + 0, 0))}
+                    value={durationInMinutesSeconds(trails.reduce((acc, trail) => trail.duration ? acc + trail.duration : acc + 0, 0))}
                 />
             </Grid>
             <Grid item md={11} xs={11}>
@@ -94,17 +94,17 @@ const Stats: React.FC<StatsProps> = (props) => {
             <Grid item md={3} xs={11}>
                 <StatsCard
                     title="Piste la plus longue enregistrée"
-                    value={allTrails.reduce((acc, trail) => trail.distance ? acc > trail.distance ? acc : trail.distance : acc + 0, 0).toString()}
+                    value={trails.reduce((acc, trail) => trail.distance ? acc > trail.distance ? acc : trail.distance : acc + 0, 0).toString()}
                     unit='m'
-                    subtitle={`le ${new Date(allTrails.find(trail => trail.distance === allTrails.reduce((acc, trail) => trail.distance ? acc > trail.distance ? acc : trail.distance : acc + 0, 0))?.date.toString() || '').toLocaleDateString() || ''}`}
+                    subtitle={`le ${new Date(trails.find(trail => trail.distance === trails.reduce((acc, trail) => trail.distance ? acc > trail.distance ? acc : trail.distance : acc + 0, 0))?.date.toString() || '').toLocaleDateString() || ''}`}
                 />
             </Grid>
             <Grid item md={3} xs={11}>
                 <StatsCard
                     title="Durée la plus courte enregistrée"
-                    value={`${durationInMinutesSeconds(allTrails.reduce((acc, trail) => trail.duration ? acc < trail.duration && acc !==  0 ? acc : trail.duration : acc + 0, 0))}`}
+                    value={`${durationInMinutesSeconds(trails.reduce((acc, trail) => trail.duration ? acc < trail.duration && acc !==  0 ? acc : trail.duration : acc + 0, 0))}`}
                     // unit='s'
-                    subtitle={`le ${new Date(allTrails.find(t => t.duration === allTrails.reduce((acc,trail) => trail.duration ? acc > trail.duration ? acc : trail.duration : acc + 0, 0))?.date ?? 0).toLocaleDateString()}`}
+                    subtitle={`le ${new Date(trails.find(t => t.duration === trails.reduce((acc,trail) => trail.duration ? acc > trail.duration ? acc : trail.duration : acc + 0, 0))?.date ?? 0).toLocaleDateString()}`}
                 />
             </Grid>
             <Grid item md={11} xs={11}>
@@ -113,21 +113,21 @@ const Stats: React.FC<StatsProps> = (props) => {
             <Grid item md={3} xs={11}>
                 <StatsCard
                     title="Vitesse maximale enregistrée"
-                    value={`${determinePaceMax(allTrails).paceMax.toFixed(1)} m/s`}
-                    subtitle={`le ${new Date(determinePaceMax(allTrails).dateOfPaceMax).toLocaleDateString()}`}
+                    value={`${determinePaceMax(trails).paceMax.toFixed(1)} m/s`}
+                    subtitle={`le ${new Date(determinePaceMax(trails).dateOfPaceMax).toLocaleDateString()}`}
                 />
             </Grid>
             <Grid item md={3} xs={11}>
                 <StatsCard
                     title="Vitesse minimale enregistrée"
-                    value={`${determinePaceMin(allTrails).paceMin.toFixed(1)} m/s`}
-                    subtitle={`le ${new Date(determinePaceMin(allTrails).dateOfPaceMin).toLocaleDateString()}`}
+                    value={`${determinePaceMin(trails).paceMin.toFixed(1)} m/s`}
+                    subtitle={`le ${new Date(determinePaceMin(trails).dateOfPaceMin).toLocaleDateString()}`}
                 />
             </Grid>
             <Grid item md={3} xs={11}>
                 <StatsCard
                     title="Vitesse moyenne enregistrée"
-                    value={`${determinePaceAverage(allTrails).toFixed(1)}`}
+                    value={`${determinePaceAverage(trails).toFixed(1)}`}
                     unit='m/s'
                 />
             </Grid>

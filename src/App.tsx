@@ -1,74 +1,205 @@
-import React, { useContext, useEffect } from 'react';
-import SessionDrawer from './Components/SessionDrawer';
-import './App.css';
-import { useState } from 'react';
-import { LocationContext } from './Components/Context/Location';
-import SessionForm from './Components/SessionForm';
-import { getAllTrail } from './Utils/api';
-import SessionDisplay from './Components/SessionDisplay';
-import { Trail } from './Utils/types';
-import { Grid } from '@mui/material';
-import PointingDogIcon from './Components/PointingDogIcon';
-import BadgesIcon from './Components/BadgesIcon';
-import ScoreIcon from '@mui/icons-material/Score';
-import Stats from './Components/Stats';
-import { useMediaQuery, useTheme } from '@mui/material';
-import Level from './Components/Level';
-import Accueil from './Components/Accueil';
+import React, { useContext, useEffect } from "react";
+import SessionDrawer from "./components/SessionDrawer";
+import "./App.css";
+import { useState } from "react";
+import { LocationContext } from "./components/Context/Location";
+import SessionForm from "./components/SessionForm";
+import { getAllTrail } from "./utils/api";
+import SessionDisplay from "./components/SessionDisplay";
+import { Trail } from "./types/trail";
+import { Grid } from "@mui/material";
+import PointingDogIcon from "./components/PointingDogIcon";
+import BadgesIcon from "./components/BadgesIcon";
+import ScoreIcon from "@mui/icons-material/Score";
+import Stats from "./components/Stats";
+import { useMediaQuery, useTheme } from "@mui/material";
+import Level from "./components/Level";
+import Accueil from "./components/Accueil";
+import { AppHeader } from "./components/AppHeader";
+import { TrailList } from "./components/TrailList";
+import { HomePage } from "./components/HomePage";
+import { StatisticsPage } from "./components/StatisticsPage";
+import { BadgesPage } from "./components/BadgesPage";
+import { TrailForm } from "./components/TrailForm";
+import { TrailDetail } from "./components/TrailDetail";
+import { EmptyState } from "./components/EmptyState";
+import PointingIcon from "./components/PointingIcon";
+import { Dog } from "lucide-react";
+
+type View = "home" | "list" | "detail" | "form" | "statistics" | "badges";
 
 interface category {
   id: string;
   children: any[];
-
 }
-
 
 function App() {
   const { location } = useContext(LocationContext) || {};
+  const [view, setView] = useState<View>("home");
+  const [editingTrail, setEditingTrail] = useState<Trail | undefined>();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
   const [categories, setCategories] = useState<category[]>([]);
-  const {allTrails, setAllTrails} = useContext(LocationContext);
-  const { triggerGetTrails } = useContext(LocationContext);
+  const { trails, setTrails, triggerGetTrails, setTriggerGetTrails } = useContext(LocationContext);
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const [selectedTrailId, setSelectedTrailId] = useState<string | null>(
+    trails.length > 0 ? trails[0]._id || null : null
+  );
+  const handleCreateNew = () => {
+    setEditingTrail(undefined);
+    setView("form");
+    setShowSidebar(true);
+  };
 
+  const handleEdit = (trail: Trail) => {
+    setEditingTrail(trail);
+    setView("form");
+  };
+
+  const handleViewTrails = () => {
+    setView("detail");
+    setShowSidebar(true);
+    if (trails.length > 0 && !selectedTrailId) {
+      setSelectedTrailId(trails[0]._id || null);
+    }
+  };
+
+  const handleNavigate = (
+    targetView: "home" | "list" | "statistics" | "badges"
+  ) => {
+    if (targetView === "home") {
+      setView("home");
+      setShowSidebar(false);
+    } else if (targetView === "list") {
+      setView("detail");
+      setShowSidebar(true);
+      if (trails.length > 0 && !selectedTrailId) {
+        setSelectedTrailId(trails[0]._id || null);
+      }
+    } else if (targetView === "statistics") {
+      setView("statistics");
+      setShowSidebar(false);
+    } else if (targetView === "badges") {
+      setView("badges");
+      setShowSidebar(false);
+    }
+  };
+
+  const handleSaveSuccess = () => {
+    setTriggerGetTrails(!triggerGetTrails); // Refetch trails
+    setView("detail");
+    setEditingTrail(undefined);
+  };
+
+  const selectedTrail = trails.find(t => (t.id || t._id) === selectedTrailId);
+
+  const handleCancel = () => {
+    if (trails.length > 0) {
+      setView("detail");
+    } else {
+      setView("home");
+      setShowSidebar(false);
+    }
+    setEditingTrail(undefined);
+  };
+
+  const handleSelectTrail = (trailId: string) => {
+    setSelectedTrailId(trailId);
+    setView("detail");
+    setShowSidebar(true);
+  };
 
   useEffect(() => {
     getAllTrail().then((data) => {
-      setAllTrails(data);
-      const newCategories = [{ id: 'Statistiques', children: [{ id: 'Pistes', icon: <ScoreIcon sx={{fill:'#FFFFFF'}}/>, trail_id: 'Stats' },{ id: 'Badges', icon: <BadgesIcon />, trail_id: 'Badges' } ] }, { id: 'Piste', children: [] }]
-      newCategories[1].children = data.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((trail: any) => {
-        return {
-          id: new Date(trail.date).toLocaleDateString(),
-          icon: <PointingDogIcon />,
-          trail_id: trail._id
-        }
-      });
+      setTrails(data);
+      const newCategories = [
+        {
+          id: "Statistiques",
+          children: [
+            {
+              id: "Pistes",
+              icon: <ScoreIcon sx={{ fill: "#FFFFFF" }} />,
+              trail_id: "Stats",
+            },
+            { id: "Badges", icon: <BadgesIcon />, trail_id: "Badges" },
+          ],
+        },
+        { id: "Piste", children: [] },
+      ];
+      newCategories[1].children = data
+        .sort(
+          (a: any, b: any) =>
+            new Date(b.date).getTime() - new Date(a.date).getTime()
+        )
+        .map((trail: any) => {
+          return {
+            id: new Date(trail.date).toLocaleDateString(),
+            icon: <Dog />,
+            trail_id: trail._id,
+          };
+        });
       setCategories(newCategories);
-    })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [triggerGetTrails]);
 
   return (
-    <div className="App">
-      <Grid container spacing={isMobile ? 0 : 2}>
-        <Grid item xs={12} md={2}>
-          <SessionDrawer sx={{ width: '100%', height: '100%' }} categories={categories} />
-        </Grid>
-        <Grid item md={10} xs={12}>
-          {location.split('/')[0] === 'newsession' &&
-            <SessionForm edit_trail={allTrails.find(t => t._id === location.split('/')[1]) ? allTrails.find(t => t._id === location.split('/')[1]) as Trail : undefined} />}
-          {allTrails.length !== 0 && allTrails.find((trail) => trail._id === location) && (
-            <SessionDisplay trailInfo={allTrails.find((trail) => trail._id === location) as Trail} />
+    <div className="h-screen flex flex-col overflow-hidden">
+      {/* Header Navigation */}
+      <AppHeader
+        currentView={view}
+        onNavigate={handleNavigate}
+        trailCount={trails.length}
+      />
+      <div className="flex-1 flex overflow-hidden">
+        {/* Sidebar - only show when viewing/editing trails */}
+        {showSidebar && (
+          <div
+            className={`flex-shrink-0 border-r border-border shadow-lg transition-all duration-300 ${
+              isSidebarCollapsed ? "w-16" : "w-80"
+            }`}
+          >
+            <TrailList
+              trails={trails}
+              selectedTrailId={selectedTrailId}
+              onSelectTrail={handleSelectTrail}
+              onCreateNew={handleCreateNew}
+              isCollapsed={isSidebarCollapsed}
+              onToggleCollapse={() =>
+                setIsSidebarCollapsed(!isSidebarCollapsed)
+              }
+            />
+          </div>
+        )}
+
+        {/* Main Content */}
+        <div className="flex-1 overflow-hidden">
+          {view === "home" ? (
+            <HomePage
+              trails={trails}
+              onViewTrails={handleViewTrails}
+              onCreateNew={handleCreateNew}
+              onViewStatistics={() => handleNavigate("statistics")}
+              onViewBadges={() => handleNavigate("badges")}
+            />
+          ) : view === "statistics" ? (
+            <StatisticsPage trails={trails} />
+          ) : view === "badges" ? (
+            <BadgesPage trails={trails} />
+          ) : view === "form" ? (
+            <TrailForm
+              trail={editingTrail}
+              onSaveSuccess={handleSaveSuccess}
+              onCancel={handleCancel}
+            />
+          ) : view === "detail" && selectedTrail ? (
+            <TrailDetail trail={selectedTrail} onEdit={handleEdit} onDeleteSuccess={handleSaveSuccess} />
+          ) : (
+            <EmptyState onCreateNew={handleCreateNew} />
           )}
-          {location === 'Stats' && (
-            <Stats />
-          )}
-          {location === 'Badges' && (
-            <Level />)}
-          {location === '' && (
-            <Accueil />)}
-        </Grid>
-      </Grid>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Modal, Fade, Button, Typography, Paper, TextField, Grid } from '@mui/material';
-import { connect } from '../Utils/api';
+import { connect } from '../utils/api';
 
 interface ConnectionModalProps {
     open: boolean;
