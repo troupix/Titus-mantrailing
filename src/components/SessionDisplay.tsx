@@ -5,7 +5,7 @@ import Header from './Header';
 import { MapContainer, Marker, TileLayer, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import markerIconPng from "leaflet/dist/images/marker-icon.png"
-import { Icon } from 'leaflet'
+import { Icon } from 'leaflet';
 import { compareTraces, durationInMinutesSeconds } from '../utils/utils';
 import { useMediaQuery } from '@mui/material';
 

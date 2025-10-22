@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Button, TextField, FormControl, InputLabel, Select, MenuItem, Grid, Typography, useMediaQuery } from '@mui/material';
-import { MantrailingTrail } from '../utils/types';
+import { MantrailingTrail } from '../types/trail';
 import { saveTrail, updateTrail } from '../utils/api';
 import { SelectChangeEvent } from '@mui/material';
 import Header from './Header';
