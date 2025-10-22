@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
@@ -29,6 +30,7 @@ import {
 } from "recharts";
 import TrailIcon from "./TrailIcon";
 import HikeIcon from "./HikeIcon";
+import { Button } from "./ui/button";
 
 interface StatisticsPageProps {
   trails: Trail[];
@@ -123,14 +125,21 @@ export function StatisticsPage({ trails }: StatisticsPageProps) {
 
   const monthlyChartData = Object.values(monthlyData).reverse();
 
+  const [distanceFilter, setDistanceFilter] = useState<"all" | "mantrailing" | "hiking">("all");
+
   // Distance breakdown over time
   const distanceOverTimeData = trails
-    .filter(trail => (trail.distance ?? 0) > 0)
+    .filter(trail => {
+      if ((trail.distance ?? 0) <= 0) return false;
+      if (distanceFilter === 'all') return true;
+      return trail.category === distanceFilter;
+    })
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .map(trail => ({
       date: new Date(trail.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }),
-      mantrailingDistance: isMantrailingTrail(trail) ? trail.distance : undefined,
-      hikingDistance: isHikingTrail(trail) ? trail.distance : undefined,
+      distance: trail.distance,
+      mantrailingDistance: isMantrailingTrail(trail) && (distanceFilter === 'all' || distanceFilter === 'mantrailing') ? trail.distance : undefined,
+      hikingDistance: isHikingTrail(trail) && (distanceFilter === 'all' || distanceFilter === 'hiking') ? trail.distance : undefined,
     }));
 
   // Category pie chart data
@@ -465,21 +474,36 @@ export function StatisticsPage({ trails }: StatisticsPageProps) {
         {/* Progress Over Time */}
         <Card className="shadow-lg border-green-100">
           <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50">
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-green-600" />
-              Évolution des distances
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-green-600" />
+                Évolution des distances
+              </CardTitle>
+              <div className="flex items-center gap-1 bg-white/50 p-1 rounded-lg">
+                <Button size="sm" variant={distanceFilter === 'all' ? 'secondary' : 'ghost'} onClick={() => setDistanceFilter('all')} className="h-7">
+                  Tout
+                </Button>
+                <Button size="sm" variant={distanceFilter === 'mantrailing' ? 'secondary' : 'ghost'} onClick={() => setDistanceFilter('mantrailing')} className="h-7">
+                  <TrailIcon className="h-4 w-4 mr-1" />
+                  Mantrailing
+                </Button>
+                <Button size="sm" variant={distanceFilter === 'hiking' ? 'secondary' : 'ghost'} onClick={() => setDistanceFilter('hiking')} className="h-7">
+                  <HikeIcon className="h-4 w-4 mr-1" />
+                  Randonnée
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="p-6">
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={distanceOverTimeData}>
+                <LineChart data={distanceOverTimeData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                   <XAxis dataKey="date" />
                   <YAxis label={{ value: 'Distance (m)', angle: -90, position: 'insideLeft' }} />
                   <Tooltip />
                   <Legend />
-                  <Line 
+                  {(distanceFilter === 'all' || distanceFilter === 'mantrailing') && <Line 
                     type="monotone" 
                     dataKey="mantrailingDistance"
                     name="Mantrailing"
@@ -488,8 +512,8 @@ export function StatisticsPage({ trails }: StatisticsPageProps) {
                     dot={{ fill: '#3b82f6', r: 4 }}
                     activeDot={{ r: 6 }}
                     connectNulls
-                  />
-                  <Line 
+                  />}
+                  {(distanceFilter === 'all' || distanceFilter === 'hiking') && <Line
                     type="monotone" 
                     dataKey="hikingDistance"
                     name="Randonnée"
@@ -498,7 +522,7 @@ export function StatisticsPage({ trails }: StatisticsPageProps) {
                     dot={{ fill: '#22c55e', r: 4 }}
                     activeDot={{ r: 6 }}
                     connectNulls
-                  />
+                  />}
                 </LineChart>
               </ResponsiveContainer>
                     </div>
