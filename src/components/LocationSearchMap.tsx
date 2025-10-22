@@ -123,7 +123,7 @@ export function LocationSearchMap({
         mapInstanceRef.current = null;
       }
     };
-  }, [center, zoom, locationText]);
+  }, []);
 
   useEffect(() => {
     if (mapInstanceRef.current) {
