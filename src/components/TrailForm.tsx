@@ -920,7 +920,7 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
                       <Input
                         id="delay"
                         type="number"
-                        value={delay / 60}
+                        value={delay}
                         onChange={(e) => setDelay(Number(e.target.value) * 60)}
                         placeholder="0"
                       />

@@ -58,10 +58,6 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
         const coordinates = feature.geometry.coordinates; // [lon, lat]
         const timestamps = feature.properties?.timestamps;
 
-        if (!timestamps || coordinates.length !== timestamps.length) {
-          return undefined;
-        }
-
         return coordinates.map((coord: [number, number], index: number) => ({
           lat: coord[1],
           lon: coord[0],
@@ -113,16 +109,18 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
               };
             }
           }
-
+          console.log(dogPoint, userPosition, calculateDistance(dogPoint, userPosition));
           const distance = calculateDistance(dogPoint, userPosition);
           if (distance > maxDist) {
             maxDist = distance;
           }
         }
+        
         setMaxDogMasterDistance(maxDist);
       }
     }
   }, [trail]);
+
 
   const handleDelete = async () => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cette piste ?")) {
