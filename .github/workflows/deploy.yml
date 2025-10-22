@@ -24,8 +24,12 @@ jobs:
             export MONGODB_URI=${{ secrets.MONGODB_URI }}
             export CORS_ORIGIN=${{ vars.CORS_ORIGIN }}
             echo '--> Git pull...'
+            set -e
+            echo '--> Git operations...'
             cd maximilien
-            git pull origin master
+            git fetch origin                 # Fetch the latest changes from the remote repository
+            git reset --hard origin/master   # Forcefully reset the local master branch to match origin/master, discarding local changes
+            git clean -df                    # Remove any untracked files and directories (e.g., old node_modules, build artifacts)
             echo '--> Install dependencies...'
             npm i
             echo '--> Restarting application with PM2...'
@@ -48,10 +52,10 @@ jobs:
         id: version
         uses: paulhatch/semantic-version@v5.4.0
         with:
-          major_pattern: '${{vars.GIT_SEMANTIC_VERSION_MAJOR_PATTERN}}'
-          minor_pattern: '${{vars.GIT_SEMANTIC_VERSION_MINOR_PATTERN}}'
-          version_format: '${major}.${minor}.${patch}'
-          tag_prefix: ''
+          major_pattern: "${{vars.GIT_SEMANTIC_VERSION_MAJOR_PATTERN}}"
+          minor_pattern: "${{vars.GIT_SEMANTIC_VERSION_MINOR_PATTERN}}"
+          version_format: "${major}.${minor}.${patch}"
+          tag_prefix: ""
       - name: git tag ${{steps.version.outputs.version}}
         run: |
           git tag ${{steps.version.outputs.version}}
