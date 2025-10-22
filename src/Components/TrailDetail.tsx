@@ -11,6 +11,8 @@ import { MapContainer, Marker, TileLayer, Polyline, useMap } from 'react-leaflet
 import 'leaflet/dist/leaflet.css';
 import markerIconPng from "leaflet/dist/images/marker-icon.png"
 import { Icon, LatLngBounds } from 'leaflet';
+import DogHomePageIcon from "./DogHomePageIcon";
+import TrailIcon from "./TrailIcon";
 
 interface TrailDetailProps {
   trail: Trail;
@@ -138,7 +140,7 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
                   <Badge className="bg-white/20 hover:bg-white/30 text-white border-white/30">
                     {trail.category === "mantrailing" ? (
                       <>
-                        <Dog className="h-3 w-3 mr-1" />
+                        <TrailIcon className="h-3 w-3 mr-1" />
                         Mantrailing
                       </>
                     ) : (
@@ -271,7 +273,7 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
               {isMantrailingTrail(trail) && (
                 <>
                   <div className="flex items-start gap-3">
-                    <Dog className="h-5 w-5 text-blue-600 mt-0.5" />
+                    <DogHomePageIcon className="h-5 w-5 text-blue-600 mt-0.5" />
                     <div className="flex-1">
                       <p className="text-sm text-muted-foreground">Chien</p>
                       <p className="text-blue-900">{trail.dogName}</p>

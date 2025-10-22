@@ -21,9 +21,11 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "./ui/collapsible";
+import DogHomePageIcon from "./DogHomePageIcon";
+import TrailIcon from "./TrailIcon";
 
 function getTrailIcon(category: Trail["category"]) {
-  return category === "mantrailing" ? Dog : Mountain;
+  return category === "mantrailing" ? TrailIcon : Mountain;
 }
 
 interface TrailListProps {
@@ -205,7 +207,7 @@ export function TrailList({
           <h3 className="mb-2 text-blue-100 text-sm">Statistiques</h3>
           <div className="bg-white/15 backdrop-blur-sm rounded-lg p-3 space-y-2 border border-white/20">
             <div className="flex items-center gap-2 text-sm">
-              <Dog className="h-4 w-4" />
+              <TrailIcon className="h-4 w-4" />
               <span>{mantrailingCount} Mantrailing</span>
             </div>
             <div className="flex items-center gap-2 text-sm">

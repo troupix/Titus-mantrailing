@@ -29,6 +29,8 @@ import {
   Legend, 
   ResponsiveContainer 
 } from "recharts";
+import DogHomePageIcon from "./DogHomePageIcon";
+import TrailIcon from "./TrailIcon";
 
 interface StatisticsPageProps {
   trails: Trail[];
@@ -146,7 +148,7 @@ export function StatisticsPage({ trails }: StatisticsPageProps) {
                 <p className="text-4xl mb-1">{totalTrails}</p>
                 <div className="flex justify-center gap-2 text-xs opacity-90">
                   <span className="flex items-center gap-1">
-                    <Dog className="h-3 w-3" /> {mantrailingTrails.length}
+                    <TrailIcon className="h-3 w-3" /> {mantrailingTrails.length}
                   </span>
                   <span>•</span>
                   <span className="flex items-center gap-1">
@@ -209,7 +211,7 @@ export function StatisticsPage({ trails }: StatisticsPageProps) {
               <div className="grid grid-cols-2 gap-4 mt-4">
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <Dog className="h-4 w-4 text-blue-600" />
+                    <TrailIcon className="h-4 w-4 text-blue-600" />
                     <span className="text-sm">Mantrailing</span>
                   </div>
                   <p className="text-2xl text-blue-900">{mantrailingTrails.length}</p>

@@ -27,6 +27,7 @@ import { TrailMap } from "./TrailMap";
 import { GpxTraceEditor } from "./GpxTraceEditor";
 import { createHike, updateHike, saveTrail, updateTrail } from "../utils/api";
 import { LocationSearchMap } from "./LocationSearchMap";
+import DogHomePageIcon from "./DogHomePageIcon";
 
 interface TrailFormProps {
   trail?: Trail;
@@ -392,7 +393,7 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2 text-blue-900">
                 {category === "mantrailing" ? (
-                  <Dog className="h-6 w-6" />
+                  <DogHomePageIcon className="h-6 w-6" />
                 ) : (
                   <Mountain className="h-6 w-6" />
                 )}
@@ -429,7 +430,7 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
                         htmlFor="mantrailing"
                         className="flex items-center gap-2 cursor-pointer flex-1"
                       >
-                        <Dog className="h-5 w-5 text-blue-600" />
+                        <DogHomePageIcon className="h-5 w-5 text-blue-600" />
                         <span>Mantrailing</span>
                       </label>
                     </div>

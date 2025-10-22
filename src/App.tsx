@@ -14,7 +14,7 @@ import { BadgesPage } from "./components/BadgesPage";
 import { TrailForm } from "./components/TrailForm";
 import { TrailDetail } from "./components/TrailDetail";
 import { EmptyState } from "./components/EmptyState";
-import { Dog } from "lucide-react";
+import DogHomePageIcon from "./components/DogHomePageIcon";
 
 type View = "home" | "list" | "detail" | "form" | "statistics" | "badges";
 
@@ -122,7 +122,7 @@ function App() {
         .map((trail: any) => {
           return {
             id: new Date(trail.date).toLocaleDateString(),
-            icon: <Dog />,
+            icon: <DogHomePageIcon />,
             trail_id: trail._id,
           };
         });

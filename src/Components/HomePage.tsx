@@ -4,6 +4,9 @@ import { Badge } from "./ui/badge";
 import { Trail, isMantrailingTrail, isHikingTrail } from "../types/trail";
 import { Dog, Mountain, MapPin, Calendar, Award, TrendingUp, Clock, Ruler, BarChart3 } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import DogHomePageIcon from "./DogHomePageIcon";
+import TrailIcon from "./TrailIcon";
+
 
 interface HomePageProps {
   trails: Trail[];
@@ -43,7 +46,7 @@ export function HomePage({ trails, onViewTrails, onCreateNew, onViewStatistics, 
           <div className="bg-gradient-to-r from-blue-100 to-green-100">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-2xl text-blue-900">
-                <Dog className="h-6 w-6" />
+                <DogHomePageIcon className="h-6 w-6" />
                 Titus
               </CardTitle>
             </CardHeader>
@@ -75,7 +78,7 @@ export function HomePage({ trails, onViewTrails, onCreateNew, onViewStatistics, 
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Badge className="bg-blue-100 text-blue-900 hover:bg-blue-200">
-                    <Dog className="h-3 w-3 mr-1" />
+                    <DogHomePageIcon className="h-3 w-3 mr-1" />
                     Épagneul Breton
                   </Badge>
                   <Badge className="bg-green-100 text-green-900 hover:bg-green-200">
@@ -100,7 +103,7 @@ export function HomePage({ trails, onViewTrails, onCreateNew, onViewStatistics, 
           >
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
-                <Dog className="h-8 w-8 opacity-80" />
+                <TrailIcon className="h-8 w-8 opacity-80" />
                 <div>
                   <p className="text-sm opacity-90">Mantrailing</p>
                   <p className="text-3xl">{mantrailingCount}</p>
@@ -187,7 +190,7 @@ export function HomePage({ trails, onViewTrails, onCreateNew, onViewStatistics, 
           <Card className="shadow-lg border-blue-100">
             <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100">
               <CardTitle className="flex items-center gap-2 text-blue-900">
-                <Dog className="h-5 w-5" />
+                <TrailIcon className="h-5 w-5" />
                 Mantrailing
               </CardTitle>
             </CardHeader>
@@ -203,7 +206,7 @@ export function HomePage({ trails, onViewTrails, onCreateNew, onViewStatistics, 
                   onClick={onCreateNew}
                   className="bg-blue-600 hover:bg-blue-700 gap-2"
                 >
-                  <Dog className="h-4 w-4" />
+                  <TrailIcon className="h-4 w-4" />
                   Nouvelle piste
                 </Button>
                 <Button 
@@ -269,7 +272,7 @@ export function HomePage({ trails, onViewTrails, onCreateNew, onViewStatistics, 
             <CardContent className="p-6">
               <div className="space-y-4">
                 {recentTrails.map((trail) => {
-                  const Icon = trail.category === "mantrailing" ? Dog : Mountain;
+                  const Icon = trail.category === "mantrailing" ? TrailIcon : Mountain;
                   return (
                     <div
                       key={trail.id || trail._id}

@@ -14,8 +14,8 @@ export function AppHeader({ currentView, onNavigate, trailCount }: AppHeaderProp
       <div className="flex items-center justify-between px-6 py-4">
         {/* Logo & Title */}
         <div className="flex items-center gap-3">
-          <div className="bg-white p-2 rounded-lg shadow-md">
-            <TitusLogo size={32} />
+          <div className="bg-white p-1 rounded-lg shadow-md">
+            <TitusLogo size={40} />
           </div>
           <div>
             <h1 className="text-xl">Carnet de Titus</h1>
