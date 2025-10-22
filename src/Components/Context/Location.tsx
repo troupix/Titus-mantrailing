@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
-import { Trail } from '../../Utils/types';
+import { Trail } from '../../types/trail';
 
 // Define the type of the context
 interface LocationContextType {
@@ -7,21 +7,21 @@ interface LocationContextType {
     setLocation: React.Dispatch<React.SetStateAction<string>>;
     triggerGetTrails: boolean;
     setTriggerGetTrails: React.Dispatch<React.SetStateAction<boolean>>;
-    allTrails: Trail[];
-    setAllTrails: React.Dispatch<React.SetStateAction<Trail[]>>;
+    trails: Trail[];
+    setTrails: React.Dispatch<React.SetStateAction<Trail[]>>;
 }
 
 // Define the LocationContext
-export const LocationContext = createContext<LocationContextType>({location: '', setLocation: () => {} , triggerGetTrails: false, setTriggerGetTrails: () => {}, allTrails:[] , setAllTrails:() => {} }as LocationContextType);
+export const LocationContext = createContext<LocationContextType>({location: '', setLocation: () => {} , triggerGetTrails: false, setTriggerGetTrails: () => {}, trails:[] , setTrails:() => {} }as LocationContextType);
 
 // Create the context
 export const LocationProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
         const [location, setLocation] = useState<string>('');
         const [triggerGetTrails, setTriggerGetTrails] = useState<boolean>(false);
-        const [allTrails, setAllTrails] = useState<Trail[]>([]);
+        const [trails, setTrails] = useState<Trail[]>([]);
 
         return (
-                <LocationContext.Provider value={{ location, setLocation, triggerGetTrails, setTriggerGetTrails, allTrails, setAllTrails }}>
+                <LocationContext.Provider value={{ location, setLocation, triggerGetTrails, setTriggerGetTrails, trails, setTrails }}>
                         {children}
                 </LocationContext.Provider>
         );

@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { LocationProvider } from './Components/Context/Location';
+import { LocationProvider } from './components/Context/Location';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

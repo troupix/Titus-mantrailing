@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Button, TextField, FormControl, InputLabel, Select, MenuItem, Grid, Typography, useMediaQuery } from '@mui/material';
-import { Trail } from '../Utils/types';
-import { saveTrail, updateTrail } from '../Utils/api';
+import { MantrailingTrail } from '../utils/types';
+import { saveTrail, updateTrail } from '../utils/api';
 import { SelectChangeEvent } from '@mui/material';
 import Header from './Header';
 import LocationSearch from './LocationSearch';
@@ -17,7 +17,7 @@ import { LocationContext } from './Context/Location';
 
 
 interface SessionFormProps {
-    edit_trail?: Trail;
+    edit_trail?: MantrailingTrail;
 }
 
 
@@ -30,11 +30,12 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
     const [markerLocation, setMarkerLocation] = useState<[number, number]>(edit_trail?.locationCoordinate ? edit_trail.locationCoordinate : [45.7578137, 4.8320114]); // [lat, lng
     const [runnerTrace, setRunnerTrace] = useState<[]>(edit_trail?.runnerTrace?.trk[0]?.trkseg[0]?.trkpt ? edit_trail.runnerTrace.trk[0].trkseg[0].trkpt.map((point: any) => [parseFloat(point.$.lat), parseFloat(point.$.lon)]) : undefined);
     const [dogTrace, setDogTrace] = useState<[]>(edit_trail?.dogTrace?.trk[0]?.trkseg[0]?.trkpt ? edit_trail.dogTrace.trk[0].trkseg[0].trkpt.map((point: any) => [parseFloat(point.$.lat), parseFloat(point.$.lon)]) : undefined);
-    const [trail, setTrail] = useState<Trail>(edit_trail ? edit_trail : {
+    const [trail, setTrail] = useState<MantrailingTrail>(edit_trail ? edit_trail : {
         dogName: 'Titus',
         date: new Date(),
         handlerName: 'Malie',
-    } as Trail);
+        category: 'mantrailing',
+    } as MantrailingTrail);
     const [openModal, setOpenModal] = useState<boolean>(false);
     const isMobile = useMediaQuery('(max-width:600px)');
 
@@ -298,7 +299,7 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                     <Grid item md={4} xs={11}>
                         <MapContainer style={{ height: "100%", width: "100%", minHeight: isMobile ? '300px' : '', marginLeft: isMobile ? '10px' : '' }} center={edit_trail?.locationCoordinate ? edit_trail.locationCoordinate : [45.7578137, 4.8320114]} zoom={16} scrollWheelZoom={true} ref={mapRef}  >
                             <TileLayer
-                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                url={process.env.REACT_APP_TILE_PROVIDER_URL!}
                             />
                             <Marker position={markerLocation} icon={new Icon({ iconUrl: markerIconPng, iconSize: [25, 41], iconAnchor: [12, 41] })} />
                             {dogTrace && <Polyline pathOptions={{ color: 'red' }} positions={dogTrace} />}

@@ -8,8 +8,8 @@ import Typography from '@mui/material/Typography';
 import PrintIcon from '@mui/icons-material/Print';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import {deleteTrail} from '../Utils/api';
-import { LocationContext } from './Context/Location';
+import {deleteTrail} from '../utils/api';
+import { LocationContext } from '../components/Context/Location';
 import { Box } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 
