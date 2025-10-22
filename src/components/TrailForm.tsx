@@ -110,6 +110,10 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
   const [userGpxData, setUserGpxData] = useState<any>(null);
   const [gpxError, setGpxError] = useState("");
 
+  // State for live preview of trace editing
+  const [previewDogPath, setPreviewDogPath] = useState<[number, number][] | null>(null);
+  const [previewUserPath, setPreviewUserPath] = useState<[number, number][] | null>(null);
+
   useEffect(() => {
     const parseFeatureCollection = (featureCollection: any) => {
       if (!featureCollection || featureCollection.type !== 'FeatureCollection' || !featureCollection.features?.[0]) return null;
@@ -216,6 +220,11 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
     setGpxError("");
   };
 
+  const handlePreviewDogPath = (previewPath: [number, number][]) => {
+    setPreviewDogPath(previewPath);
+  };
+
+
   const handleUpdateDogPath = (newPath: [number, number][]) => {
     if (!dogGpxData) return;
 
@@ -253,6 +262,11 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
     if (category === "mantrailing") {
       setDistance(newDistance);
     }
+    setPreviewDogPath(null); // Clear preview on final update
+  };
+
+  const handlePreviewUserPath = (previewPath: [number, number][]) => {
+    setPreviewUserPath(previewPath);
   };
 
   const handleUpdateUserPath = (newPath: [number, number][]) => {
@@ -292,6 +306,7 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
     if (category === "hiking") {
       setDistance(newDistance);
     }
+    setPreviewUserPath(null); // Clear preview on final update
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -789,8 +804,8 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
                       locationCoordinate
                     }
                     zoom={dogGpxData || userGpxData ? 15 : 12}
-                    dogPath={dogGpxData?.path}
-                    victimPath={userGpxData?.path}
+                    dogPath={previewDogPath || dogGpxData?.path}
+                    victimPath={previewUserPath || userGpxData?.path}
                     onLocationChange={(locationText, coordinates) => {
                       setLocation(locationText);
                       setLocationCoordinate(coordinates);
@@ -817,6 +832,7 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
                       label="Trace du chien"
                       color="#3b82f6"
                       onUpdate={handleUpdateDogPath}
+                      onPreview={handlePreviewDogPath}
                     />
                   </div>
                 )}
@@ -828,6 +844,7 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
                       label="Votre trace"
                       color="#22c55e"
                       onUpdate={handleUpdateUserPath}
+                      onPreview={handlePreviewUserPath}
                     />
                   </div>
                 )}
@@ -839,6 +856,7 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
                       label="Trace de la victime"
                       color="#f97316"
                       onUpdate={handleUpdateUserPath}
+                      onPreview={handlePreviewUserPath}
                     />
                   </div>
                 )}
@@ -850,6 +868,7 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
                       label="Trace du chien"
                       color="#3b82f6"
                       onUpdate={handleUpdateDogPath}
+                      onPreview={handlePreviewDogPath}
                     />
                   </div>
                 )}

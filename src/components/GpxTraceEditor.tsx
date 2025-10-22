@@ -8,15 +8,23 @@ interface GpxTraceEditorProps {
   label: string;
   color: string;
   onUpdate: (newPath: [number, number][]) => void;
+  onPreview?: (newPath: [number, number][]) => void;
 }
 
-export function GpxTraceEditor({ path, label, color, onUpdate }: GpxTraceEditorProps) {
+export function GpxTraceEditor({ path, label, color, onUpdate, onPreview }: GpxTraceEditorProps) {
   const [range, setRange] = useState<[number, number]>([0, path.length - 1]);
   const [isDragging, setIsDragging] = useState<'start' | 'end' | null>(null);
 
   useEffect(() => {
     setRange([0, path.length - 1]);
   }, [path.length]);
+
+  useEffect(() => {
+    if (onPreview) {
+      const newPath = path.slice(range[0], range[1] + 1);
+      onPreview(newPath);
+    }
+  }, [range, path, onPreview]);
 
   const calculateDistance = (points: [number, number][]): number => {
     if (points.length < 2) return 0;
