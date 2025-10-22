@@ -367,7 +367,7 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
                     >
                       <TileLayer
                           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                          url={process.env.REACT_APP_TILE_PROVIDER_URL!}
                       />
                       <FitBounds dogTrace={dogTrace} runnerTrace={runnerTrace} />
                       {dogTrace && <Polyline pathOptions={{ color: 'red' }} positions={dogTrace} />}

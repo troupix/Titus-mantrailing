@@ -83,7 +83,7 @@ export function LocationSearchMap({
       // Initialize map
       const map = L.map(mapRef.current).setView(center, zoom);
 
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      L.tileLayer(process.env.REACT_APP_TILE_PROVIDER_URL!, {
         attribution:
           '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
@@ -186,7 +186,7 @@ export function LocationSearchMap({
       try {
         // Use Nominatim API for geocoding
         const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          `${process.env.REACT_APP_NOMINATIM_API_URL}?format=json&q=${encodeURIComponent(
             query
           )}&limit=5`
         );

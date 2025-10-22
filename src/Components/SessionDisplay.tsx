@@ -100,7 +100,7 @@ const SessionDisplay: React.FC<SessionDisplayProps> = ({ trailInfo }) => {
                     <MapContainer style={{ height: "100%", width: "100%", minHeight: isMobile ? '300px': '', marginLeft: isMobile ? '10px' : '' }} center={trailInfo.locationCoordinate} zoom={16} scrollWheelZoom={true} ref={mapRef}>
                         <TileLayer
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            url={process.env.REACT_APP_TILE_PROVIDER_URL!}
                         />
                         {dogTrace && <Polyline pathOptions={{ color: 'red' }} positions={dogTrace} />}
                         {runnerTrace && <Marker position={runnerTrace[runnerTrace.length - 1]} icon={new Icon({ iconUrl: require('../assets/flag.png'), iconAnchor: [8, 16] })} />}

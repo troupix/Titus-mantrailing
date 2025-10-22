@@ -43,7 +43,7 @@ export function TrailMap({ mapData }: TrailMapProps) {
       }
 
       map = L.map(mapRef.current).setView(mapData.center, mapData.zoom);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      L.tileLayer(process.env.REACT_APP_TILE_PROVIDER_URL!, {
         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       }).addTo(map);
 

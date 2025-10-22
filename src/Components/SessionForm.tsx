@@ -299,7 +299,7 @@ const SessionForm: React.FC<SessionFormProps> = (props) => {
                     <Grid item md={4} xs={11}>
                         <MapContainer style={{ height: "100%", width: "100%", minHeight: isMobile ? '300px' : '', marginLeft: isMobile ? '10px' : '' }} center={edit_trail?.locationCoordinate ? edit_trail.locationCoordinate : [45.7578137, 4.8320114]} zoom={16} scrollWheelZoom={true} ref={mapRef}  >
                             <TileLayer
-                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                url={process.env.REACT_APP_TILE_PROVIDER_URL!}
                             />
                             <Marker position={markerLocation} icon={new Icon({ iconUrl: markerIconPng, iconSize: [25, 41], iconAnchor: [12, 41] })} />
                             {dogTrace && <Polyline pathOptions={{ color: 'red' }} positions={dogTrace} />}
