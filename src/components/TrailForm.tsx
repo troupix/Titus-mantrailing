@@ -912,6 +912,9 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
                           <SelectItem value="blind">
                             Départ à l'aveugle / Blind
                           </SelectItem>
+                           <SelectItem value="double blind">
+                            Double aveugle / Double blind
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

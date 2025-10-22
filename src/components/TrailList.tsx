@@ -46,7 +46,14 @@ export function TrailList({
   const isAllowedToCreate =
     localStorage.getItem("isAllowedToCreate") === "true";
 
-  const groupedTrails = trails.reduce((acc, trail) => {
+  const [filter, setFilter] = useState<"all" | "mantrailing" | "hiking">("all");
+
+  const filteredTrails = trails.filter((trail) => {
+    if (filter === "all") return true;
+    return trail.category === filter;
+  });
+
+  const groupedTrails = filteredTrails.reduce((acc, trail) => {
     const month = new Date(trail.date).toLocaleDateString("fr-FR", {
       year: "numeric",
       month: "long",
@@ -57,6 +64,10 @@ export function TrailList({
     acc[month].push(trail);
     return acc;
   }, {} as Record<string, Trail[]>);
+
+  const handleFilterClick = (category: "mantrailing" | "hiking") => {
+    setFilter((prevFilter) => (prevFilter === category ? "all" : category));
+  };
 
   // Track which months are expanded (all expanded by default)
   const [expandedMonths, setExpandedMonths] = useState<Record<string, boolean>>(
@@ -115,7 +126,7 @@ export function TrailList({
         <ScrollArea className="flex-1 overflow-auto">
           <div className="px-2 py-2 space-y-2">
             <TooltipProvider>
-              {trails.map((trail) => {
+              {filteredTrails.map((trail) => {
                 const Icon = getTrailIcon(trail.category);
                 return (
                   <Tooltip key={trail.id || trail._id}>
@@ -203,15 +214,27 @@ export function TrailList({
         {/* Statistics - Always visible */}
         <div className="mt-4">
           <h3 className="mb-2 text-blue-100 text-sm">Statistiques</h3>
-          <div className="bg-white/15 backdrop-blur-sm rounded-lg p-3 space-y-2 border border-white/20">
-            <div className="flex items-center gap-2 text-sm">
+          <div className="bg-white/15 backdrop-blur-sm rounded-lg p-3 space-y-1 border border-white/20">
+            <button
+              onClick={() => handleFilterClick("mantrailing")}
+              className={`w-full flex items-center gap-2 text-sm p-1 rounded-md transition-colors ${
+                filter === "mantrailing"
+                  ? "bg-white/20"
+                  : "hover:bg-white/10"
+              }`}
+            >
               <TrailIcon className="h-4 w-4" />
               <span>{mantrailingCount} Mantrailing</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
+            </button>
+            <button
+              onClick={() => handleFilterClick("hiking")}
+              className={`w-full flex items-center gap-2 text-sm p-1 rounded-md transition-colors ${
+                filter === "hiking" ? "bg-white/20" : "hover:bg-white/10"
+              }`}
+            >
               <HikeIcon className="h-4 w-4" />
               <span>{hikingCount} Randonnées</span>
-            </div>
+            </button>
           </div>
         </div>
       </div>
