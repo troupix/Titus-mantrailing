@@ -27,6 +27,8 @@ jobs:
           # Set the REACT_APP_API_URL environment variable during the build process.
           # The value is fetched from a GitHub Secret for security.
           REACT_APP_API_URL: ${{ vars.REACT_APP_API_URL }}
+          REACT_APP_TILE_PROVIDER_URL: ${{ vars.REACT_APP_TILE_PROVIDER_URL }}
+          REACT_APP_NOMINATIM_API_URL: ${{ vars.REACT_APP_NOMINATIM_API_URL }}
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3 # Action to deploy to GitHub Pages
