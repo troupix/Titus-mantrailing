@@ -18,6 +18,8 @@ interface HomePageProps {
 }
 
 export function HomePage({ trails, onViewTrails, onCreateNew, onViewStatistics, onViewBadges }: HomePageProps) {
+  const isAllowedToCreate = localStorage.getItem("isAllowedToCreate") === "true";
+
   // Calculate statistics
   const mantrailingCount = trails.filter(t => t.category === "mantrailing").length;
   const hikingCount = trails.filter(t => t.category === "hiking").length;
@@ -202,13 +204,15 @@ export function HomePage({ trails, onViewTrails, onCreateNew, onViewStatistics, 
                 développe ses capacités naturelles de pistage.
               </p>
               <div className="flex gap-2">
-                <Button 
-                  onClick={onCreateNew}
-                  className="bg-blue-600 hover:bg-blue-700 gap-2"
-                >
-                  <TrailIcon className="h-4 w-4" />
-                  Nouvelle piste
-                </Button>
+                {isAllowedToCreate && (
+                  <Button
+                    onClick={onCreateNew}
+                    className="bg-blue-600 hover:bg-blue-700 gap-2"
+                  >
+                    <TrailIcon className="h-4 w-4" />
+                    Nouvelle piste
+                  </Button>
+                )}
                 <Button 
                   onClick={onViewTrails}
                   variant="outline"
@@ -236,13 +240,15 @@ export function HomePage({ trails, onViewTrails, onCreateNew, onViewStatistics, 
                 profite pleinement de la nature.
               </p>
               <div className="flex gap-2">
-                <Button 
-                  onClick={onCreateNew}
-                  className="bg-green-600 hover:bg-green-700 gap-2"
-                >
-                  <HikeIcon className="h-4 w-4" />
-                  Nouvelle randonnée
-                </Button>
+                {isAllowedToCreate && (
+                  <Button
+                    onClick={onCreateNew}
+                    className="bg-green-600 hover:bg-green-700 gap-2"
+                  >
+                    <HikeIcon className="h-4 w-4" />
+                    Nouvelle randonnée
+                  </Button>
+                )}
                 <Button 
                   onClick={onViewTrails}
                   variant="outline"
