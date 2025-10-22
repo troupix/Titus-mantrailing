@@ -129,23 +129,23 @@ export function LocationSearchMap({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run only once on mount
 
-  useEffect(() => {
-    // Effect to update map view when center or zoom props change
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.setView(center, zoom);
-    }
-  }, [center, zoom]);
-
+  // Combined effect to update map view and paths when center, zoom, or path props change
   useEffect(() => {
     if (!mapInstanceRef.current) return;
     const L = (window as any).L;
     if (!L) return;
 
-    // Remove old dog path
+    // Clear existing path layers
     if (dogPathLayerRef.current) {
-      dogPathLayerRef.current.remove();
+      mapInstanceRef.current.removeLayer(dogPathLayerRef.current);
       dogPathLayerRef.current = null;
     }
+    if (victimPathLayerRef.current) {
+      mapInstanceRef.current.removeLayer(victimPathLayerRef.current);
+      victimPathLayerRef.current = null;
+    }
+
+    const allPaths: [number, number][] = [];
 
     // Add new dog path if available
     if (dogPath && dogPath.length > 0) {
@@ -154,18 +154,7 @@ export function LocationSearchMap({
         weight: 3,
         opacity: 0.7
       }).addTo(mapInstanceRef.current);
-    }
-  }, [dogPath]);
-
-  useEffect(() => {
-    if (!mapInstanceRef.current) return;
-    const L = (window as any).L;
-    if (!L) return;
-
-    // Remove old victim path
-    if (victimPathLayerRef.current) {
-      victimPathLayerRef.current.remove();
-      victimPathLayerRef.current = null;
+      allPaths.push(...dogPath);
     }
 
     // Add new victim path if available
@@ -175,10 +164,19 @@ export function LocationSearchMap({
         weight: 3,
         opacity: 0.7
       }).addTo(mapInstanceRef.current);
+      allPaths.push(...victimPath);
     }
-  }, [victimPath]);
 
-  
+    // Adjust map view to fit all paths or set to center/zoom
+    if (allPaths.length > 0) {
+      const bounds = L.latLngBounds(allPaths);
+      mapInstanceRef.current.fitBounds(bounds, { padding: [20, 20] }); // Add some padding
+    } else {
+      mapInstanceRef.current.setView(center, zoom);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dogPath, victimPath, center, zoom, mapInstanceRef.current]);
+
   const handleSearch = async (query: string) => {
     setLocationText(query);
 
