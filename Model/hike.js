@@ -60,11 +60,11 @@ const hikeSchema = new mongoose.Schema({
     type: [String] // Array of image URLs
   },
   userTrack: {
-    type: String, // Storing raw GPX/KML file content as a string
+    type: Object, // Storing raw GPX/KML file content as a string
     default: ''
   },
   dogTrack: {
-    type: String, // Storing raw GPX/KML file content as a string
+    type: Object, // Storing raw GPX/KML file content as a string
     default: ''
   },
   createdAt: {
