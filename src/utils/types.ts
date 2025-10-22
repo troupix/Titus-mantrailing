@@ -1,0 +1,1 @@
+export type { Trail, MantrailingTrail, HikingTrail } from '../types/trail';
