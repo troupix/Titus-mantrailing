@@ -23,9 +23,10 @@ import {
 } from "./ui/collapsible";
 import DogHomePageIcon from "./DogHomePageIcon";
 import TrailIcon from "./TrailIcon";
+import HikeIcon from "./HikeIcon";
 
 function getTrailIcon(category: Trail["category"]) {
-  return category === "mantrailing" ? TrailIcon : Mountain;
+  return category === "mantrailing" ? TrailIcon : HikeIcon;
 }
 
 interface TrailListProps {
@@ -211,7 +212,7 @@ export function TrailList({
               <span>{mantrailingCount} Mantrailing</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
-              <Mountain className="h-4 w-4" />
+              <HikeIcon className="h-4 w-4" />
               <span>{hikingCount} Randonnées</span>
             </div>
           </div>

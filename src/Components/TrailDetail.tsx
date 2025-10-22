@@ -13,6 +13,7 @@ import markerIconPng from "leaflet/dist/images/marker-icon.png"
 import { Icon, LatLngBounds } from 'leaflet';
 import DogHomePageIcon from "./DogHomePageIcon";
 import TrailIcon from "./TrailIcon";
+import HikeIcon from "./HikeIcon";
 
 interface TrailDetailProps {
   trail: Trail;
@@ -145,7 +146,7 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
                       </>
                     ) : (
                       <>
-                        <Mountain className="h-3 w-3 mr-1" />
+                        <HikeIcon className="h-3 w-3 mr-1" />
                         Randonnée
                       </>
                     )}

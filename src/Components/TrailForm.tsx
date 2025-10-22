@@ -28,6 +28,7 @@ import { GpxTraceEditor } from "./GpxTraceEditor";
 import { createHike, updateHike, saveTrail, updateTrail } from "../utils/api";
 import { LocationSearchMap } from "./LocationSearchMap";
 import DogHomePageIcon from "./DogHomePageIcon";
+import HikeIcon from "./HikeIcon";
 
 interface TrailFormProps {
   trail?: Trail;
@@ -395,7 +396,7 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
                 {category === "mantrailing" ? (
                   <DogHomePageIcon className="h-6 w-6" />
                 ) : (
-                  <Mountain className="h-6 w-6" />
+                  <HikeIcon className="h-6 w-6" />
                 )}
                 {trail ? "Modifier" : "Nouvelle"}{" "}
                 {category === "mantrailing"
@@ -446,7 +447,7 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
                         htmlFor="hiking"
                         className="flex items-center gap-2 cursor-pointer flex-1"
                       >
-                        <Mountain className="h-5 w-5 text-green-600" />
+                        <HikeIcon className="h-5 w-5 text-green-600" />
                         <span>Randonnée</span>
                       </label>
                     </div>

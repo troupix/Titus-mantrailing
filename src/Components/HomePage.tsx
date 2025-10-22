@@ -6,6 +6,7 @@ import { Dog, Mountain, MapPin, Calendar, Award, TrendingUp, Clock, Ruler, BarCh
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import DogHomePageIcon from "./DogHomePageIcon";
 import TrailIcon from "./TrailIcon";
+import HikeIcon from "./HikeIcon";
 
 
 interface HomePageProps {
@@ -118,7 +119,7 @@ export function HomePage({ trails, onViewTrails, onCreateNew, onViewStatistics, 
           >
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
-                <Mountain className="h-8 w-8 opacity-80" />
+                <HikeIcon className="h-8 w-8 opacity-80" />
                 <div>
                   <p className="text-sm opacity-90">Randonnées</p>
                   <p className="text-3xl">{hikingCount}</p>
@@ -224,7 +225,7 @@ export function HomePage({ trails, onViewTrails, onCreateNew, onViewStatistics, 
           <Card className="shadow-lg border-green-100">
             <CardHeader className="bg-gradient-to-r from-green-50 to-green-100">
               <CardTitle className="flex items-center gap-2 text-green-900">
-                <Mountain className="h-5 w-5" />
+                <HikeIcon className="h-5 w-5" />
                 Randonnée
               </CardTitle>
             </CardHeader>
@@ -240,7 +241,7 @@ export function HomePage({ trails, onViewTrails, onCreateNew, onViewStatistics, 
                   onClick={onCreateNew}
                   className="bg-green-600 hover:bg-green-700 gap-2"
                 >
-                  <Mountain className="h-4 w-4" />
+                  <HikeIcon className="h-4 w-4" />
                   Nouvelle randonnée
                 </Button>
                 <Button 
@@ -272,7 +273,7 @@ export function HomePage({ trails, onViewTrails, onCreateNew, onViewStatistics, 
             <CardContent className="p-6">
               <div className="space-y-4">
                 {recentTrails.map((trail) => {
-                  const Icon = trail.category === "mantrailing" ? TrailIcon : Mountain;
+                  const Icon = trail.category === "mantrailing" ? TrailIcon : HikeIcon;
                   return (
                     <div
                       key={trail.id || trail._id}

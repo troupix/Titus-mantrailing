@@ -31,6 +31,7 @@ import {
 } from "recharts";
 import DogHomePageIcon from "./DogHomePageIcon";
 import TrailIcon from "./TrailIcon";
+import HikeIcon from "./HikeIcon";
 
 interface StatisticsPageProps {
   trails: Trail[];
@@ -52,29 +53,65 @@ export function StatisticsPage({ trails }: StatisticsPageProps) {
   const mantrailingDuration = mantrailingTrails.reduce((sum, t) => sum + (t.duration ?? 0), 0);
   const hikingDuration = hikingTrails.reduce((sum, t) => sum + (t.duration ?? 0), 0);
 
-  // Calculate records
-  const longestTrail = trails.length > 0 ? trails.reduce((max, t) => ((t.distance ?? 0) > (max.distance ?? 0) ? t : max)) : undefined;
-  const trailsWithDistance = trails.filter(t => (t.distance ?? 0) > 0);
-  const shortestTrail = trailsWithDistance.length > 0 ? trailsWithDistance.reduce((min, t) => ((t.distance ?? 0) < (min.distance ?? 0) ? t : min)) : undefined;
-  const longestDuration = trails.length > 0 ? trails.reduce((max, t) => ((t.duration ?? 0) > (max.duration ?? 0) ? t : max)) : undefined;
-  const trailsWithDuration = trails.filter(t => (t.duration ?? 0) > 0);
-  const shortestDuration = trailsWithDuration.length > 0 ? trailsWithDuration.reduce((min, t) => ((t.duration ?? 0) < (min.duration ?? 0) ? t : min)) : undefined;
+  // --- Records Calculations ---
 
-  // Calculate speeds
-  const trailsWithSpeed = trails.map(t => {
-    const distance = t.distance ?? 0;
-    const duration = t.duration ?? 0;
-    return {
-        ...t,
-        speed: duration > 0 ? distance / duration : 0
-    };
-  });
-  const maxSpeed = Math.max(...trailsWithSpeed.map(t => t.speed));
-  const minSpeed = Math.min(...trailsWithSpeed.filter(t => t.speed > 0).map(t => t.speed));
-  const avgSpeed = totalDuration > 0 ? totalDistance / totalDuration : 0;
+  // Helper to find min/max in a trail array for a given property
+  const findRecord = <T extends Trail>(arr: T[], prop: 'distance' | 'duration', type: 'max' | 'min'): T | undefined => {
+    const filteredArr = arr.filter(t => (t[prop] ?? 0) > 0);
+    if (filteredArr.length === 0) return undefined;
+    return filteredArr.reduce((record, current) => {
+      const recordVal = record[prop] ?? 0;
+      const currentVal = current[prop] ?? 0;
+      if (type === 'max') return currentVal > recordVal ? current : record;
+      return currentVal < recordVal ? current : record; // This will return a T
+    });
+  };
 
-  const fastestTrail = trailsWithSpeed.find(t => t.speed === maxSpeed);
-  const slowestTrail = trailsWithSpeed.find(t => t.speed === minSpeed);
+  // Distance Records
+  const longestMantrailingTrail = findRecord(mantrailingTrails, 'distance', 'max');
+  const shortestMantrailingTrail = findRecord(mantrailingTrails, 'distance', 'min');
+  const longestHikingTrail = findRecord(hikingTrails, 'distance', 'max');
+  const shortestHikingTrail = findRecord(hikingTrails, 'distance', 'min');
+
+  // Duration Records
+  const longestMantrailingDuration = findRecord(mantrailingTrails, 'duration', 'max');
+  const shortestMantrailingDuration = findRecord(mantrailingTrails, 'duration', 'min');
+  const longestHikingDuration = findRecord(hikingTrails, 'duration', 'max');
+  const shortestHikingDuration = findRecord(hikingTrails, 'duration', 'min');
+
+  // --- Speed Calculations ---
+
+  // Helper to calculate speed for a set of trails
+  const calculateSpeedStats = <T extends Trail>(arr: T[]) => {
+    const trailsWithSpeed = arr.map(t => {
+      const distance = t.distance ?? 0;
+      const duration = t.duration ?? 0;
+      return {
+          ...t,
+          speed: duration > 0 ? distance / duration : 0
+      };
+    });
+
+    const validSpeeds = trailsWithSpeed.filter(t => t.speed > 0);
+    if (validSpeeds.length === 0) {
+      return { maxSpeed: 0, minSpeed: 0, avgSpeed: 0, fastestTrail: undefined, slowestTrail: undefined };
+    }
+
+    const maxSpeed = Math.max(...validSpeeds.map(t => t.speed));
+    const minSpeed = Math.min(...validSpeeds.map(t => t.speed));
+    
+    const totalDistance = arr.reduce((sum, t) => sum + (t.distance ?? 0), 0);
+    const totalDuration = arr.reduce((sum, t) => sum + (t.duration ?? 0), 0);
+    const avgSpeed = totalDuration > 0 ? totalDistance / totalDuration : 0;
+
+    const fastestTrail = trailsWithSpeed.find(t => t.speed === maxSpeed);
+    const slowestTrail = trailsWithSpeed.find(t => t.speed === minSpeed);
+
+    return { maxSpeed, minSpeed, avgSpeed, fastestTrail, slowestTrail };
+  };
+
+  const mantrailingSpeedStats = calculateSpeedStats(mantrailingTrails);
+  const hikingSpeedStats = calculateSpeedStats(hikingTrails);
 
   // Monthly breakdown
   const monthlyData = trails.reduce((acc, trail) => {
@@ -152,7 +189,7 @@ export function StatisticsPage({ trails }: StatisticsPageProps) {
                   </span>
                   <span>•</span>
                   <span className="flex items-center gap-1">
-                    <Mountain className="h-3 w-3" /> {hikingTrails.length}
+                    <HikeIcon className="h-3 w-3" /> {hikingTrails.length}
                   </span>
                 </div>
               </div>
@@ -221,7 +258,7 @@ export function StatisticsPage({ trails }: StatisticsPageProps) {
                 </div>
                 <div className="bg-green-50 p-4 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <Mountain className="h-4 w-4 text-green-600" />
+                    <HikeIcon className="h-4 w-4 text-green-600" />
                     <span className="text-sm">Randonnée</span>
                   </div>
                   <p className="text-2xl text-green-900">{hikingTrails.length}</p>
@@ -276,146 +313,153 @@ export function StatisticsPage({ trails }: StatisticsPageProps) {
               </TabsList>
               
               <TabsContent value="distance" className="space-y-4 mt-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-lg border-2 border-green-200">
-                    <div className="flex items-center gap-2 mb-3">
-                      <TrendingUp className="h-5 w-5 text-green-600" />
-                      <h3 className="text-green-900">Plus longue piste</h3>
+                <div className="space-y-6">
+                  {/* Mantrailing Distance */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3 flex items-center gap-2 text-blue-800"><TrailIcon className="h-5 w-5" />Mantrailing</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-gradient-to-br from-blue-50 to-sky-50 p-6 rounded-lg border-2 border-blue-200">
+                        <div className="flex items-center gap-2 mb-3"><TrendingUp className="h-5 w-5 text-blue-600" /><h3 className="text-blue-900">Plus longue piste</h3></div>
+                        <p className="text-3xl text-blue-900 mb-2">{(longestMantrailingTrail?.distance ?? 0)} m</p>                        
+                        {longestMantrailingTrail && isMantrailingTrail(longestMantrailingTrail) && <><p className="text-sm text-muted-foreground mb-1">{`${longestMantrailingTrail.dogName} - ${longestMantrailingTrail.location || ''}`}</p><Badge className="bg-blue-600">{new Date(longestMantrailingTrail.date).toLocaleDateString('fr-FR')}</Badge></>}
+                      </div>
+                      <div className="bg-gradient-to-br from-blue-50 to-sky-50 p-6 rounded-lg border-2 border-blue-200">
+                        <div className="flex items-center gap-2 mb-3"><Ruler className="h-5 w-5 text-blue-600" /><h3 className="text-blue-900">Plus courte piste</h3></div>
+                        <p className="text-3xl text-blue-900 mb-2">{(shortestMantrailingTrail?.distance ?? 0)} m</p>                        
+                        {shortestMantrailingTrail && isMantrailingTrail(shortestMantrailingTrail) && <><p className="text-sm text-muted-foreground mb-1">{`${shortestMantrailingTrail.dogName} - ${shortestMantrailingTrail.location || ''}`}</p><Badge className="bg-blue-600">{new Date(shortestMantrailingTrail.date).toLocaleDateString('fr-FR')}</Badge></>}
+                      </div>
                     </div>
-                    <p className="text-3xl text-green-900 mb-2">{(longestTrail?.distance ?? 0)} m</p>
-                    {longestTrail && (
-                      <>
-                        <p className="text-sm text-muted-foreground mb-1">
-                          {isMantrailingTrail(longestTrail) 
-                            ? `${longestTrail.dogName} - ${longestTrail.location || ''}`
-                            : longestTrail.name}
-                        </p>
-                        <Badge className="bg-green-600">
-                          {new Date(longestTrail.date).toLocaleDateString('fr-FR')}
-                        </Badge>
-                      </>
-                    )}
                   </div>
-                  
-                  <div className="bg-gradient-to-br from-blue-50 to-sky-50 p-6 rounded-lg border-2 border-blue-200">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Ruler className="h-5 w-5 text-blue-600" />
-                      <h3 className="text-blue-900">Plus courte piste</h3>
+                  {/* Hiking Distance */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3 flex items-center gap-2 text-green-800"><HikeIcon className="h-5 w-5" />Randonnée</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-lg border-2 border-green-200">
+                        <div className="flex items-center gap-2 mb-3"><TrendingUp className="h-5 w-5 text-green-600" /><h3 className="text-green-900">Plus longue rando</h3></div>
+                        <p className="text-3xl text-green-900 mb-2">{(longestHikingTrail?.distance ?? 0)} m</p>
+                        {longestHikingTrail && isHikingTrail(longestHikingTrail) && <><p className="text-sm text-muted-foreground mb-1">{longestHikingTrail.name}</p><Badge className="bg-green-600">{new Date(longestHikingTrail.date).toLocaleDateString('fr-FR')}</Badge></>}
+                      </div>
+                      <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-lg border-2 border-green-200">
+                        <div className="flex items-center gap-2 mb-3"><Ruler className="h-5 w-5 text-green-600" /><h3 className="text-green-900">Plus courte rando</h3></div>
+                        <p className="text-3xl text-green-900 mb-2">{(shortestHikingTrail?.distance ?? 0)} m</p>                        
+                        {shortestHikingTrail && isHikingTrail(shortestHikingTrail) && <><p className="text-sm text-muted-foreground mb-1">{shortestHikingTrail.name}</p><Badge className="bg-green-600">{new Date(shortestHikingTrail.date).toLocaleDateString('fr-FR')}</Badge></>}
+                      </div>
                     </div>
-                    <p className="text-3xl text-blue-900 mb-2">{(shortestTrail?.distance ?? 0)} m</p>
-                    {shortestTrail && (
-                      <>
-                        <p className="text-sm text-muted-foreground mb-1">
-                          {isMantrailingTrail(shortestTrail) 
-                            ? `${shortestTrail.dogName} - ${shortestTrail.location || ''}`
-                            : shortestTrail.name}
-                        </p>
-                        <Badge className="bg-blue-600">
-                          {new Date(shortestTrail.date).toLocaleDateString('fr-FR')}
-                        </Badge>
-                      </>
-                    )}
                   </div>
                 </div>
               </TabsContent>
 
               <TabsContent value="duration" className="space-y-4 mt-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-gradient-to-br from-purple-50 to-violet-50 p-6 rounded-lg border-2 border-purple-200">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Timer className="h-5 w-5 text-purple-600" />
-                      <h3 className="text-purple-900">Durée la plus longue</h3>
+                <div className="space-y-6">
+                  {/* Mantrailing Duration */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3 flex items-center gap-2 text-blue-800"><TrailIcon className="h-5 w-5" />Mantrailing</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-gradient-to-br from-purple-50 to-violet-50 p-6 rounded-lg border-2 border-purple-200">
+                        <div className="flex items-center gap-2 mb-3"><Timer className="h-5 w-5 text-purple-600" /><h3 className="text-purple-900">Durée la plus longue</h3></div>
+                        {longestMantrailingDuration && isMantrailingTrail(longestMantrailingDuration) ? (<>
+                          <p className="text-2xl text-purple-900 mb-2">{formatDuration(longestMantrailingDuration.duration ?? 0)}</p>
+                          <p className="text-sm text-muted-foreground mb-1">{`${longestMantrailingDuration.dogName} - ${longestMantrailingDuration.location || ''}`}</p>
+                          <Badge className="bg-purple-600">{new Date(longestMantrailingDuration.date).toLocaleDateString('fr-FR')}</Badge>
+                        </>) : <p className="text-2xl text-purple-900 mb-2">N/A</p>}
+                      </div>
+                      <div className="bg-gradient-to-br from-pink-50 to-rose-50 p-6 rounded-lg border-2 border-pink-200">
+                        <div className="flex items-center gap-2 mb-3"><Zap className="h-5 w-5 text-pink-600" /><h3 className="text-pink-900">Durée la plus courte</h3></div>
+                        {shortestMantrailingDuration && isMantrailingTrail(shortestMantrailingDuration) ? (<>
+                          <p className="text-2xl text-pink-900 mb-2">{formatDuration(shortestMantrailingDuration.duration ?? 0)}</p>
+                          <p className="text-sm text-muted-foreground mb-1">{`${shortestMantrailingDuration.dogName} - ${shortestMantrailingDuration.location || ''}`}</p>
+                          <Badge className="bg-pink-600">{new Date(shortestMantrailingDuration.date).toLocaleDateString('fr-FR')}</Badge>
+                        </>) : <p className="text-2xl text-pink-900 mb-2">N/A</p>}
+                      </div>
                     </div>
-                    {longestDuration && longestDuration.duration && longestDuration.duration > 0 ? (
-                      <>
-                        <p className="text-2xl text-purple-900 mb-2">
-                          {formatDuration(longestDuration.duration ?? 0)}
-                        </p>
-                        <p className="text-sm text-muted-foreground mb-1">
-                          {isMantrailingTrail(longestDuration) 
-                            ? `${longestDuration.dogName} - ${longestDuration.location || ''}`
-                            : longestDuration.name}
-                        </p>
-                        <Badge className="bg-purple-600">
-                          {new Date(longestDuration.date).toLocaleDateString('fr-FR')}
-                        </Badge>
-                      </>
-                    ) : (
-                      <p className="text-2xl text-purple-900 mb-2">N/A</p>
-                    )}
                   </div>
-                  
-                  <div className="bg-gradient-to-br from-pink-50 to-rose-50 p-6 rounded-lg border-2 border-pink-200">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Zap className="h-5 w-5 text-pink-600" />
-                      <h3 className="text-pink-900">Durée la plus courte</h3>
+                  {/* Hiking Duration */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3 flex items-center gap-2 text-green-800"><HikeIcon className="h-5 w-5" />Randonnée</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-gradient-to-br from-purple-50 to-violet-50 p-6 rounded-lg border-2 border-purple-200">
+                        <div className="flex items-center gap-2 mb-3"><Timer className="h-5 w-5 text-purple-600" /><h3 className="text-purple-900">Durée la plus longue</h3></div>
+                        {longestHikingDuration && isHikingTrail(longestHikingDuration) ? (<>
+                          <p className="text-2xl text-purple-900 mb-2">{formatDuration(longestHikingDuration.duration ?? 0)}</p>
+                          <p className="text-sm text-muted-foreground mb-1">{longestHikingDuration.name}</p>
+                          <Badge className="bg-purple-600">{new Date(longestHikingDuration.date).toLocaleDateString('fr-FR')}</Badge>
+                        </>) : <p className="text-2xl text-purple-900 mb-2">N/A</p>}
+                      </div>
+                      <div className="bg-gradient-to-br from-pink-50 to-rose-50 p-6 rounded-lg border-2 border-pink-200">
+                        <div className="flex items-center gap-2 mb-3"><Zap className="h-5 w-5 text-pink-600" /><h3 className="text-pink-900">Durée la plus courte</h3></div>
+                        {shortestHikingDuration && isHikingTrail(shortestHikingDuration) ? (<>
+                          <p className="text-2xl text-pink-900 mb-2">{formatDuration(shortestHikingDuration.duration ?? 0)}</p>
+                          <p className="text-sm text-muted-foreground mb-1">{shortestHikingDuration.name}</p>
+                          <Badge className="bg-pink-600">{new Date(shortestHikingDuration.date).toLocaleDateString('fr-FR')}</Badge>
+                        </>) : <p className="text-2xl text-pink-900 mb-2">N/A</p>}
+                      </div>
                     </div>
-                    {shortestDuration ? (
-                      <>
-                        <p className="text-2xl text-pink-900 mb-2">
-                          {formatDuration(shortestDuration.duration ?? 0)}
-                        </p>
-                        <p className="text-sm text-muted-foreground mb-1">
-                          {isMantrailingTrail(shortestDuration) 
-                            ? `${shortestDuration.dogName} - ${shortestDuration.location || ''}`
-                            : shortestDuration.name}
-                        </p>
-                        <Badge className="bg-pink-600">
-                          {new Date(shortestDuration.date).toLocaleDateString('fr-FR')}
-                        </Badge>
-                      </>
-                    ) : (
-                      <p className="text-2xl text-pink-900 mb-2">N/A</p>
-                    )}
                   </div>
                 </div>
               </TabsContent>
 
               <TabsContent value="speed" className="space-y-4 mt-4">
-                {totalDuration > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-gradient-to-br from-orange-50 to-amber-50 p-6 rounded-lg border-2 border-orange-200">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Zap className="h-5 w-5 text-orange-600" />
-                        <h3 className="text-orange-900">Vitesse max</h3>
+                <div className="space-y-6">
+                  {/* Mantrailing Speed */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3 flex items-center gap-2 text-blue-800"><TrailIcon className="h-5 w-5" />Mantrailing</h3>
+                    {mantrailingDuration > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="bg-gradient-to-br from-orange-50 to-amber-50 p-6 rounded-lg border-2 border-orange-200">
+                          <div className="flex items-center gap-2 mb-3"><Zap className="h-5 w-5 text-orange-600" /><h3 className="text-orange-900">Vitesse max</h3></div>
+                          <p className="text-3xl text-orange-900 mb-2">{mantrailingSpeedStats.maxSpeed.toFixed(1)}</p>
+                          <p className="text-sm text-muted-foreground mb-2">m/s</p>
+                          {mantrailingSpeedStats.fastestTrail && <Badge className="bg-orange-600">{new Date(mantrailingSpeedStats.fastestTrail.date).toLocaleDateString('fr-FR')}</Badge>}
+                        </div>
+                        <div className="bg-gradient-to-br from-cyan-50 to-teal-50 p-6 rounded-lg border-2 border-cyan-200">
+                          <div className="flex items-center gap-2 mb-3"><Target className="h-5 w-5 text-cyan-600" /><h3 className="text-cyan-900">Vitesse min</h3></div>
+                          <p className="text-3xl text-cyan-900 mb-2">{mantrailingSpeedStats.minSpeed.toFixed(1)}</p>
+                          <p className="text-sm text-muted-foreground mb-2">m/s</p>
+                          {mantrailingSpeedStats.slowestTrail && <Badge className="bg-cyan-600">{new Date(mantrailingSpeedStats.slowestTrail.date).toLocaleDateString('fr-FR')}</Badge>}
+                        </div>
+                        <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-6 rounded-lg border-2 border-indigo-200">
+                          <div className="flex items-center gap-2 mb-3"><TrendingUp className="h-5 w-5 text-indigo-600" /><h3 className="text-indigo-900">Vitesse moyenne</h3></div>
+                          <p className="text-3xl text-indigo-900 mb-2">{mantrailingSpeedStats.avgSpeed.toFixed(1)}</p>
+                          <p className="text-sm text-muted-foreground">m/s</p>
+                        </div>
                       </div>
-                      <p className="text-3xl text-orange-900 mb-2">{maxSpeed.toFixed(1)}</p>
-                      <p className="text-sm text-muted-foreground mb-2">m/s</p>
-                      {fastestTrail && (
-                        <Badge className="bg-orange-600">
-                          {new Date(fastestTrail.date).toLocaleDateString('fr-FR')}
-                        </Badge>
-                      )}
-                    </div>
-                    
-                    <div className="bg-gradient-to-br from-cyan-50 to-teal-50 p-6 rounded-lg border-2 border-cyan-200">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Target className="h-5 w-5 text-cyan-600" />
-                        <h3 className="text-cyan-900">Vitesse min</h3>
+                    ) : (
+                      <div className="text-center p-6 bg-gray-50 rounded-lg">
+                        <p className="text-muted-foreground">Données non disponibles pour calculer la vitesse.</p>
                       </div>
-                      <p className="text-3xl text-cyan-900 mb-2">{minSpeed.toFixed(1)}</p>
-                      <p className="text-sm text-muted-foreground mb-2">m/s</p>
-                      {slowestTrail && (
-                        <Badge className="bg-cyan-600">
-                          {new Date(slowestTrail.date).toLocaleDateString('fr-FR')}
-                        </Badge>
-                      )}
-                    </div>
-                    
-                    <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-6 rounded-lg border-2 border-indigo-200">
-                      <div className="flex items-center gap-2 mb-3">
-                        <TrendingUp className="h-5 w-5 text-indigo-600" />
-                        <h3 className="text-indigo-900">Vitesse moyenne</h3>
-                      </div>
-                      <p className="text-3xl text-indigo-900 mb-2">{avgSpeed.toFixed(1)}</p>
-                      <p className="text-sm text-muted-foreground">m/s</p>
-                    </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="text-center p-6">
-                    <p className="text-muted-foreground">Données de durée non disponibles pour calculer la vitesse.</p>
+
+                  {/* Hiking Speed */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3 flex items-center gap-2 text-green-800"><HikeIcon className="h-5 w-5" />Randonnée</h3>
+                    {hikingDuration > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="bg-gradient-to-br from-orange-50 to-amber-50 p-6 rounded-lg border-2 border-orange-200">
+                          <div className="flex items-center gap-2 mb-3"><Zap className="h-5 w-5 text-orange-600" /><h3 className="text-orange-900">Vitesse max</h3></div>
+                          <p className="text-3xl text-orange-900 mb-2">{hikingSpeedStats.maxSpeed.toFixed(1)}</p>
+                          <p className="text-sm text-muted-foreground mb-2">m/s</p>
+                          {hikingSpeedStats.fastestTrail && <Badge className="bg-orange-600">{new Date(hikingSpeedStats.fastestTrail.date).toLocaleDateString('fr-FR')}</Badge>}
+                        </div>
+                        <div className="bg-gradient-to-br from-cyan-50 to-teal-50 p-6 rounded-lg border-2 border-cyan-200">
+                          <div className="flex items-center gap-2 mb-3"><Target className="h-5 w-5 text-cyan-600" /><h3 className="text-cyan-900">Vitesse min</h3></div>
+                          <p className="text-3xl text-cyan-900 mb-2">{hikingSpeedStats.minSpeed.toFixed(1)}</p>
+                          <p className="text-sm text-muted-foreground mb-2">m/s</p>
+                          {hikingSpeedStats.slowestTrail && <Badge className="bg-cyan-600">{new Date(hikingSpeedStats.slowestTrail.date).toLocaleDateString('fr-FR')}</Badge>}
+                        </div>
+                        <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-6 rounded-lg border-2 border-indigo-200">
+                          <div className="flex items-center gap-2 mb-3"><TrendingUp className="h-5 w-5 text-indigo-600" /><h3 className="text-indigo-900">Vitesse moyenne</h3></div>
+                          <p className="text-3xl text-indigo-900 mb-2">{hikingSpeedStats.avgSpeed.toFixed(1)}</p>
+                          <p className="text-sm text-muted-foreground">m/s</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center p-6 bg-gray-50 rounded-lg">
+                        <p className="text-muted-foreground">Données non disponibles pour calculer la vitesse.</p>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </TabsContent>
             </Tabs>
           </CardContent>
@@ -460,7 +504,7 @@ export function StatisticsPage({ trails }: StatisticsPageProps) {
                   />
                 </LineChart>
               </ResponsiveContainer>
-            </div>
+                    </div>
           </CardContent>
         </Card>
       </div>
