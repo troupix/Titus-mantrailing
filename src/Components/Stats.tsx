@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Grid, Typography } from '@mui/material';
 import Header from './Header';
-import { LocationContext } from '../components/Context/Location';
+import { LocationContext } from './context/Location';
 import StatsCard from './StatsCard'; // Corrected casing
 import { durationInMinutesSeconds } from '../utils/utils';
 import { calculatePaceMax, calculatePaceAverage, calculatePaceMin } from '../utils/utils';

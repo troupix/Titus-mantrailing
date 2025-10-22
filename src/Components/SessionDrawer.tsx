@@ -9,7 +9,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import NewSessionButton from './NewSessionButton';
 import { useContext } from 'react';
-import { LocationContext } from './Context/Location';
+import { LocationContext } from './context/Location';
 import { Grid, Menu, MenuItem, useMediaQuery, useTheme } from '@mui/material';
 import Bouton from '@mui/material/Button';
 import ConnectionModal from './ConnectionModal';

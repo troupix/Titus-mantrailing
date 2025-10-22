@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Typography, Box, Grid, Checkbox } from '@mui/material';
 import Header from './Header';
-import { LocationContext } from './Context/Location';
+import { LocationContext } from './context/Location';
 import { changeOfDirection, compareTime } from '../utils/utils';
 import { Assessment } from '@mui/icons-material';
 

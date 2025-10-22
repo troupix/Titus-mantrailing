@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from "react";
 import "./App.css";
 import { useState } from "react";
-import { LocationContext } from "./components/Context/Location";
+import { LocationContext } from "./components/context/Location";
 import { getAllTrail } from "./utils/api";
 import { Trail } from "./types/trail";
 import BadgesIcon from "./components/BadgesIcon";

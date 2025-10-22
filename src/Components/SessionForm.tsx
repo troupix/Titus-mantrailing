@@ -13,7 +13,7 @@ import FileUploadIcon from '@mui/icons-material/FileUpload';
 import ConnectionModal from './ConnectionModal';
 
 import { MapContainer, TileLayer, Marker, useMapEvents, Polyline } from 'react-leaflet';
-import { LocationContext } from './Context/Location';
+import { LocationContext } from './context/Location';
 
 
 interface SessionFormProps {
