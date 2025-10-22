@@ -1,20 +1,11 @@
 import React, { useContext, useEffect } from "react";
-import SessionDrawer from "./components/SessionDrawer";
 import "./App.css";
 import { useState } from "react";
 import { LocationContext } from "./components/Context/Location";
-import SessionForm from "./components/SessionForm";
 import { getAllTrail } from "./utils/api";
-import SessionDisplay from "./components/SessionDisplay";
 import { Trail } from "./types/trail";
-import { Grid } from "@mui/material";
-import PointingDogIcon from "./components/PointingDogIcon";
 import BadgesIcon from "./components/BadgesIcon";
 import ScoreIcon from "@mui/icons-material/Score";
-import Stats from "./components/Stats";
-import { useMediaQuery, useTheme } from "@mui/material";
-import Level from "./components/Level";
-import Accueil from "./components/Accueil";
 import { AppHeader } from "./components/AppHeader";
 import { TrailList } from "./components/TrailList";
 import { HomePage } from "./components/HomePage";
@@ -23,7 +14,6 @@ import { BadgesPage } from "./components/BadgesPage";
 import { TrailForm } from "./components/TrailForm";
 import { TrailDetail } from "./components/TrailDetail";
 import { EmptyState } from "./components/EmptyState";
-import PointingIcon from "./components/PointingIcon";
 import { Dog } from "lucide-react";
 
 type View = "home" | "list" | "detail" | "form" | "statistics" | "badges";
@@ -34,15 +24,12 @@ interface category {
 }
 
 function App() {
-  const { location } = useContext(LocationContext) || {};
   const [view, setView] = useState<View>("home");
   const [editingTrail, setEditingTrail] = useState<Trail | undefined>();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
-  const [categories, setCategories] = useState<category[]>([]);
+  const [, setCategories] = useState<category[]>([]);
   const { trails, setTrails, triggerGetTrails, setTriggerGetTrails } = useContext(LocationContext);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [selectedTrailId, setSelectedTrailId] = useState<string | null>(
     trails.length > 0 ? trails[0]._id || null : null
   );
