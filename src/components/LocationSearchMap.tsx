@@ -33,6 +33,12 @@ export function LocationSearchMap({
   const isMounted = useRef(true);
 
   useEffect(() => {
+    onLocationChangeRef.current = onLocationChange;
+  });
+
+  const onLocationChangeRef = useRef(onLocationChange);
+
+  useEffect(() => {
     isMounted.current = true;
     return () => {
       isMounted.current = false;
@@ -101,8 +107,8 @@ export function LocationSearchMap({
         markerRef.current = L.marker(coordinates).addTo(map);
 
         // Update location
-        if (onLocationChange) {
-          onLocationChange(locationText, coordinates);
+        if (onLocationChangeRef.current) {
+          onLocationChangeRef.current(locationText, coordinates);
         }
       });
 
@@ -117,7 +123,7 @@ export function LocationSearchMap({
         mapInstanceRef.current = null;
       }
     };
-  }, []);
+  }, [center, zoom, locationText]);
 
   useEffect(() => {
     if (mapInstanceRef.current) {
