@@ -43,6 +43,86 @@ const FitBounds = ({ dogTrace, runnerTrace }: { dogTrace?: [number, number][], r
 
 export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps) {
   const isAllowedToCreate = localStorage.getItem('isAllowedToCreate') === 'true';
+  const [maxDogMasterDistance, setMaxDogMasterDistance] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (isHikingTrail(trail) && trail.dogTrack && trail.userTrack) {
+      const getTrackPointsFromGeoJSON = (featureCollection: any): { lat: number, lon: number, time: number }[] | undefined => {
+        if (!featureCollection || featureCollection.type !== 'FeatureCollection' || !featureCollection.features?.[0]) {
+          return undefined;
+        }
+        const feature = featureCollection.features[0];
+        if (feature.geometry?.type !== 'LineString') {
+          return undefined;
+        }
+        const coordinates = feature.geometry.coordinates; // [lon, lat]
+        const timestamps = feature.properties?.timestamps;
+
+        if (!timestamps || coordinates.length !== timestamps.length) {
+          return undefined;
+        }
+
+        return coordinates.map((coord: [number, number], index: number) => ({
+          lat: coord[1],
+          lon: coord[0],
+          time: new Date(timestamps[index]).getTime(),
+        }));
+      };
+
+      const calculateDistance = (point1: {lat: number, lon: number}, point2: {lat: number, lon: number}): number => {
+        const R = 6371e3; // Earth's radius in meters
+        const φ1 = (point1.lat * Math.PI) / 180;
+        const φ2 = (point2.lat * Math.PI) / 180;
+        const Δφ = ((point2.lat - point1.lat) * Math.PI) / 180;
+        const Δλ = ((point2.lon - point1.lon) * Math.PI) / 180;
+
+        const a =
+          Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+          Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return R * c;
+      }
+
+      const dogPoints = getTrackPointsFromGeoJSON(trail.dogTrack);
+      const userPoints = getTrackPointsFromGeoJSON(trail.userTrack);
+
+      if (dogPoints && userPoints && dogPoints.length > 0 && userPoints.length > 0) {
+        let maxDist = 0;
+        for (const dogPoint of dogPoints) {
+          const userIndex = userPoints.findIndex(p => p.time > dogPoint.time);
+
+          let userPosition;
+
+          if (userIndex === 0) {
+            userPosition = userPoints[0];
+          } else if (userIndex === -1) {
+            userPosition = userPoints[userPoints.length - 1];
+          } else {
+            const p1 = userPoints[userIndex - 1];
+            const p2 = userPoints[userIndex];
+            const timeDiff = p2.time - p1.time;
+
+            if (timeDiff <= 0) {
+              userPosition = p1;
+            } else {
+              const ratio = (dogPoint.time - p1.time) / timeDiff;
+              userPosition = {
+                lat: p1.lat + ratio * (p2.lat - p1.lat),
+                lon: p1.lon + ratio * (p2.lon - p1.lon),
+              };
+            }
+          }
+
+          const distance = calculateDistance(dogPoint, userPosition);
+          if (distance > maxDist) {
+            maxDist = distance;
+          }
+        }
+        setMaxDogMasterDistance(maxDist);
+      }
+    }
+  }, [trail]);
 
   const handleDelete = async () => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cette piste ?")) {
@@ -259,6 +339,8 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
               </CardContent>
             </Card>
           )}
+
+
         </div>
 
         {/* Details Grid */}
@@ -336,6 +418,16 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
                   <div className="flex-1">
                     <p className="text-sm text-muted-foreground">Description</p>
                     <p className="text-green-900">{trail.description}</p>
+                  </div>
+                </div>
+              )}
+
+              {isHikingTrail(trail) && maxDogMasterDistance !== null && (
+                <div className="flex items-start gap-3">
+                  <DogHomePageIcon className="h-5 w-5 text-green-600 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm text-muted-foreground">Éloignement max. du chien</p>
+                    <p className="text-green-900">{formatDistance(maxDogMasterDistance)}</p>
                   </div>
                 </div>
               )}
