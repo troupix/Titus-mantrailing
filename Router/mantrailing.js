@@ -88,6 +88,7 @@ router.post('/update', (req, res) => {
     //update the trail
     Trail.updateOne({ _id: req.body.id }, {
         dogName: req.body.trail.dogName,
+        date: req.body.trail.date,
         handlerName: req.body.trail.handlerName,
         distance: req.body.trail.distance,
         location: req.body.trail.location,
