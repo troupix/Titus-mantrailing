@@ -166,7 +166,7 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
     }
   };
 
-  // Extract map data from trail - now only for hiking
+  // Extract map data from trail
   const getMapData = () => {
     let dogPath: [number, number][] | undefined;
     let victimPath: [number, number][] | undefined;
@@ -192,15 +192,23 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
         const avgLon = victimPath.reduce((sum, p) => sum + p[1], 0) / victimPath.length;
         center = [avgLat, avgLon];
       }
+    } else if (isMantrailingTrail(trail)) {
+      victimPath = getCoordinatesFromTrack(trail.runnerTrace);
+      dogPath = getCoordinatesFromTrack(trail.dogTrace);
+
+      if (trail.locationCoordinate) {
+        center = trail.locationCoordinate;
+      } else if (victimPath && victimPath.length > 0) {
+        const avgLat = victimPath.reduce((sum, p) => sum + p[0], 0) / victimPath.length;
+        const avgLon = victimPath.reduce((sum, p) => sum + p[1], 0) / victimPath.length;
+        center = [avgLat, avgLon];
+      }
     }
 
     return { center, zoom: 15, dogPath, victimPath };
   };
 
   const mapData = getMapData();
-
-  const runnerTrace = isMantrailingTrail(trail) && trail.runnerTrace?.trk[0]?.trkseg[0]?.trkpt ? trail.runnerTrace.trk[0].trkseg[0].trkpt.map((point: any) => [parseFloat(point.$.lat), parseFloat(point.$.lon)]) : undefined;
-  const dogTrace = isMantrailingTrail(trail) && trail.dogTrace?.trk[0]?.trkseg[0]?.trkpt ? trail.dogTrace.trk[0].trkseg[0].trkpt.map((point: any) => [parseFloat(point.$.lat), parseFloat(point.$.lon)]) : undefined;
   
   return (
     <div className="h-full overflow-auto bg-gradient-to-br from-blue-50 to-white">
@@ -450,22 +458,22 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
             <CardContent className="p-0">
               {isMantrailingTrail(trail) ? (
                 <div className="h-96">
-                  {trail.locationCoordinate && trail.locationCoordinate.length === 2 &&
+                  {mapData.center &&
                     <MapContainer 
                       key={trail.id || trail._id} // Force re-render when trail changes
                       style={{ height: "100%", width: "100%" }} 
-                      center={trail.locationCoordinate} 
-                      zoom={16} 
+                      center={mapData.center} 
+                      zoom={mapData.zoom} 
                       scrollWheelZoom={true}
                     >
                       <TileLayer
                           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                           url={process.env.REACT_APP_TILE_PROVIDER_URL!}
                       />
-                      <FitBounds dogTrace={dogTrace} runnerTrace={runnerTrace} />
-                      {dogTrace && <Polyline pathOptions={{ color: 'red' }} positions={dogTrace} />}
-                      {runnerTrace && <Marker position={runnerTrace[runnerTrace.length - 1]} icon={new Icon({ iconUrl: require('../assets/flag.png'), iconAnchor: [8, 16] })} />}
-                      {runnerTrace && <Polyline pathOptions={{ color: 'blue' }} positions={runnerTrace} />}
+                      <FitBounds dogTrace={mapData.dogPath} runnerTrace={mapData.victimPath} />
+                      {mapData.dogPath && <Polyline pathOptions={{ color: 'red' }} positions={mapData.dogPath} />}
+                      {mapData.victimPath && <Marker position={mapData.victimPath[mapData.victimPath.length - 1]} icon={new Icon({ iconUrl: require('../assets/flag.png'), iconAnchor: [8, 16] })} />}
+                      {mapData.victimPath && <Polyline pathOptions={{ color: 'blue' }} positions={mapData.victimPath} />}
                       {trail.locationCoordinate && <Marker position={trail.locationCoordinate} icon={new Icon({ iconUrl: markerIconPng, iconSize: [25, 41], iconAnchor: [12, 41] })} />}
                     </MapContainer>
                   }
