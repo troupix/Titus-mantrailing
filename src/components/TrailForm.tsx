@@ -110,8 +110,8 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
   const [userGpxData, setUserGpxData] = useState<any>(null);
   const [gpxError, setGpxError] = useState("");
 
-  // State for live preview of trace editing
-  const [previewDogPath, setPreviewDogPath] = useState<[number, number][] | null>(null);
+  // State for live preview of trace editing. The path is what the map uses.
+  const [previewDogPath, setPreviewDogPath] = useState<[number, number][] | null>(null); 
   const [previewUserPath, setPreviewUserPath] = useState<[number, number][] | null>(null);
 
   useEffect(() => {
@@ -198,7 +198,7 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
         }
 
         // Auto-fill duration if available and not already set
-        if (gpxData.duration && duration === 0) {
+        if (gpxData.duration) {
           setDuration(gpxData.duration);
         }
 
@@ -220,12 +220,12 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
     setGpxError("");
   };
 
-  const handlePreviewDogPath = (previewPath: [number, number][]) => {
+  const handlePreviewDogPath = (previewPath: [number, number][], newTimestamps?: (string | Date)[]) => {
     setPreviewDogPath(previewPath);
   };
 
 
-  const handleUpdateDogPath = (newPath: [number, number][]) => {
+  const handleUpdateDogPath = (newPath: [number, number][], newTimestamps?: (string | Date)[]) => {
     if (!dogGpxData) return;
 
     const calculateDistance = (points: [number, number][]): number => {
@@ -246,6 +246,17 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
       return Math.round(totalDistance);
     };
 
+    const calculateDuration = (timestamps?: (string | Date)[]): number => {
+      if (!timestamps || timestamps.length < 2) return 0;
+      try {
+        const startTime = new Date(timestamps[0]).getTime();
+        const endTime = new Date(timestamps[timestamps.length - 1]).getTime();
+        return Math.round((endTime - startTime) / 1000);
+      } catch (e) {
+        return 0;
+      }
+    };
+
     const newDistance = calculateDistance(newPath);
     const avgLat =
       newPath.reduce((sum, point) => sum + point[0], 0) / newPath.length;
@@ -257,19 +268,21 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
       path: newPath,
       distance: newDistance,
       center: [avgLat, avgLon],
+      timestamps: newTimestamps,
     });
 
     if (category === "mantrailing") {
       setDistance(newDistance);
+      setDuration(calculateDuration(newTimestamps));
     }
     setPreviewDogPath(null); // Clear preview on final update
   };
 
-  const handlePreviewUserPath = (previewPath: [number, number][]) => {
+  const handlePreviewUserPath = (previewPath: [number, number][], newTimestamps?: (string | Date)[]) => {
     setPreviewUserPath(previewPath);
   };
 
-  const handleUpdateUserPath = (newPath: [number, number][]) => {
+  const handleUpdateUserPath = (newPath: [number, number][], newTimestamps?: (string | Date)[]) => {
     if (!userGpxData) return;
 
     const calculateDistance = (points: [number, number][]): number => {
@@ -290,6 +303,17 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
       return Math.round(totalDistance);
     };
 
+    const calculateDuration = (timestamps?: (string | Date)[]): number => {
+      if (!timestamps || timestamps.length < 2) return 0;
+      try {
+        const startTime = new Date(timestamps[0]).getTime();
+        const endTime = new Date(timestamps[timestamps.length - 1]).getTime();
+        return Math.round((endTime - startTime) / 1000);
+      } catch (e) {
+        return 0;
+      }
+    };
+
     const newDistance = calculateDistance(newPath);
     const avgLat =
       newPath.reduce((sum, point) => sum + point[0], 0) / newPath.length;
@@ -301,10 +325,12 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
       path: newPath,
       distance: newDistance,
       center: [avgLat, avgLon],
+      timestamps: newTimestamps,
     });
 
     if (category === "hiking") {
       setDistance(newDistance);
+      setDuration(calculateDuration(newTimestamps));
     }
     setPreviewUserPath(null); // Clear preview on final update
   };

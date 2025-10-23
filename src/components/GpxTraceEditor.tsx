@@ -7,9 +7,9 @@ interface GpxTraceEditorProps {
   path: [number, number][];
   label: string;
   color: string;
-  onUpdate: (newPath: [number, number][]) => void;
+  onUpdate: (newPath: [number, number][], newTimestamps?: (string | Date)[]) => void;
   timestamps?: (string | Date)[];
-  onPreview?: (newPath: [number, number][]) => void;
+  onPreview?: (newPath: [number, number][], newTimestamps?: (string | Date)[]) => void;
 }
 
 export function GpxTraceEditor({ path, label, color, onUpdate, onPreview, timestamps }: GpxTraceEditorProps) {
@@ -24,8 +24,10 @@ export function GpxTraceEditor({ path, label, color, onUpdate, onPreview, timest
   useEffect(() => {
     if (onPreview) {
       const newPath = path.slice(range[0], range[1] + 1);
-      onPreview(newPath);
+      const newTimestamps = timestamps?.slice(range[0], range[1] + 1);
+      onPreview(newPath, newTimestamps);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [range, path, onPreview]);
 
   const calculateDistance = (points: [number, number][]): number => {
@@ -88,7 +90,8 @@ export function GpxTraceEditor({ path, label, color, onUpdate, onPreview, timest
   };
 
   const handleApply = () => {
-    onUpdate(selectedPath);
+    const newTimestamps = timestamps?.slice(range[0], range[1] + 1);
+    onUpdate(selectedPath, newTimestamps);
   };
 
   const handleReset = () => {
