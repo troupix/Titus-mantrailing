@@ -39,6 +39,7 @@ router.post('/save', (req, res) => {
     //save the data to the database
     const newTrail = new Trail({
         dogName: req.body.dogName,
+        date: req.body.date,
         handlerName: req.body.handlerName,
         distance: req.body.distance,
         location: req.body.location,
