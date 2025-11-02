@@ -3,6 +3,23 @@ const router = express.Router();
 const Hike = require('../Model/hike'); // Assurez-vous que le chemin est correct
 const { getWeather } = require('../utils/weatherService');
 const checkAuthToken = require('../utils/checkAuthToken');
+const multer = require('multer');
+const { uploadFile, generateSignedUrl } = require('../utils/r2');
+const crypto = require('crypto');
+const fs = require('fs');
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = crypto.randomUUID();
+        const fileExtension = file.originalname.split('.').pop();
+        cb(null, `${uniqueSuffix}.${fileExtension}`);
+    },
+});
+
+const upload = multer({ storage: storage });
 
 /**
  * @route   POST /api/hike
@@ -55,10 +72,21 @@ router.post('/', checkAuthToken, async (req, res) => {
  */
 router.get('/', checkAuthToken, async (req, res) => {
   try {
-    // For now, gets all hikes.
-    // Ideally, you would filter by userId: const hikes = await Hike.find({ userId: req.user.id });
     const hikes = await Hike.find({userId: req.user.id}).sort({ createdAt: -1 });
-    res.json(hikes);
+
+    const hikesWithSignedUrls = await Promise.all(hikes.map(async (hike) => {
+        const hikeObject = hike.toObject();
+        if (hikeObject.photos && hikeObject.photos.length > 0) {
+            const signedPhotos = await Promise.all(hikeObject.photos.map(async (photoUrl) => {
+                const fileName = photoUrl.split('/').pop();
+                return await generateSignedUrl(fileName);
+            }));
+            hikeObject.photos = signedPhotos;
+        }
+        return hikeObject;
+    }));
+
+    res.json(hikesWithSignedUrls);
   } catch (error) {
     res.status(500).send({ message: 'Error retrieving hikes.', error: error.message });
   }
@@ -81,7 +109,16 @@ router.get('/:id', checkAuthToken, async (req, res) => {
       return res.status(404).send({ message: 'Hike not found.' });
     }
 
-    res.json(hike);
+    const hikeObject = hike.toObject();
+    if (hikeObject.photos && hikeObject.photos.length > 0) {
+        const signedPhotos = await Promise.all(hikeObject.photos.map(async (photoUrl) => {
+            const fileName = photoUrl.split('/').pop();
+            return await generateSignedUrl(fileName);
+        }));
+        hikeObject.photos = signedPhotos;
+    }
+
+    res.json(hikeObject);
   } catch (error) {
     // Handles errors like a malformed ID
     res.status(500).send({ message: 'Error retrieving the hike.', error: error.message });
@@ -158,9 +195,7 @@ router.delete('/:id', checkAuthToken, async (req, res) => {
   }
 });
 
-const { uploadFile } = require('../utils/r2');
-const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
+
 
 router.post('/:id/photos', checkAuthToken, upload.array('photos', 10), async (req, res) => {
     try {
@@ -173,6 +208,7 @@ router.post('/:id/photos', checkAuthToken, upload.array('photos', 10), async (re
         for (const file of req.files) {
             const result = await uploadFile(file);
             photoUrls.push(result.Location);
+            fs.unlinkSync(file.path); // Delete the temporary file
         }
 
         hike.photos.push(...photoUrls);
@@ -180,6 +216,9 @@ router.post('/:id/photos', checkAuthToken, upload.array('photos', 10), async (re
 
         res.status(200).send(hike);
     } catch (error) {
+        if (req.files) {
+            req.files.forEach(file => fs.unlinkSync(file.path)); // Ensure temporary files are deleted on error
+        }
         res.status(500).send({ message: 'Error uploading photos.', error: error.message });
     }
 });
