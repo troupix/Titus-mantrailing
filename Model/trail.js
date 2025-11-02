@@ -1,16 +1,41 @@
 const mongoose = require('mongoose');
 
+/**
+ * @module models/trail
+ * @description Defines the Mongoose schema for a mantrailing trail session.
+ * @property {mongoose.Schema.Types.ObjectId} _id - Unique identifier for the trail.
+ * @property {string} [trainer] - The name of the trainer for the session.
+ * @property {string} dogName - The name of the dog.
+ * @property {string} handlerName - The name of the handler.
+ * @property {number} [distance] - The distance of the trail in meters.
+ * @property {string} [location] - A description of the trail's location.
+ * @property {Date} date - The date and time of the trail.
+ * @property {number} [duration] - The duration of the trail in seconds.
+ * @property {number} [delay=0] - The time delay in seconds before the dog starts.
+ * @property {string} [notes=''] - Any notes related to the trail.
+ * @property {string} [trailType] - The type of trail (e.g., urban, rural).
+ * @property {string} [startType='knowing'] - The type of start for the trail.
+ * @property {Array<number>} [locationCoordinate] - The geographical coordinates of the start.
+ * @property {object} [runnerTrace] - GeoJSON or similar object representing the runner's path.
+ * @property {object} [dogTrace] - GeoJSON or similar object representing the dog's path.
+ */
 const TrailSchema = new mongoose.Schema({
     _id: {
         type: mongoose.Schema.Types.ObjectId,
         auto: true
     },
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
     trainer: {
         type: String,
         required: false
     },
-    dogName: {
-        type: String,
+    dog: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Dog',
         required: true
     },
     handlerName: {
@@ -63,6 +88,13 @@ const TrailSchema = new mongoose.Schema({
     dogTrace: {
         type: Object,
         required: false
+    },
+    weather: {
+        temperature: Number,
+        conditions: String,
+        windDirection: String,
+        windSpeed: Number,
+        humidity: Number
     }
 
 });

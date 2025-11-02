@@ -1,120 +1,187 @@
 const express = require('express');
 const router = express.Router();
 const Hike = require('../Model/hike'); // Assurez-vous que le chemin est correct
+const { getWeather } = require('../utils/weatherService');
+const checkAuthToken = require('../utils/checkAuthToken');
 
 /**
  * @route   POST /api/hike
- * @desc    Créer une nouvelle randonnée
- * @access  Public (Idéalement, devrait être privé après authentification)
+ * @desc    Create a new hike
+ * @access  Public (Should be private with authentication)
+ * @param   {object} req.body - The hike data
+ * @param   {string} req.body.name - The name of the hike
+ * @param   {string} [req.body.description] - A description of the hike
+ * @param   {string} [req.body.location] - A description of the hike's location
+ * @param   {Array<number>} [req.body.locationCoordinate] - The geographical coordinates of the start
+ * @param   {object} [req.body.startLocation] - The starting location of the hike as a GeoJSON point
+ * @param   {number} [req.body.distance] - The distance of the hike in meters
+ * @param   {number} [req.body.duration] - The duration of the hike in seconds
+ * @param   {number} [req.body.elevationGain] - The total elevation gain in meters
+ * @param   {string} [req.body.difficulty] - The difficulty of the hike
+ * @param   {Array<string>} [req.body.photos] - An array of URLs to photos of the hike
+ * @param   {object} [req.body.userTrack] - The user's track, e.g., from a GPX file
+ * @param   {object} [req.body.dogTrack] - The dog's track, e.g., from a GPX file
+ * @param   {Date} [req.body.date] - The date of the hike
+ * @returns {object} 201 - The created hike object
+ * @returns {object} 400 - Validation error
+ * @returns {object} 500 - Server error
  */
-router.post('/', async (req, res) => {
+router.post('/', checkAuthToken, async (req, res) => {
   try {
-    // Idéalement, l'userId devrait provenir d'un middleware d'authentification
-    // Crée une nouvelle instance de Hike avec toutes les données fournies
-    const hike = new Hike({ ...req.body });
+    // Ideally, userId should come from an authentication middleware
+    // Create a new instance of Hike with all provided data
+    let weather = {};
+    if (req.body.locationCoordinate && req.body.date) {
+        weather = await getWeather(req.body.locationCoordinate[0], req.body.locationCoordinate[1], new Date(req.body.date).toISOString().split('T')[0]);
+    }
+    const hike = new Hike({ ...req.body, weather, userId: req.user.id });
 
-    await hike.save();
-    res.status(201).send(hike);
+    const savedHike = await hike.save();
+    res.status(201).json(savedHike);
   } catch (error) {
     if (error.name === 'ValidationError') {
-      return res.status(400).send({ message: 'Erreur de validation.', error: error.message });
+      return res.status(400).send({ message: 'Validation error.', error: error.message });
     }
-    res.status(500).send({ message: 'Erreur lors de la création de la randonnée.', error: error.message });
+    res.status(500).send({ message: 'Error creating the hike.', error: error.message });
   }
 });
 
 /**
  * @route   GET /api/hike
- * @desc    Récupérer toutes les randonnées d'un utilisateur
- * @access  Public (Idéalement, filtrer par l'userId de l'utilisateur authentifié)
+ * @desc    Get all hikes for a user
+ * @access  Public (Ideally, filter by the authenticated user's userId)
+ * @returns {Array<object>} 200 - An array of hike objects
+ * @returns {object} 500 - Server error
  */
-router.get('/', async (req, res) => {
+router.get('/', checkAuthToken, async (req, res) => {
   try {
-    // Pour l'instant, récupère toutes les randonnées.
-    // Idéalement, vous filtreriez par userId : const hikes = await Hike.find({ userId: req.user.id });
-    const hikes = await Hike.find().sort({ createdAt: -1 });
-    res.send(hikes);
+    // For now, gets all hikes.
+    // Ideally, you would filter by userId: const hikes = await Hike.find({ userId: req.user.id });
+    const hikes = await Hike.find({userId: req.user.id}).sort({ createdAt: -1 });
+    res.json(hikes);
   } catch (error) {
-    res.status(500).send({ message: 'Erreur lors de la récupération des randonnées.', error: error.message });
+    res.status(500).send({ message: 'Error retrieving hikes.', error: error.message });
   }
 });
 
 /**
  * @route   GET /api/hike/:id
- * @desc    Récupérer une randonnée par son ID
+ * @desc    Get a hike by its ID
  * @access  Public
+ * @param   {string} req.params.id - The ID of the hike
+ * @returns {object} 200 - The hike object
+ * @returns {object} 404 - Hike not found
+ * @returns {object} 500 - Server error
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', checkAuthToken, async (req, res) => {
   try {
-    const hike = await Hike.findById(req.params.id);
+    const hike = await Hike.findOne({ _id: req.params.id, userId: req.user.id });
 
     if (!hike) {
-      return res.status(404).send({ message: 'Randonnée non trouvée.' });
+      return res.status(404).send({ message: 'Hike not found.' });
     }
 
-    res.send(hike);
+    res.json(hike);
   } catch (error) {
-    // Gère les erreurs comme un ID mal formé
-    res.status(500).send({ message: 'Erreur lors de la récupération de la randonnée.', error: error.message });
+    // Handles errors like a malformed ID
+    res.status(500).send({ message: 'Error retrieving the hike.', error: error.message });
   }
 });
 
 /**
  * @route   PUT /api/hike/:id
- * @desc    Mettre à jour une randonnée
- * @access  Public (Idéalement, vérifier que l'utilisateur est le propriétaire de la randonnée)
+ * @desc    Update a hike
+ * @access  Public (Ideally, verify that the user is the owner of the hike)
+ * @param   {string} req.params.id - The ID of the hike to update
+ * @param   {object} req.body - The fields to update
+ * @returns {object} 200 - The updated hike object
+ * @returns {object} 404 - Hike not found
+ * @returns {object} 400 - Validation error
+ * @returns {object} 500 - Server error
  */
-router.put('/:id', async (req, res) => {
+router.put('/:id', checkAuthToken, async (req, res) => {
   try {
-    // Crée un objet avec uniquement les champs autorisés à être mis à jour
+    const hike = await Hike.findOne({ _id: req.params.id, userId: req.user.id });
+
+    if (!hike) {
+      return res.status(404).send({ message: 'Hike not found.' });
+    }
+
+    // Create an object with only the allowed fields to be updated
     const allowedUpdates = [
       'name', 'description', 'startLocation', 'distance', 'duration', 'elevationGain',
       'difficulty', 'photos', 'userTrack', 'dogTrack', 'location',
       'locationCoordinate', 'date'
     ];
-    const updates = {};
+
     Object.keys(req.body).forEach((key) => {
       if (allowedUpdates.includes(key)) {
-        updates[key] = req.body[key];
+        hike[key] = req.body[key];
       }
     });
 
-    const hike = await Hike.findByIdAndUpdate(
-      req.params.id,
-      { $set: updates },
-      { new: true, runValidators: true } // `new: true` retourne le document mis à jour
-    );
-
-    if (!hike) {
-      return res.status(404).send({ message: 'Randonnée non trouvée.' });
+    if (!hike.weather && hike.locationCoordinate && hike.date) {
+        hike.weather = await getWeather(hike.locationCoordinate[0], hike.locationCoordinate[1], new Date(hike.date).toISOString().split('T')[0]);
     }
 
-    res.send(hike);
+    await hike.save();
+
+    res.json(hike);
   } catch (error) {
     if (error.name === 'ValidationError') {
-      return res.status(400).send({ message: 'Erreur de validation lors de la mise à jour.', error: error.message });
+      return res.status(400).send({ message: 'Validation error during update.', error: error.message });
     }
-    res.status(500).send({ message: 'Erreur lors de la mise à jour de la randonnée.', error: error.message });
+    res.status(500).send({ message: 'Error updating the hike.', error: error.message });
   }
 });
 
 /**
  * @route   DELETE /api/hike/:id
- * @desc    Supprimer une randonnée
- * @access  Public (Idéalement, vérifier que l'utilisateur est le propriétaire)
+ * @desc    Delete a hike
+ * @access  Public (Ideally, verify that the user is the owner)
+ * @param   {string} req.params.id - The ID of the hike to delete
+ * @returns {object} 200 - Success message
+ * @returns {object} 404 - Hike not found
+ * @returns {object} 500 - Server error
  */
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', checkAuthToken, async (req, res) => {
   try {
-    const hike = await Hike.findByIdAndDelete(req.params.id);
+    const hike = await Hike.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
 
     if (!hike) {
-      return res.status(404).send({ message: 'Randonnée non trouvée.' });
+      return res.status(404).send({ message: 'Hike not found.' });
     }
 
-    res.send({ message: 'Randonnée supprimée avec succès.' });
+    res.json({ message: 'Hike successfully deleted.' });
   } catch (error) {
-    res.status(500).send({ message: 'Erreur lors de la suppression de la randonnée.', error: error.message });
+    res.status(500).send({ message: 'Error deleting the hike.', error: error.message });
   }
+});
+
+const { uploadFile } = require('../utils/r2');
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
+
+router.post('/:id/photos', checkAuthToken, upload.array('photos', 10), async (req, res) => {
+    try {
+        const hike = await Hike.findOne({ _id: req.params.id, userId: req.user.id });
+        if (!hike) {
+            return res.status(404).send({ message: 'Hike not found.' });
+        }
+
+        const photoUrls = [];
+        for (const file of req.files) {
+            const result = await uploadFile(file);
+            photoUrls.push(result.Location);
+        }
+
+        hike.photos.push(...photoUrls);
+        await hike.save();
+
+        res.status(200).send(hike);
+    } catch (error) {
+        res.status(500).send({ message: 'Error uploading photos.', error: error.message });
+    }
 });
 
 module.exports = router;

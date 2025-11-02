@@ -50,7 +50,7 @@ describe('User Management API', () => {
 
             const res = await request(app)
                 .post('/api/users/create')
-                .send({ username: 'test', email: 'test@test.com', color: 'blue', role: 'user' });
+                .send({ username: 'test', email: 'test@test.com', color: 'blue', role: ['user'] });
 
             expect(res.statusCode).toEqual(200);
             expect(res.body).toEqual(mockSavedUser);
@@ -75,6 +75,24 @@ describe('User Management API', () => {
                 email: 'updated@test.com',
                 color: undefined,
                 role: undefined
+            }, { new: true, select: '-password' });
+        });
+
+        it('should update a user with a new role', async () => {
+            const updatedUser = { username: 'updated', role: ['admin', 'user'] };
+            User.findByIdAndUpdate.mockResolvedValue(updatedUser);
+
+            const res = await request(app)
+                .put('/api/users/some-id')
+                .send({ role: ['admin', 'user'] });
+
+            expect(res.statusCode).toEqual(200);
+            expect(res.body).toEqual(updatedUser);
+            expect(User.findByIdAndUpdate).toHaveBeenCalledWith('some-id', {
+                username: undefined,
+                email: undefined,
+                color: undefined,
+                role: ['admin', 'user']
             }, { new: true, select: '-password' });
         });
 

@@ -25,14 +25,27 @@ const UserSchema = new Schema({
         type: String,
         required: true
     },
+    profilePicture: {
+        type: String,
+        required: false
+    },
     color: {
         type: String,
         required: false
     },
     role: {
-        type: String,
-        required: true
+        type: [String],
+        required: true,
+        default: ['user']
     },
+    dogs: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Dog'
+    }],
+    trainedDogs: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Dog'
+    }],
     // add more fields as per your requirement
 });
 

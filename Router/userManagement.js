@@ -36,7 +36,7 @@ router.get('/:id', (req, res) => {
  * @param {string} req.body.username - The username of the user.
  * @param {string} req.body.email - The email of the user.
  * @param {string} req.body.color - The color of the user.
- * @param {string} req.body.role - The role of the user.
+ * @param {string|string[]} req.body.role - The role(s) of the user.
  * 
  * @returns {user} The newly created user object.
  */
@@ -46,7 +46,7 @@ router.post('/create', (req, res) => {
         password: bcrypt.hashSync('password', 10), // Set a default password
         email: req.body.email,
         color: req.body.color,
-        role: req.body.role
+        role: req.body.role ? (Array.isArray(req.body.role) ? req.body.role : [req.body.role]) : ['user']
     });
     newUser.save({ password: 0 }) // Exclude the password field from the response
         .then(user => res.json(user))
@@ -63,7 +63,7 @@ router.post('/create', (req, res) => {
  * @param {string} req.body.password - The password of the user.
  * @param {string} req.body.email - The email of the user.
  * @param {string} req.body.color - The color of the user.
- * @param {string} req.body.role - The role of the user.
+ * @param {string|string[]} req.body.role - The role(s) of the user.
  * 
  * @returns {user} The updated user object.
  */
@@ -72,8 +72,11 @@ router.put('/:id', (req, res) => {
         username: req.body.name,
         email: req.body.mail,
         color: req.body.color,
-        role: req.body.role
     };
+
+    if (req.body.role) {
+        updateFields.role = Array.isArray(req.body.role) ? req.body.role : [req.body.role];
+    }
 
     if (req.body.password) {
         updateFields.password = bcrypt.hashSync(req.body.password, 10);

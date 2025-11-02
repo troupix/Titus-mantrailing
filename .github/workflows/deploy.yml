@@ -23,6 +23,10 @@ jobs:
             export DB_NAME=${{ vars.DB_NAME }}
             export MONGODB_URI=${{ secrets.MONGODB_URI }}
             export CORS_ORIGIN=${{ vars.CORS_ORIGIN }}
+            export R2_ACCESS_KEY_ID=${{ secrets.R2_ACCESS_KEY_ID }}
+            export R2_SECRET_ACCESS_KEY=${{ secrets.R2_SECRET_ACCESS_KEY }}
+            export R2_BUCKET_NAME=${{ vars.R2_BUCKET_NAME }}
+            export R2_ENDPOINT=${{ vars.R2_ENDPOINT }}
             echo '--> Git pull...'
             set -e
             echo '--> Git operations...'

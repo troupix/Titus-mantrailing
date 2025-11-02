@@ -65,7 +65,8 @@ describe('User API', () => {
 
     describe('POST /api/user/register', () => {
         it('should register a new user and return a token', async () => {
-            bcrypt.hash.mockImplementation((password, salt, callback) => callback(null, 'hashedpassword'));
+            User.findOne.mockResolvedValue(null);
+            bcrypt.hash.mockResolvedValue('hashedpassword');
             const mockSavedUser = { email: 'test@test.com', username: 'test', password: 'hashedpassword' };
             User.prototype.save = jest.fn().mockResolvedValue(mockSavedUser);
             createAuthToken.mockReturnValue('test-token');
@@ -74,9 +75,9 @@ describe('User API', () => {
                 .post('/api/user/register')
                 .send({ username: 'test', password: 'password', email: 'test@test.com' });
 
-            expect(res.statusCode).toEqual(200);
+            expect(res.statusCode).toEqual(201);
             expect(res.body).toEqual({ token: 'test-token' });
-            expect(bcrypt.hash).toHaveBeenCalledWith('password', 10, expect.any(Function));
+            expect(bcrypt.hash).toHaveBeenCalledWith('password', 10);
             expect(User.prototype.save).toHaveBeenCalledTimes(1);
             expect(createAuthToken).toHaveBeenCalledWith(mockSavedUser);
         });

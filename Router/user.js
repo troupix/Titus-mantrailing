@@ -17,6 +17,10 @@ const router = express.Router();
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
+    if (!email || !password) {
+        return res.status(400).send('Please enter all fields');
+    }
+
     let user;
     try {
         user = await User.findOne({ email });
@@ -52,33 +56,45 @@ router.post('/login', async (req, res) => {
  * @param {string} req.body.email - The user's email.
  * @returns {Object} token - A JWT token.
  */
-router.post('/register', (req, res) => {
+router.post('/register', async (req, res) => {
     const { username, password, email } = req.body;
 
-    const saltRounds = 10;
+    if (!username || !email || !password) {
+        return res.status(400).send('Please enter all fields');
+    }
 
-    bcrypt.hash(password, saltRounds, function (err, hashedPassword) {
-        if (err) {
-            console.error(err);
-            return res.status(500).send('Server error');
+    if (password.length < 8) {
+        return res.status(400).send('Password must be at least 8 characters');
+    }
+
+    const emailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).send('Invalid email format');
+    }
+
+    try {
+        let user = await User.findOne({ email });
+        if (user) {
+            return res.status(409).send('User already exists');
         }
 
-        const user = new User({
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        user = new User({
             email,
             username,
             password: hashedPassword
         });
 
-        user.save()
-            .then(user => {
-                const token = createAuthToken(user);
-                res.json({ token });
-            })
-            .catch(err => {
-                console.error(err);
-                res.status(500).send('Server error');
-            });
-    });
+        const savedUser = await user.save();
+
+        const token = createAuthToken(savedUser);
+        res.status(201).json({ token });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server error');
+    }
 });
 
 /**
@@ -92,5 +108,23 @@ router.get('/check', checkAuthToken, (req, res) => {
 });
 
 
+
+const multer = require('multer');
+const { uploadFile } = require('../utils/r2');
+
+const upload = multer({ dest: 'uploads/' });
+
+router.post('/picture', checkAuthToken, upload.single('picture'), async (req, res) => {
+    try {
+        const result = await uploadFile(req.file);
+        const user = await User.findById(req.user.id);
+        user.profilePicture = result.Location;
+        await user.save();
+        res.json(user);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server error');
+    }
+});
 
 module.exports = router;
