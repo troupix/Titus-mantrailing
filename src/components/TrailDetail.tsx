@@ -3,6 +3,7 @@ import { Trail, isMantrailingTrail, isHikingTrail } from "../types/trail";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
+import { Dialog, DialogContent, DialogOverlay } from "./ui/dialog";
 import { Edit, MapPin, Clock, Ruler, User, TrendingUp, Award, Calendar, FileText, Trash2 } from "lucide-react";
 import { TrailMap } from "./TrailMap";
 import { deleteTrail, deleteHike } from "../utils/api";
@@ -44,6 +45,8 @@ const FitBounds = ({ dogTrace, runnerTrace }: { dogTrace?: [number, number][], r
 export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps) {
   const isAllowedToCreate = localStorage.getItem('isAllowedToCreate') === 'true';
   const [maxDogMasterDistance, setMaxDogMasterDistance] = useState<number | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [currentImage, setCurrentImage] = useState('');
 
   useEffect(() => {
     if (isHikingTrail(trail) && trail.dogTrack && trail.userTrack) {
@@ -457,7 +460,7 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
             </CardHeader>
             <CardContent className="p-0">
               {isMantrailingTrail(trail) ? (
-                <div className="h-96">
+                <div className="h-96 relative z-0">
                   {mapData.center &&
                     <MapContainer 
                       key={trail.id || trail._id} // Force re-render when trail changes
@@ -484,7 +487,7 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
                     <TrailMap key={trail.id || trail._id} mapData={mapData} />
                   </div>
                   {(mapData.dogPath || mapData.victimPath) && (
-                    <div className="p-4 bg-gray-50 border-t flex gap-6 text-sm">
+                    <div className="p-4 bg-gray-50 border-t flex gap-6 text-sm relative z-0">
                       {mapData.dogPath && (
                         <div className="flex items-center gap-2">
                           <div className="w-4 h-1 bg-blue-600 rounded"></div>
@@ -508,6 +511,37 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
             </CardContent>
           </Card>
         </div>
+
+        {/* Photos Section */}
+        {isHikingTrail(trail) && trail.photos && trail.photos.length > 0 && (
+          <Card className="border-2 border-green-200 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-green-50 to-green-100">
+              <CardTitle className="text-green-900">Photos</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {trail.photos.map((photoUrl, index) => (
+                <img
+                  key={index}
+                  src={photoUrl}
+                  alt={`Hike photo ${index + 1}`}
+                  className="w-full h-48 object-cover rounded-md shadow-md cursor-pointer transform transition-transform duration-200 hover:scale-105"
+                  onClick={() => {
+                    setCurrentImage(photoUrl);
+                    setShowModal(true);
+                  }}
+                />
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Image Modal */}
+        <Dialog open={showModal} onOpenChange={setShowModal}>
+          <DialogOverlay />
+          <DialogContent className="w-[80vw] max-w-none p-0 max-h-[90vh]">
+            <img src={currentImage} alt="Enlarged photo" className="w-full h-full object-contain" />
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

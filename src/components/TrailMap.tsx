@@ -106,10 +106,10 @@ export function TrailMap({ mapData }: TrailMapProps) {
     <div className="relative">
       <div
         ref={mapRef}
-        className="w-full h-[400px] rounded-lg overflow-hidden border border-border"
+        className="w-full h-[400px] rounded-lg overflow-hidden border border-border z-50"
       />
       {showLegend && (
-        <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-3 border border-gray-200 z-[1000]">
+        <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-3 border border-gray-200 z-50">
           <p className="text-xs text-gray-500 mb-2">Légende</p>
           <div className="space-y-2 text-sm">
             {mapData.dogPath && mapData.dogPath.length > 0 && (

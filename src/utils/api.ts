@@ -176,3 +176,12 @@ export const getTrainers = async (): Promise<{ id: string, name: string }[]> => 
     const response = await api.get('/api/user/trainers');
     return response.data;
 };
+
+export const uploadHikePhotos = async (id: string, formData: FormData): Promise<string[]> => {
+    const response = await api.post(`/api/hike/${id}/photos`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+    return response.data;
+}

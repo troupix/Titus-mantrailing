@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import {
   Trail,
   TrailCategory,
-  MantrailingTrail,
   HikingTrail,
   isMantrailingTrail,
   isHikingTrail,
@@ -32,6 +31,7 @@ import {
   updateTrail,
   deleteTrail,
   deleteHike,
+  uploadHikePhotos,
 } from "../utils/api";
 import { LocationSearchMap } from "./LocationSearchMap";
 import DogHomePageIcon from "./DogHomePageIcon";
@@ -47,7 +47,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
-import { useAuth } from "../contexts/AuthContext";
 import { DogSelector } from "./DogSelector";
 
 interface TrailFormProps {
@@ -57,7 +56,6 @@ interface TrailFormProps {
 }
 
 export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
-  const { dogs } = useAuth();
   const [category, setCategory] = useState<TrailCategory>(
     trail?.category || "mantrailing"
   );
@@ -111,6 +109,16 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
   const [delay, setDelay] = useState(
     trail && isMantrailingTrail(trail) ? trail.delay || 0 : 0
   );
+
+  // Photo upload fields
+  const [selectedPhotos, setSelectedPhotos] = useState<File[]>([]);
+  const [existingPhotos, setExistingPhotos] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (trail && isHikingTrail(trail) && trail.photos) {
+      setExistingPhotos(trail.photos);
+    }
+  }, [trail]);
 
   // Hiking specific fields
   const [name, setName] = useState(
@@ -436,15 +444,32 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
               : undefined,
           userTrack: createGeoJSONFeatureCollection(userGpxData),
           dogTrack: createGeoJSONFeatureCollection(dogGpxData),
+          photos: existingPhotos, // This line was missing or incorrectly placed
         };
 
-        if (trail && (trail.id || trail._id)) {
-          await updateHike(
-            trail.id || trail._id || "",
+        let currentHikeId = trail?.id || trail?._id;
+        let savedHike;
+
+        if (currentHikeId) {
+          // Update existing hike with potentially modified existingPhotos
+          savedHike = await updateHike(
+            currentHikeId,
             hikingData as Omit<HikingTrail, "id" | "_id">
           );
+          currentHikeId = savedHike._id || savedHike.id;
         } else {
-          await createHike(hikingData as HikingTrail);
+          // Create new hike with existingPhotos (which would be empty initially)
+          savedHike = await createHike(hikingData as HikingTrail);
+          currentHikeId = savedHike._id || savedHike.id;
+        }
+
+        // If there are new photos selected, upload them
+        if (selectedPhotos.length > 0 && currentHikeId) {
+          const formData = new FormData();
+          selectedPhotos.forEach((photo) => {
+            formData.append("photos", photo);
+          });
+          await uploadHikePhotos(currentHikeId, formData);
         }
       }
       onSaveSuccess();
@@ -1089,6 +1114,79 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
                   />
                 </div>
               </div>
+
+              {/* Photo Upload Section for Hiking */}
+              {category === "hiking" && (
+                <div className="space-y-4">
+                  <h3 className="text-lg text-blue-900">Photos de la randonnée</h3>
+                  <div className="space-y-2">
+                    <Label htmlFor="photos">Ajouter des photos</Label>
+                    <Input
+                      id="photos"
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          setSelectedPhotos(Array.from(e.target.files));
+                        }
+                      }}
+                    />
+                  </div>
+
+                  {/* Display selected new photos */}
+                  {selectedPhotos.length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+                      {selectedPhotos.map((file, index) => (
+                        <div key={file.name + index} className="relative">
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={`Preview ${file.name}`}
+                            className="w-full h-32 object-cover rounded-md"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute top-1 right-1 h-6 w-6"
+                            onClick={() =>
+                              setSelectedPhotos(selectedPhotos.filter((_, i) => i !== index))
+                            }
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Display existing photos */}
+                  {existingPhotos.length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+                      {existingPhotos.map((photoUrl, index) => (
+                        <div key={photoUrl + index} className="relative">
+                          <img
+                            src={photoUrl}
+                            alt={`Existing ${index}`}
+                            className="w-full h-32 object-cover rounded-md"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute top-1 right-1 h-6 w-6"
+                            onClick={() =>
+                              setExistingPhotos(existingPhotos.filter((_, i) => i !== index))
+                            }
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Form Actions */}
               <div className="flex gap-3 pt-4">

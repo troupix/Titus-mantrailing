@@ -60,6 +60,7 @@ export interface HikingTrail extends BaseTrail {
     features: any[];
   } | null; // Allow null for dogTrack
   userId?: string;
+  photos?: string[];
 }
 
 // Union type for both trail types
