@@ -236,3 +236,20 @@ export const compareTime = (dogTrace: GPXSegment[], runnerTrace: GPXSegment[]) =
     console.log(dogStartTime, runnerStartTime, (dogStartTime - runnerStartTime) / 1000)
     return (dogStartTime - runnerStartTime) / 1000;
 }
+
+export function calculateAge(birthDate: string): number {
+  const birth = new Date(birthDate);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age;
+}
+
+// Helper to format age
+export function formatAge(birthDate: string): string {
+  const age = calculateAge(birthDate);
+  return age === 1 ? "1 an" : `${age} ans`;
+}

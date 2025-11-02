@@ -1,1 +1,37 @@
-export type { Trail, MantrailingTrail, HikingTrail } from '../types/trail';
+export interface User {
+  _id: string;
+  username: string;
+  email: string;
+  profilePicture?: string;
+  color?: string;
+  role: string[];
+  dogs: string[];
+  trainedDogs: string[];
+}
+
+export interface Dog {
+  _id: string;
+  name: string;
+  breed?: string;
+  birthDate?: Date;
+  photo?: string;
+  ownerIds: string[];
+  trainerIds: string[];
+  createdAt: Date;
+}
+
+export interface LoginCredentials {
+  email?: string;
+  password?: string;
+  role?: "handler" | "trainer";
+}
+
+export interface RegisterData {
+  email: string;
+  password?: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  role: "handler" | "trainer";
+  trainerId?: string;
+}

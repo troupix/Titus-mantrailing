@@ -4,15 +4,18 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { LocationProvider } from './components/context/Location';
+import { AuthProvider } from './contexts/AuthContext';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-<LocationProvider>
-    <App />
-    </LocationProvider>
+    <AuthProvider>
+      <LocationProvider>
+        <App />
+      </LocationProvider>
+    </AuthProvider>
   </React.StrictMode>
 );
 

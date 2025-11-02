@@ -326,13 +326,13 @@ export function StatisticsPage({ trails }: StatisticsPageProps) {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="bg-gradient-to-br from-blue-50 to-sky-50 p-6 rounded-lg border-2 border-blue-200">
                         <div className="flex items-center gap-2 mb-3"><TrendingUp className="h-5 w-5 text-blue-600" /><h3 className="text-blue-900">Plus longue piste</h3></div>
-                        <p className="text-3xl text-blue-900 mb-2">{(longestMantrailingTrail?.distance ?? 0)} m</p>                        
-                        {longestMantrailingTrail && isMantrailingTrail(longestMantrailingTrail) && <><p className="text-sm text-muted-foreground mb-1">{`${longestMantrailingTrail.dogName} - ${longestMantrailingTrail.location || ''}`}</p><Badge className="bg-blue-600">{new Date(longestMantrailingTrail.date).toLocaleDateString('fr-FR')}</Badge></>}
+                        <p className="text-3xl text-blue-900 mb-2">{(longestMantrailingTrail?.distance ?? 0)} m</p>
+                        {longestMantrailingTrail && isMantrailingTrail(longestMantrailingTrail) && <><p className="text-sm text-muted-foreground mb-1">{`${longestMantrailingTrail.dog.name} - ${longestMantrailingTrail.location || ''}`}</p><Badge className="bg-blue-600">{new Date(longestMantrailingTrail.date).toLocaleDateString('fr-FR')}</Badge></>}
                       </div>
                       <div className="bg-gradient-to-br from-blue-50 to-sky-50 p-6 rounded-lg border-2 border-blue-200">
                         <div className="flex items-center gap-2 mb-3"><Ruler className="h-5 w-5 text-blue-600" /><h3 className="text-blue-900">Plus courte piste</h3></div>
                         <p className="text-3xl text-blue-900 mb-2">{(shortestMantrailingTrail?.distance ?? 0)} m</p>                        
-                        {shortestMantrailingTrail && isMantrailingTrail(shortestMantrailingTrail) && <><p className="text-sm text-muted-foreground mb-1">{`${shortestMantrailingTrail.dogName} - ${shortestMantrailingTrail.location || ''}`}</p><Badge className="bg-blue-600">{new Date(shortestMantrailingTrail.date).toLocaleDateString('fr-FR')}</Badge></>}
+                        {shortestMantrailingTrail && isMantrailingTrail(shortestMantrailingTrail) && <><p className="text-sm text-muted-foreground mb-1">{`${shortestMantrailingTrail.dog.name} - ${shortestMantrailingTrail.location || ''}`}</p><Badge className="bg-blue-600">{new Date(shortestMantrailingTrail.date).toLocaleDateString('fr-FR')}</Badge></>}
                       </div>
                     </div>
                   </div>
@@ -365,7 +365,7 @@ export function StatisticsPage({ trails }: StatisticsPageProps) {
                         <div className="flex items-center gap-2 mb-3"><Timer className="h-5 w-5 text-purple-600" /><h3 className="text-purple-900">Durée la plus longue</h3></div>
                         {longestMantrailingDuration && isMantrailingTrail(longestMantrailingDuration) ? (<>
                           <p className="text-2xl text-purple-900 mb-2">{formatDuration(longestMantrailingDuration.duration ?? 0)}</p>
-                          <p className="text-sm text-muted-foreground mb-1">{`${longestMantrailingDuration.dogName} - ${longestMantrailingDuration.location || ''}`}</p>
+                          <p className="text-sm text-muted-foreground mb-1">{`${longestMantrailingDuration.dog.name} - ${longestMantrailingDuration.location || ''}`}</p>
                           <Badge className="bg-purple-600">{new Date(longestMantrailingDuration.date).toLocaleDateString('fr-FR')}</Badge>
                         </>) : <p className="text-2xl text-purple-900 mb-2">N/A</p>}
                       </div>
@@ -373,7 +373,7 @@ export function StatisticsPage({ trails }: StatisticsPageProps) {
                         <div className="flex items-center gap-2 mb-3"><Zap className="h-5 w-5 text-pink-600" /><h3 className="text-pink-900">Durée la plus courte</h3></div>
                         {shortestMantrailingDuration && isMantrailingTrail(shortestMantrailingDuration) ? (<>
                           <p className="text-2xl text-pink-900 mb-2">{formatDuration(shortestMantrailingDuration.duration ?? 0)}</p>
-                          <p className="text-sm text-muted-foreground mb-1">{`${shortestMantrailingDuration.dogName} - ${shortestMantrailingDuration.location || ''}`}</p>
+                          <p className="text-sm text-muted-foreground mb-1">{`${shortestMantrailingDuration.dog.name} - ${shortestMantrailingDuration.location || ''}`}</p>
                           <Badge className="bg-pink-600">{new Date(shortestMantrailingDuration.date).toLocaleDateString('fr-FR')}</Badge>
                         </>) : <p className="text-2xl text-pink-900 mb-2">N/A</p>}
                       </div>

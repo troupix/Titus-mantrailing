@@ -1,6 +1,5 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "./App.css";
-import { useState } from "react";
 import { LocationContext } from "./components/context/Location";
 import { getAllTrail } from "./utils/api";
 import { Trail } from "./types/trail";
@@ -15,8 +14,11 @@ import { TrailForm } from "./components/TrailForm";
 import { TrailDetail } from "./components/TrailDetail";
 import { EmptyState } from "./components/EmptyState";
 import DogHomePageIcon from "./components/DogHomePageIcon";
+import { ManagementPage } from "./components/ManagementPage";
+import { useAuth } from "./contexts/AuthContext";
+import { LoginPage } from "./components/LoginPage";
 
-type View = "home" | "list" | "detail" | "form" | "statistics" | "badges";
+type View = "home" | "list" | "detail" | "form" | "statistics" | "badges" | "management";
 
 interface category {
   id: string;
@@ -24,6 +26,25 @@ interface category {
 }
 
 function App() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-xl font-semibold">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LoginPage />;
+  }
+
+  return <MainApp />;
+}
+
+function MainApp() {
+  const { user } = useAuth();
   const [view, setView] = useState<View>("home");
   const [editingTrail, setEditingTrail] = useState<Trail | undefined>();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -53,7 +74,7 @@ function App() {
   };
 
   const handleNavigate = (
-    targetView: "home" | "list" | "statistics" | "badges"
+    targetView: "home" | "list" | "statistics" | "badges" | "management"
   ) => {
     if (targetView === "home") {
       setView("home");
@@ -69,6 +90,9 @@ function App() {
       setShowSidebar(false);
     } else if (targetView === "badges") {
       setView("badges");
+      setShowSidebar(false);
+    }else if( targetView === "management"){
+      setView("management");
       setShowSidebar(false);
     }
   };
@@ -98,38 +122,40 @@ function App() {
   };
 
   useEffect(() => {
-    getAllTrail().then((data) => {
-      setTrails(data);
-      const newCategories = [
-        {
-          id: "Statistiques",
-          children: [
-            {
-              id: "Pistes",
-              icon: <ScoreIcon sx={{ fill: "#FFFFFF" }} />,
-              trail_id: "Stats",
-            },
-            { id: "Badges", icon: <BadgesIcon />, trail_id: "Badges" },
-          ],
-        },
-        { id: "Piste", children: [] },
-      ];
-      newCategories[1].children = data
-        .sort(
-          (a: any, b: any) =>
-            new Date(b.date).getTime() - new Date(a.date).getTime()
-        )
-        .map((trail: any) => {
-          return {
-            id: new Date(trail.date).toLocaleDateString(),
-            icon: <DogHomePageIcon />,
-            trail_id: trail._id,
-          };
-        });
-      setCategories(newCategories);
-    });
+    if (user) {
+      getAllTrail().then((data) => {
+        setTrails(data);
+        const newCategories = [
+          {
+            id: "Statistiques",
+            children: [
+              {
+                id: "Pistes",
+                icon: <ScoreIcon sx={{ fill: "#FFFFFF" }} />,
+                trail_id: "Stats",
+              },
+              { id: "Badges", icon: <BadgesIcon />, trail_id: "Badges" },
+            ],
+          },
+          { id: "Piste", children: [] },
+        ];
+        newCategories[1].children = data
+          .sort(
+            (a: any, b: any) =>
+              new Date(b.date).getTime() - new Date(a.date).getTime()
+          )
+          .map((trail: any) => {
+            return {
+              id: new Date(trail.date).toLocaleDateString(),
+              icon: <DogHomePageIcon />,
+              trail_id: trail._id,
+            };
+          });
+        setCategories(newCategories);
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [triggerGetTrails]);
+  }, [triggerGetTrails, user]);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
@@ -143,7 +169,7 @@ function App() {
         {/* Sidebar - only show when viewing/editing trails */}
         {showSidebar && (
           <div
-            className={`flex-shrink-0 border-r border-border shadow-lg transition-all duration-300 ${
+            className={`flex-shrink-0 border-r border-border shadow-lg transition-all duration-300 ${ 
               isSidebarCollapsed ? "w-16" : "w-80"
             }`}
           >
@@ -161,7 +187,7 @@ function App() {
         )}
 
         {/* Main Content */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1">
           {view === "home" ? (
             <HomePage
               trails={trails}
@@ -182,6 +208,8 @@ function App() {
             />
           ) : view === "detail" && selectedTrail ? (
             <TrailDetail trail={selectedTrail} onEdit={handleEdit} onDeleteSuccess={handleSaveSuccess} />
+          ) : view === "management" ? (
+            <ManagementPage />
           ) : (
             <EmptyState onCreateNew={handleCreateNew} />
           )}

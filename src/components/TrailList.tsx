@@ -7,7 +7,7 @@ import {
   ChevronRight,
   ChevronDown,
 } from "lucide-react";
-import { Trail, isMantrailingTrail } from "../types/trail";
+import { Trail, isHikingTrail, isMantrailingTrail } from "../types/trail";
 import {
   Tooltip,
   TooltipContent,
@@ -126,7 +126,7 @@ export function TrailList({
         <ScrollArea className="flex-1 overflow-auto">
           <div className="px-2 py-2 space-y-2">
             <TooltipProvider>
-              {filteredTrails.map((trail) => {
+              {filteredTrails.map((trail: Trail) => {
                 const Icon = getTrailIcon(trail.category);
                 return (
                   <Tooltip key={trail.id || trail._id}>
@@ -151,9 +151,11 @@ export function TrailList({
                     <TooltipContent side="right">
                       <div className="flex items-center gap-2">
                         <p className="text-xs">
-                          {isMantrailingTrail(trail)
-                            ? trail.dogName
-                            : trail.name}
+                          {isMantrailingTrail(trail) && typeof trail.dog === "object"
+                            ? trail.dog.name
+                            : isHikingTrail(trail)
+                            ? trail.name
+                            : ""}
                         </p>
                         <span
                           className={`text-xs px-1.5 py-0.5 rounded ${
@@ -296,9 +298,11 @@ export function TrailList({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <div className="truncate text-sm">
-                              {isMantrailingTrail(trail)
-                                ? trail.dogName
-                                : trail.name}
+                              {isMantrailingTrail(trail) && typeof trail.dog === "object"
+                                ? trail.dog.name
+                                : isHikingTrail(trail)
+                                ? trail.name
+                                : ""}
                             </div>
                             <span
                               className={`text-xs px-1.5 py-0.5 rounded flex-shrink-0 ${

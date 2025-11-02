@@ -1,3 +1,5 @@
+import { Dog } from "../utils/types";
+
 // Common fields for both trail types
 interface BaseTrail {
   id?: string;
@@ -15,7 +17,19 @@ interface BaseTrail {
 export interface MantrailingTrail extends BaseTrail {
   category: "mantrailing";
   trainer?: string;
-  dogName: string;
+  dog: Dog;
+  handlerName: string;
+  trailType?: string;
+  startType?: "knowing" | "blind" | string; // départ visuel ou à l'aveugle
+  locationCoordinate?: [number, number]; // [lat, lon]
+  runnerTrace?: any;
+  dogTrace?: any;
+  delay?: number; // in seconds
+}
+
+export interface MantrailingTrailPayload extends Omit<MantrailingTrail, 'dog'> {
+  dog: string; // Represents the dog's ID when sending data to the backend
+
   handlerName: string;
   trailType?: string;
   startType?: "knowing" | "blind" | string; // départ visuel ou à l'aveugle
@@ -34,18 +48,17 @@ export interface HikingTrail extends BaseTrail {
     type: "Point";
     coordinates: [number, number]; // [longitude, latitude]
   };
-  elevationGain?: number; // in meters
   difficulty?: "Easy" | "Moderate" | "Hard" | "Expert";
+  elevationGain?: number | null; // in meters
   userTrack?: {
     type: string;
     features: any[];
-    properties?: any;
-  };
+    properties?: any; 
+  } | null; // Allow null for userTrack
   dogTrack?: {
     type: string;
     features: any[];
-    properties?: any;
-  };
+  } | null; // Allow null for dogTrack
   userId?: string;
 }
 

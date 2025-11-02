@@ -6,6 +6,7 @@ import {
   HikingTrail,
   isMantrailingTrail,
   isHikingTrail,
+  MantrailingTrailPayload,
 } from "../types/trail";
 import { parseGPXFile } from "../utils/gpxParser";
 import { Button } from "./ui/button";
@@ -24,10 +25,30 @@ import {
 import { X, Upload, FileText, Trash2, Info } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
 import { GpxTraceEditor } from "./GpxTraceEditor";
-import { createHike, updateHike, saveTrail, updateTrail } from "../utils/api";
+import {
+  createHike,
+  updateHike,
+  saveTrail,
+  updateTrail,
+  deleteTrail,
+  deleteHike,
+} from "../utils/api";
 import { LocationSearchMap } from "./LocationSearchMap";
 import DogHomePageIcon from "./DogHomePageIcon";
 import HikeIcon from "./HikeIcon";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "./ui/alert-dialog";
+import { useAuth } from "../contexts/AuthContext";
+import { DogSelector } from "./DogSelector";
 
 interface TrailFormProps {
   trail?: Trail;
@@ -36,6 +57,7 @@ interface TrailFormProps {
 }
 
 export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
+  const { dogs } = useAuth();
   const [category, setCategory] = useState<TrailCategory>(
     trail?.category || "mantrailing"
   );
@@ -66,9 +88,12 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
   const [notes, setNotes] = useState(trail?.notes || "");
 
   // Mantrailing specific fields
-  const [dogName, setDogName] = useState(
-    (trail && isMantrailingTrail(trail) ? trail.dogName : "Titus") || "Titus"
-  );
+  const [selectedDogId, setSelectedDogId] = useState<string>(() => {
+    if (trail && isMantrailingTrail(trail) && trail.dog) {
+      return trail.dog._id;
+    }
+    return ""; // Default to empty, user must select a dog
+  });
   const [handlerName, setHandlerName] = useState(
     (trail && isMantrailingTrail(trail) ? trail.handlerName : "") || ""
   );
@@ -213,9 +238,11 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
     if (type === "dog") {
       setDogGpxFile(null);
       setDogGpxData(null);
+      setPreviewDogPath(null);
     } else {
       setUserGpxFile(null);
       setUserGpxData(null);
+      setPreviewUserPath(null);
     }
     setGpxError("");
   };
@@ -360,11 +387,11 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
 
     try {
       if (category === "mantrailing") {
-        const mantrailingData: Omit<MantrailingTrail, "id" | "_id"> & {
+        const mantrailingData: MantrailingTrailPayload & {
           id?: string;
         } = {
           category: "mantrailing",
-          dogName,
+          dog: selectedDogId,
           handlerName,
           trainer,
           date,
@@ -383,10 +410,10 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
         if (trail && (trail.id || trail._id)) {
           await updateTrail(
             trail.id || trail._id || "",
-            mantrailingData as Trail
+            mantrailingData as MantrailingTrailPayload
           );
         } else {
-          await saveTrail(mantrailingData as Trail);
+          await saveTrail(mantrailingData as MantrailingTrailPayload);
         }
       } else { // hiking
         const hikingData: Omit<HikingTrail, "id" | "_id"> & { id?: string } = {
@@ -414,7 +441,7 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
         if (trail && (trail.id || trail._id)) {
           await updateHike(
             trail.id || trail._id || "",
-            hikingData as HikingTrail
+            hikingData as Omit<HikingTrail, "id" | "_id">
           );
         } else {
           await createHike(hikingData as HikingTrail);
@@ -423,6 +450,21 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
       onSaveSuccess();
     } catch (error) {
       console.error("Failed to save trail:", error);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!trail) return;
+
+    try {
+      if (category === "mantrailing") {
+        await deleteTrail(trail.id || trail._id || "");
+      } else {
+        await deleteHike(trail.id || trail._id || "");
+      }
+      onSaveSuccess();
+    } catch (error) {
+      console.error("Failed to delete trail:", error);
     }
   };
 
@@ -543,29 +585,19 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
                 {category === "mantrailing" && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="dogName">Nom du chien *</Label>
-                      <Input
-                        id="dogName"
-                        value={dogName}
-                        onChange={(e) => setDogName(e.target.value)}
+                      <DogSelector 
+                        value={selectedDogId}
+                        onChange={setSelectedDogId}
                         required
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="handlerName">Nom du maître *</Label>
-                      <Select
+                      <Input
                         value={handlerName}
-                        onValueChange={setHandlerName}
+                        onChange={(e) => setHandlerName(e.target.value)}
                         required
-                      >
-                        <SelectTrigger id="handlerName">
-                          <SelectValue placeholder="Sélectionner un maître" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Malie">Malie</SelectItem>
-                          <SelectItem value="Max">Max</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      />
                     </div>
                   </div>
                 )}
@@ -1069,6 +1101,38 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
                 <Button type="button" variant="outline" onClick={onCancel}>
                   Annuler
                 </Button>
+                {trail && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Êtes-vous sûr de vouloir supprimer cette trace ?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Cette action est irréversible.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Annuler</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleDelete}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          Supprimer
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
               </div>
             </form>
           </CardContent>

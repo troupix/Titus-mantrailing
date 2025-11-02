@@ -294,7 +294,7 @@ export function HomePage({ trails, onViewTrails, onCreateNew, onViewStatistics, 
                       <div className="flex-1 min-w-0">
                         <h4 className="truncate">
                           {isMantrailingTrail(trail) 
-                            ? `${trail.dogName} - ${trail.location || new Date(trail.date).toLocaleDateString('fr-FR')}`
+                            ? `${trail.dog.name} - ${trail.location || new Date(trail.date).toLocaleDateString('fr-FR')}`
                             : trail.name}
                         </h4>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">

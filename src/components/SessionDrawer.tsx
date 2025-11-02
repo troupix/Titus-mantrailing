@@ -12,7 +12,7 @@ import { useContext } from 'react';
 import { LocationContext } from './context/Location';
 import { Grid, Menu, MenuItem, useMediaQuery, useTheme } from '@mui/material';
 import Bouton from '@mui/material/Button';
-import ConnectionModal from './ConnectionModal';
+import { useAuth } from '../contexts/AuthContext';
 
 const item = {
   py: '2px',
@@ -55,14 +55,14 @@ export const Navigator: React.FC<NavProps> = (props) => {
   const { categories } = props;
   const { ...other } = props;
   const { setLocation } = useContext(LocationContext);
+  const { user } = useAuth();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [anchorElTrail, setAnchorElTrail] = React.useState<null | HTMLElement>(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const open = Boolean(anchorEl);
   const openTrail = Boolean(anchorElTrail);
-  const [isConnected, setIsConnected] = React.useState<Boolean>(localStorage.getItem('isAllowedToCreate') === 'true');
-  const [openConnection, setOpenConnection] = React.useState(false);
+
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -94,13 +94,13 @@ export const Navigator: React.FC<NavProps> = (props) => {
       {!isMobile &&
         <List disablePadding sx={{ backgroundColor: '#101F33' }}>
           <ListItem sx={{ ...item, ...itemCategory, textAlign: 'center', alignItems: 'center' }}>
-            {setLocation && (
+            {user && setLocation && (
               <NewSessionButton onClick={() => { setLocation('newsession') }} />
             )}
           </ListItem>
-          {!isConnected && (
+          {!user && (
             <ListItem sx={{ ...item, ...itemCategory, textAlign: 'center', alignItems: 'center' }}>
-              <Bouton variant="contained" onClick={() => { setOpenConnection(true) }} fullWidth sx={{ paddingRight: isMobile ? '5%' : '' }}>Se Connecter</Bouton>
+              <Bouton variant="contained" onClick={() => { setLocation('login') }} fullWidth sx={{ paddingRight: isMobile ? '5%' : '' }}>Se Connecter</Bouton>
             </ListItem>)
           }
           {categories.map(({ id, children }) => (
@@ -123,9 +123,9 @@ export const Navigator: React.FC<NavProps> = (props) => {
       {isMobile &&
         <Grid container spacing={2} sx={{ textAlign: 'center', marginTop: '5px' }}>
           <Grid item xs={3}>
-            {isConnected && <NewSessionButton onClick={() => { setLocation('newsession') }} />}
-            {!isConnected && (
-              <Bouton variant="contained" onClick={() => { setOpenConnection(true) }} fullWidth sx={{ paddingRight: isMobile ? '5%' : '' }}>Co</Bouton>
+            {user && <NewSessionButton onClick={() => { setLocation('newsession') }} />}
+            {!user && (
+              <Bouton variant="contained" onClick={() => { setLocation('login') }} fullWidth sx={{ paddingRight: isMobile ? '5%' : '' }}>Co</Bouton>
             )}
           </Grid>
           {categories[0] && <Grid item xs={4}>
@@ -178,7 +178,6 @@ export const Navigator: React.FC<NavProps> = (props) => {
               ))}
             </Menu>
           </Grid>}
-          <ConnectionModal open={openConnection} onClose={() => setOpenConnection(false)} setConnection={setIsConnected} />
         </Grid>
       }
     </Drawer>

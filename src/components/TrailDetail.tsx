@@ -160,7 +160,7 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
   // Get display title based on trail type
   const getTitle = () => {
     if (isMantrailingTrail(trail)) {
-      return `${trail.dogName} - ${new Date(trail.date).toLocaleDateString('fr-FR')}`;
+      return `${typeof trail.dog === "object" ? trail.dog.name : ""} - ${new Date(trail.date).toLocaleDateString('fr-FR')}`;
     } else {
       return trail.name;
     }
@@ -365,7 +365,7 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
                     <DogHomePageIcon className="h-5 w-5 text-blue-600 mt-0.5" />
                     <div className="flex-1">
                       <p className="text-sm text-muted-foreground">Chien</p>
-                      <p className="text-blue-900">{trail.dogName}</p>
+                      <p className="text-blue-900">{typeof trail.dog === "object" ? trail.dog.name : ""}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
