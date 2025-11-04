@@ -43,7 +43,7 @@ router.post('/login', async (req, res) => {
         }
 
         const token = createAuthToken(user);
-        res.json({ token });
+        res.json({ token, user: { _id: user._id, email: user.email, username: user.username, role: user.role } });
     });
 });
 
@@ -104,7 +104,7 @@ router.post('/register', async (req, res) => {
  * @middleware checkAuthToken
  */
 router.get('/check', checkAuthToken, (req, res) => {
-    res.send('Check endpoint');
+    res.send(req.user);
 });
 
 

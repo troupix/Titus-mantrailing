@@ -10,8 +10,11 @@ require('dotenv').config();
  */
 function createAuthToken(user) {
     const payload = {
-        id: user.id,
-        username: user.username
+        id: user._id,
+        _id: user._id,
+        username: user.username,
+        role: user.role,
+        email: user.email
     };
 
     const secret = process.env.ACCESS_TOKEN_SECRET; // Replace with your actual secret key
