@@ -50,31 +50,6 @@ export function ProfilePage() {
     setError("");
   };
 
-  const getRoleBadgeVariant = (role: string) => {
-    switch (role) {
-      case "trainer":
-        return "default";
-      case "handler":
-        return "secondary";
-      case "admin":
-        return "destructive";
-      default:
-        return "outline";
-    }
-  };
-
-  const getRoleLabel = (role: string) => {
-    switch (role) {
-      case "trainer":
-        return "Éducateur";
-      case "handler":
-        return "Handler";
-      case "admin":
-        return "Administrateur";
-      default:
-        return role;
-    }
-  };
 
   return (
     <div className="h-full overflow-auto p-6 md:p-8">

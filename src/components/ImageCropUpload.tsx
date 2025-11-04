@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Label } from "./ui/label";
 import { Slider } from "./ui/slider";
-import { Upload, Crop, X, Check } from "lucide-react";
+import { Upload, X, Check } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 interface ImageCropUploadProps {

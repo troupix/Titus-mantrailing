@@ -24,7 +24,6 @@ import {
 import { Badge } from "./ui/badge";
 import {
   Plus,
-  Dog as DogIcon,
   Pencil,
   Trash2,
   Calendar,

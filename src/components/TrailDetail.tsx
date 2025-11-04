@@ -523,7 +523,7 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
                 <img
                   key={index}
                   src={photoUrl}
-                  alt={`Hike photo ${index + 1}`}
+                  alt={`Hike ${index + 1}`}
                   className="w-full h-48 object-cover rounded-md shadow-md cursor-pointer transform transition-transform duration-200 hover:scale-105"
                   onClick={() => {
                     setCurrentImage(photoUrl);
@@ -539,7 +539,7 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
         <Dialog open={showModal} onOpenChange={setShowModal}>
           <DialogOverlay />
           <DialogContent className="w-[80vw] max-w-none p-0 max-h-[90vh]">
-            <img src={currentImage} alt="Enlarged photo" className="w-full h-full object-contain" />
+            <img src={currentImage} alt="Enlarged" className="w-full h-full object-contain" />
           </DialogContent>
         </Dialog>
       </div>

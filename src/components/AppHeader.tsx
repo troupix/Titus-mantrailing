@@ -6,7 +6,6 @@ import {
   Award,
   Settings,
   LogOut,
-  Shield,
   User,
 } from "lucide-react";
 import TitusLogo from "./TitusLogo";

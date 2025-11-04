@@ -1,10 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
 import "./App.css";
-import { LocationContext } from "./components/context/Location";
+import { LocationContext, LocationProvider } from "./components/context/Location";
 import { getAllTrail } from "./utils/api";
 import { Trail } from "./types/trail";
-import BadgesIcon from "./components/BadgesIcon";
-import ScoreIcon from "@mui/icons-material/Score";
 import { AppHeader } from "./components/AppHeader";
 import { TrailList } from "./components/TrailList";
 import { HomePage } from "./components/HomePage";
@@ -13,7 +11,6 @@ import { BadgesPage } from "./components/BadgesPage";
 import { TrailForm } from "./components/TrailForm";
 import { TrailDetail } from "./components/TrailDetail";
 import { EmptyState } from "./components/EmptyState";
-import DogHomePageIcon from "./components/DogHomePageIcon";
 import { ManagementPage } from "./components/ManagementPage";
 import { useAuth } from "./contexts/AuthContext";
 import { LoginPage } from "./components/LoginPage";
@@ -21,10 +18,6 @@ import { ProfilePage } from "./components/ProfilePage";
 
 type View = "home" | "list" | "detail" | "form" | "statistics" | "badges" | "management" | "profile";
 
-interface category {
-  id: string;
-  children: any[];
-}
 
 function App() {
   const { user, loading } = useAuth();
@@ -41,7 +34,11 @@ function App() {
     return <LoginPage />;
   }
 
-  return <MainApp />;
+  return (
+    <LocationProvider>
+      <MainApp />
+    </LocationProvider>
+  );
 }
 
 function MainApp() {
@@ -50,7 +47,6 @@ function MainApp() {
   const [editingTrail, setEditingTrail] = useState<Trail | undefined>();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
-  const [, setCategories] = useState<category[]>([]);
   const { trails, setTrails, triggerGetTrails, setTriggerGetTrails } = useContext(LocationContext);
   const [selectedTrailId, setSelectedTrailId] = useState<string | null>(
     trails.length > 0 ? trails[0]._id || null : null
@@ -129,33 +125,6 @@ function MainApp() {
     if (user) {
       getAllTrail().then((data) => {
         setTrails(data);
-        const newCategories = [
-          {
-            id: "Statistiques",
-            children: [
-              {
-                id: "Pistes",
-                icon: <ScoreIcon sx={{ fill: "#FFFFFF" }} />,
-                trail_id: "Stats",
-              },
-              { id: "Badges", icon: <BadgesIcon />, trail_id: "Badges" },
-            ],
-          },
-          { id: "Piste", children: [] },
-        ];
-        newCategories[1].children = data
-          .sort(
-            (a: any, b: any) =>
-              new Date(b.date).getTime() - new Date(a.date).getTime()
-          )
-          .map((trail: any) => {
-            return {
-              id: new Date(trail.date).toLocaleDateString(),
-              icon: <DogHomePageIcon />,
-              trail_id: trail._id,
-            };
-          });
-        setCategories(newCategories);
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
