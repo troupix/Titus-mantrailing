@@ -84,7 +84,7 @@ function isMantrailingTrail(trail: Trail | MantrailingTrailPayload): trail is Ma
 }
 
 // User API
-export const login = async (credentials: LoginCredentials): Promise<{ token: string }> => {
+export const login = async (credentials: LoginCredentials): Promise<{ token: string, user: User }> => {
     const response = await api.post('/api/user/login', credentials);
     localStorage.setItem('token', response.data.token);
     return response.data;

@@ -56,7 +56,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (credentials: LoginCredentials) => {
     try {
-      await apiLogin(credentials);
+      const newUser = (await apiLogin(credentials)).user;
+      if (!newUser) {
+        throw new Error("Login failed: No user returned");
+      }
+      setUser(newUser);
       await checkAuth();
     } catch (error) {
       console.error("Login failed:", error);

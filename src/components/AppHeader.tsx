@@ -1,6 +1,25 @@
 import { Button } from "./ui/button";
-import { Home, List, BarChart3, Award, Settings } from "lucide-react";
+import {
+  Home,
+  List,
+  BarChart3,
+  Award,
+  Settings,
+  LogOut,
+  Shield,
+  User,
+} from "lucide-react";
 import TitusLogo from "./TitusLogo";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "./ui/avatar";
+import { useAuth } from "../contexts/AuthContext";
 
 interface AppHeaderProps {
   currentView:
@@ -10,9 +29,10 @@ interface AppHeaderProps {
     | "form"
     | "statistics"
     | "badges"
-    | "management";
+    | "management"
+    | "profile";
   onNavigate: (
-    view: "home" | "list" | "statistics" | "badges" | "management"
+    view: "home" | "list" | "statistics" | "badges" | "management" | "profile"
   ) => void;
   trailCount: number;
 }
@@ -22,6 +42,26 @@ export function AppHeader({
   onNavigate,
   trailCount,
 }: AppHeaderProps) {
+  const { user, logout } = useAuth();
+  const handleLogout = async () => {
+    await logout();
+  };
+
+  const getUserInitials = () => {
+    console.log("getUserInitials: user =", user);
+    if (!user || !user.username) return "U";
+    const nameParts = user.username.split(" ");
+    if (nameParts.length === 0) return "U";
+    const firstInitial = nameParts[0][0] || "";
+    const lastInitial = nameParts.length > 1 ? nameParts[nameParts.length - 1][0] : "";
+    return `${firstInitial}${lastInitial}`.toUpperCase();
+  };
+
+  const getUserFullName = (user: any) => {
+    if (!user || (!user.firstName && !user.lastName)) return "Utilisateur Inconnu";
+    return `${user.firstName || ""} ${user.lastName || ""}`.trim().toUpperCase();
+  };
+
   return (
     <header className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white shadow-lg">
       <div className="flex items-center justify-between px-6 py-4">
@@ -116,6 +156,49 @@ export function AppHeader({
                 <Settings className="h-4 w-4" />
                 <span className="hidden sm:inline">Gestion</span>
               </Button>
+              {/* User Menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="gap-2 text-white hover:bg-white/10"
+                  >
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="bg-white text-blue-700">
+                        {getUserInitials()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="hidden md:inline">{user?.username}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col">
+                      <span>{getUserFullName(user!)}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {user?.email}
+                      </span>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => onNavigate("profile")}>
+                    <User className="mr-2 h-4 w-4" />
+                    Mon profil
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onNavigate("management")}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Gestion (Chiens, Handlers, Éducateurs)
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="text-destructive"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Déconnexion
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>
           )}
         </nav>

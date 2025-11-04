@@ -11,6 +11,7 @@ import { Dog, Mountain, AlertCircle, GraduationCap, User, DogIcon } from "lucide
 import { checkEmailRoles } from "../utils/api";
 import { Switch } from "./ui/switch";
 import DogHomePageIcon from "./DogHomePageIcon";
+import HikeIcon from "./HikeIcon";
 
 export function LoginPage() {
   const { login, register, trainers } = useAuth();
@@ -121,7 +122,7 @@ export function LoginPage() {
         <CardHeader className="text-center">
           <div className="flex justify-center gap-3 mb-4">
             <DogHomePageIcon className="w-10 h-10 text-blue-600" />
-            <Mountain className="w-10 h-10 text-green-600" />
+            <HikeIcon className="w-10 h-10 text-green-600" />
           </div>
           <CardTitle>Carnet de Mantrailing</CardTitle>
           <CardDescription>
@@ -130,10 +131,10 @@ export function LoginPage() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            {/* <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Connexion</TabsTrigger>
               <TabsTrigger value="register">Inscription</TabsTrigger>
-            </TabsList>
+            </TabsList> */}
 
             <TabsContent value="login">
               <form onSubmit={handleLogin} className="space-y-4">

@@ -7,6 +7,8 @@ export interface User {
   role: string[];
   dogs: string[];
   trainedDogs: string[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface Dog {

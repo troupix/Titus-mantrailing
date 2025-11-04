@@ -17,8 +17,9 @@ import DogHomePageIcon from "./components/DogHomePageIcon";
 import { ManagementPage } from "./components/ManagementPage";
 import { useAuth } from "./contexts/AuthContext";
 import { LoginPage } from "./components/LoginPage";
+import { ProfilePage } from "./components/ProfilePage";
 
-type View = "home" | "list" | "detail" | "form" | "statistics" | "badges" | "management";
+type View = "home" | "list" | "detail" | "form" | "statistics" | "badges" | "management" | "profile";
 
 interface category {
   id: string;
@@ -74,7 +75,7 @@ function MainApp() {
   };
 
   const handleNavigate = (
-    targetView: "home" | "list" | "statistics" | "badges" | "management"
+    targetView: "home" | "list" | "statistics" | "badges" | "management" | "profile",
   ) => {
     if (targetView === "home") {
       setView("home");
@@ -93,6 +94,9 @@ function MainApp() {
       setShowSidebar(false);
     }else if( targetView === "management"){
       setView("management");
+      setShowSidebar(false);
+    } else if (targetView === "profile") {
+      setView("profile");
       setShowSidebar(false);
     }
   };
@@ -210,6 +214,8 @@ function MainApp() {
             <TrailDetail trail={selectedTrail} onEdit={handleEdit} onDeleteSuccess={handleSaveSuccess} />
           ) : view === "management" ? (
             <ManagementPage />
+          ) : view === "profile" ? (
+            <ProfilePage />
           ) : (
             <EmptyState onCreateNew={handleCreateNew} />
           )}
