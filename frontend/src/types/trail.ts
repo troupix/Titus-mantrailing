@@ -25,6 +25,7 @@ export interface MantrailingTrail extends BaseTrail {
   runnerTrace?: any;
   dogTrace?: any;
   delay?: number; // in seconds
+  trainerComment?: string;
 }
 
 export interface MantrailingTrailPayload extends Omit<MantrailingTrail, 'dog'> {
@@ -37,6 +38,7 @@ export interface MantrailingTrailPayload extends Omit<MantrailingTrail, 'dog'> {
   runnerTrace?: any;
   dogTrace?: any;
   delay?: number; // in seconds
+  trainerComment?: string;
 }
 
 // Hiking specific fields (Hike schema)

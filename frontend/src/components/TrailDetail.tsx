@@ -15,6 +15,7 @@ import { Icon, LatLngBounds } from 'leaflet';
 import DogHomePageIcon from "./DogHomePageIcon";
 import TrailIcon from "./TrailIcon";
 import HikeIcon from "./HikeIcon";
+import { useAuth } from "../contexts/AuthContext";
 
 interface TrailDetailProps {
   trail: Trail;
@@ -43,6 +44,8 @@ const FitBounds = ({ dogTrace, runnerTrace }: { dogTrace?: [number, number][], r
 };
 
 export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps) {
+  const { user } = useAuth();
+  const isTrainer = user?.role.includes("trainer");
   const isAllowedToCreate = localStorage.getItem('isAllowedToCreate') === 'true';
   const [maxDogMasterDistance, setMaxDogMasterDistance] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -445,6 +448,13 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
                 <div className="border-t pt-4">
                   <p className="text-sm text-muted-foreground mb-2">Notes</p>
                   <p className="text-gray-700 whitespace-pre-wrap">{trail.notes}</p>
+                </div>
+              )}
+
+              {isMantrailingTrail(trail) && isTrainer && trail.trainerComment && (
+                <div className="border-t pt-4">
+                  <p className="text-sm text-muted-foreground mb-2">Commentaire du formateur (privé)</p>
+                  <p className="text-gray-700 whitespace-pre-wrap">{trail.trainerComment}</p>
                 </div>
               )}
             </CardContent>

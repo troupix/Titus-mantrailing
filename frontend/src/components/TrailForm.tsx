@@ -41,6 +41,7 @@ import {
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
 import { activityFormRegistry } from "./ActivityFormRegistry";
+import { useAuth } from "../contexts/AuthContext";
 
 interface TrailFormProps {
   trail?: Trail;
@@ -49,6 +50,7 @@ interface TrailFormProps {
 }
 
 export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
+  const { user } = useAuth();
   const [category, setCategory] = useState<TrailCategory>(
     trail?.category || "mantrailing"
   );
@@ -90,6 +92,9 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
   );
   const [trainer, setTrainer] = useState(
     trail && isMantrailingTrail(trail) ? trail.trainer || "" : ""
+  );
+  const [trainerComment, setTrainerComment] = useState(
+    trail && isMantrailingTrail(trail) ? trail.trainerComment || "" : ""
   );
   const [trailType, setTrailType] = useState(
     trail && isMantrailingTrail(trail) ? trail.trailType || "" : ""
@@ -406,6 +411,7 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
           locationCoordinate: dogGpxData?.startPoint || locationCoordinate,
           dogTrace: createGeoJSONFeatureCollection(dogGpxData),
           runnerTrace: createGeoJSONFeatureCollection(userGpxData),
+          trainerComment,
         };
 
         if (trail && (trail.id || trail._id)) {
@@ -604,6 +610,9 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
                   setStartType={setStartType}
                   delay={delay}
                   setDelay={setDelay}
+                  user={user}
+                  trainerComment={trainerComment}
+                  setTrainerComment={setTrainerComment}
                   name={name}
                   setName={setName}
                   description={description}

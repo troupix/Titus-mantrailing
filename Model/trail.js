@@ -68,6 +68,11 @@ const TrailSchema = new mongoose.Schema({
         default: '',
         required: false
     },
+    trainerComment: {
+        type: String,
+        default: '',
+        required: false
+    },
     trailType: {
         type: String,
         required: false

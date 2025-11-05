@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "test": "jest",
+    "migrate": "node scripts/runMigrations.js",
     "prepare": "husky",
     "commitlint": "commitlint",
     "postinstall": "npm install --prefix frontend --ignore-scripts",

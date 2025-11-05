@@ -1,6 +1,7 @@
 
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
 import {
   Select,
   SelectContent,
@@ -9,6 +10,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { DogSelector } from "./DogSelector";
+import { User } from "../utils/types";
 
 interface MantrailingFormProps {
   selectedDogId: string;
@@ -23,6 +25,9 @@ interface MantrailingFormProps {
   setStartType: (value: string) => void;
   delay: number;
   setDelay: (value: number) => void;
+  user: User | null;
+  trainerComment: string;
+  setTrainerComment: (value: string) => void;
 }
 
 export function MantrailingForm({
@@ -38,7 +43,12 @@ export function MantrailingForm({
   setStartType,
   delay,
   setDelay,
+  user,
+  trainerComment,
+  setTrainerComment,
 }: MantrailingFormProps) {
+  const isTrainer = user?.role.includes("trainer");
+
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -67,6 +77,17 @@ export function MantrailingForm({
           placeholder="Ex: Claudia"
         />
       </div>
+      {isTrainer && (
+        <div className="space-y-2">
+          <Label htmlFor="trainerComment">Commentaire du formateur</Label>
+          <Textarea
+            id="trainerComment"
+            value={trainerComment}
+            onChange={(e) => setTrainerComment(e.target.value)}
+            placeholder="Ajoutez un commentaire visible uniquement par les formateurs..."
+          />
+        </div>
+      )}
       <div className="space-y-2">
         <Label htmlFor="trailType">Type de piste</Label>
         <Input
