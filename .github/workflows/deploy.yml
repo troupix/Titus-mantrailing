@@ -36,6 +36,10 @@ jobs:
             git clean -df                    # Remove any untracked files and directories (e.g., old node_modules, build artifacts)
             echo '--> Install dependencies...'
             npm i
+            echo '--> Install frontend dependencies...'
+            npm i --prefix frontend
+            echo '--> Build frontend...'
+            npm run build --prefix frontend
             echo '--> Restarting application with PM2...'
             pm2 startOrRestart ecosystem.config.js --env production
             echo '--> done.'

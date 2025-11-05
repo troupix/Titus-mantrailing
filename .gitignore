@@ -2,20 +2,24 @@
 **/node_modules/
 npm-debug.log
 yarn-error.log
-# React
-build/
-dist/
-.cache/
-# SQLite
-**/*.sqlite
-back/maxdb.sqlite
-.env
-!*.env.example
-# Logs
-logs/
 
 # React
 build/
 dist/
 .cache/
+
+# SQLite
+**/*.sqlite
+back/maxdb.sqlite
+
+.env
+!*.env.example
+
+# Logs
+logs/
+
+# React
+frontend/build/
+frontend/dist/
+frontend/.cache/
 uploads/

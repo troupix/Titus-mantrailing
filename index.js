@@ -14,7 +14,8 @@ app.use(express.json()); // Parse JSON request bodies
 
 // CORS Configuration
 const allowedOrigins = [
-  'https://troupix.github.io' // Allow the GitHub Pages origin
+  'https://troupix.github.io',
+  'https://maximilien-api.com' // Allow the GitHub Pages origin
 ];
 if (process.env.CORS_ORIGIN) {
   allowedOrigins.push(process.env.CORS_ORIGIN);
@@ -28,7 +29,8 @@ app.use(cors({
   origin: allowedOrigins
 }));
 
-const mongoose = require('mongoose');
+const path = require('path');
+app.use(express.static(path.join(__dirname, 'frontend', 'build')));
 
 
 app.use('/api/user', userRouter);
@@ -36,5 +38,9 @@ app.use('/api/mantrailing', mantrailingRouter);
 app.use('/api/hike', hikeRouter);
 app.use('/api/users', userManagementRouter);
 app.use('/api/dogs', dogRouter);
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend', 'build', 'index.html'));
+});
 
 module.exports = app;
