@@ -133,8 +133,17 @@ export const uploadProfilePicture = async (formData: FormData) => {
     return response.data;
 };
 
-export const uploadDogPhoto = async (formData: FormData): Promise<{ url: string }> => {
-    const response = await api.post('/api/dogs/upload-photo', formData, {
+export const uploadDogProfilePhoto = async (formData: FormData): Promise<{ url: string }> => {
+    const response = await api.post('/api/dogs/upload-profile-photo', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+    return response.data;
+};
+
+export const updateDogPresentation = async (id: string, formData: FormData): Promise<Dog> => {
+    const response = await api.put<Dog>(`/api/dogs/${id}/presentation`, formData, {
         headers: {
             'Content-Type': 'multipart/form-data',
         },
@@ -143,7 +152,7 @@ export const uploadDogPhoto = async (formData: FormData): Promise<{ url: string 
 };
 
 // Dog API
-export const createDog = async (dogData: Omit<Dog, '_id' | 'createdAt'>): Promise<Dog> => {
+export const createDog = async (dogData: Omit<Dog, '_id' | 'createdAt' | 'legend' | 'presentation' | 'profilePhoto' | 'presentationPhoto'>): Promise<Dog> => {
     const response = await api.post<Dog>('/api/dogs', dogData);
     return response.data;
 };

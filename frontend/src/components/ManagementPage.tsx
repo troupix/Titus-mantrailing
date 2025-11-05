@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { Dog } from "../utils/types";
 import { formatAge } from "../utils/utils";
-import { createDog, updateDog, deleteDog, uploadDogPhoto } from "../utils/api";
+import { createDog, updateDog, deleteDog, uploadDogProfilePhoto, updateDogPresentation } from "../utils/api";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -28,6 +28,7 @@ import {
   Trash2,
   Calendar,
   Bone,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ImageCropUpload } from "./ImageCropUpload";
@@ -38,6 +39,15 @@ export function ManagementPage() {
 
   const [dogPhoto, setDogPhoto] = useState<Blob | null>(null);
   const [dogPhotoPreview, setDogPhotoPreview] = useState<string | undefined>(undefined);
+
+  // Presentation management state
+  const [isPresentationDialogOpen, setIsPresentationDialogOpen] = useState(false);
+  const [editingPresentationDog, setEditingPresentationDog] = useState<Dog | null>(null);
+  const [presentationText, setPresentationText] = useState("");
+  const [presentationLegend, setPresentationLegend] = useState("");
+  const [presentationPhoto, setPresentationPhoto] = useState<Blob | null>(null);
+  const [presentationPhotoPreview, setPresentationPhotoPreview] = useState<string | undefined>(undefined);
+  const [presentationLoading, setPresentationLoading] = useState(false);
 
   useEffect(() => {
     console.log(dogs);
@@ -51,8 +61,6 @@ export function ManagementPage() {
   const [dogBreed, setDogBreed] = useState("");
   const [dogBirthDate, setDogBirthDate] = useState("");
 
-  // const myDogs = dogs.filter((dog) => user && dog.ownerIds.includes(user._id));
-
   useEffect(() => {
     if (editingDog) {
       setDogName(editingDog.name ?? "");
@@ -63,11 +71,22 @@ export function ManagementPage() {
           : ""
       );
       setDogPhoto(null); // Clear the Blob when editing a new dog
-      setDogPhotoPreview(editingDog.photo ?? undefined);
+      setDogPhotoPreview(editingDog.profilePhoto ?? undefined);
     } else {
       resetDogForm();
     }
   }, [editingDog]);
+
+  useEffect(() => {
+    if (editingPresentationDog) {
+      setPresentationText(editingPresentationDog.presentation ?? "");
+      setPresentationLegend(editingPresentationDog.legend ?? "");
+      setPresentationPhoto(null);
+      setPresentationPhotoPreview(editingPresentationDog.presentationPhoto ?? undefined);
+    } else {
+      resetPresentationForm();
+    }
+  }, [editingPresentationDog]);
 
   const resetDogForm = () => {
     setDogName("");
@@ -75,6 +94,13 @@ export function ManagementPage() {
     setDogBirthDate("");
     setDogPhoto(null);
     setDogPhotoPreview(undefined);
+  };
+
+  const resetPresentationForm = () => {
+    setPresentationText("");
+    setPresentationLegend("");
+    setPresentationPhoto(null);
+    setPresentationPhotoPreview(undefined);
   };
 
   const handleOpenDogsDialog = (dog?: Dog) => {
@@ -93,6 +119,17 @@ export function ManagementPage() {
     resetDogForm();
   };
 
+  const handleOpenPresentationDialog = (dog: Dog) => {
+    setEditingPresentationDog(dog);
+    setIsPresentationDialogOpen(true);
+  };
+
+  const handleClosePresentationDialog = () => {
+    setIsPresentationDialogOpen(false);
+    setEditingPresentationDog(null);
+    resetPresentationForm();
+  };
+
   useEffect(() => {
     console.log(isDogsDialogOpen);
   }, [isDogsDialogOpen]);
@@ -105,16 +142,13 @@ export function ManagementPage() {
     setDogsLoading(true);
 
     try {
-      let photoUrl = dogPhotoPreview;
+      let profilePhotoUrl = dogPhotoPreview;
       if (dogPhoto) {
         // If a new photo Blob exists, upload it
         const formData = new FormData();
-        formData.append("photo", dogPhoto, "dog_photo.jpeg");
-        // Assuming an API endpoint for photo upload that returns the URL
-        // This part needs to be implemented in api.ts and backend
-        // For now, let's assume uploadDogPhoto exists and returns the URL
-        const uploadResponse = await uploadDogPhoto(formData);
-        photoUrl = uploadResponse.url; // Or whatever the response structure is
+        formData.append("photo", dogPhoto, "dog_profile_photo.jpeg");
+        const uploadResponse = await uploadDogProfilePhoto(formData);
+        profilePhotoUrl = uploadResponse.url; // Or whatever the response structure is
       }
 
       if (editingDog) {
@@ -122,18 +156,22 @@ export function ManagementPage() {
           name: dogName,
           breed: dogBreed || undefined,
           birthDate: dogBirthDate ? new Date(dogBirthDate) : undefined,
-          photo: photoUrl || undefined,
+          profilePhoto: profilePhotoUrl || undefined,
         });
         toast.success("Chien mis à jour avec succès");
       } else {
-        await createDog({
+        const newDogData = {
           name: dogName,
           ownerIds: [user._id],
           breed: dogBreed || undefined,
           birthDate: dogBirthDate ? new Date(dogBirthDate) : undefined,
           trainerIds: [],
-          photo: photoUrl || undefined,
-        });
+        };
+        const createdDog = await createDog(newDogData);
+
+        if (profilePhotoUrl) {
+          await updateDog(createdDog._id, { profilePhoto: profilePhotoUrl });
+        }
         toast.success("Chien ajouté avec succès");
       }
 
@@ -149,6 +187,38 @@ export function ManagementPage() {
     }
     finally {
       setDogsLoading(false);
+    }
+  };
+
+  const handlePresentationSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!editingPresentationDog) return;
+
+    setPresentationLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("legend", presentationLegend);
+      formData.append("presentation", presentationText);
+
+      if (presentationPhoto) {
+        formData.append("photo", presentationPhoto, "dog_presentation_photo.jpeg");
+      }
+
+      await updateDogPresentation(editingPresentationDog._id, formData);
+      toast.success("Présentation du chien mise à jour avec succès");
+      await refreshDogs();
+      handleClosePresentationDialog();
+    } catch (error) {
+      console.error("Error saving dog presentation:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Erreur lors de l'enregistrement de la présentation"
+      );
+    } finally {
+      setPresentationLoading(false);
     }
   };
 
@@ -288,6 +358,79 @@ export function ManagementPage() {
             </DialogContent>
           </Dialog>
 
+          {/* Dog Presentation Dialog */}
+          <Dialog open={isPresentationDialogOpen} onOpenChange={handleClosePresentationDialog}>
+            <DialogContent className="sm:max-w-[600px]">
+              <form onSubmit={handlePresentationSubmit}>
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingPresentationDog?.name ? `Modifier la présentation de ${editingPresentationDog.name}` : "Modifier la présentation"}
+                  </DialogTitle>
+                  <DialogDescription>
+                    Mettez à jour la photo, la légende et le texte de présentation de votre chien.
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="space-y-4 py-4">
+                  <ImageCropUpload
+                    value={presentationPhotoPreview}
+                    onChange={(blob) => {
+                      setPresentationPhoto(blob);
+                      if (blob) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setPresentationPhotoPreview(reader.result as string);
+                        };
+                        reader.readAsDataURL(blob);
+                      } else {
+                        setPresentationPhotoPreview(undefined);
+                      }
+                    }}
+                    label="Photo de présentation"
+                    shape="rect"
+                    fallbackText={editingPresentationDog?.name || "Chien"}
+                  />
+
+                  <div className="space-y-2">
+                    <Label htmlFor="presentation-legend">Légende de la photo</Label>
+                    <Input
+                      id="presentation-legend"
+                      placeholder="Ex: Titus en pleine action !"
+                      value={presentationLegend}
+                      onChange={(e) => setPresentationLegend(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="presentation-text">Texte de présentation (Markdown)</Label>
+                    <textarea
+                      id="presentation-text"
+                      rows={10}
+                      className="flex h-auto w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-justify"
+                      placeholder="Décrivez votre chien en utilisant le format Markdown..."
+                      value={presentationText}
+                      onChange={(e) => setPresentationText(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleClosePresentationDialog}
+                    disabled={presentationLoading}
+                  >
+                    Annuler
+                  </Button>
+                  <Button type="submit" disabled={presentationLoading}>
+                    {presentationLoading ? "Enregistrement..." : "Enregistrer"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+
           {dogs.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
@@ -310,10 +453,10 @@ export function ManagementPage() {
                     <div className="flex items-start gap-4">
                       {/* Dog Photo */}
                       <div className="flex-shrink-0">
-                        {dog.photo ? (
+                        {dog.profilePhoto ? (
                           <div className="w-20 h-20 rounded-full overflow-hidden bg-muted">
                             <img
-                              src={dog.photo}
+                              src={dog.profilePhoto}
                               alt={dog.name}
                               className="w-full h-full object-cover"
                             />
@@ -338,6 +481,13 @@ export function ManagementPage() {
                         )}
                       </div>
                       <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleOpenPresentationDialog(dog)}
+                        >
+                          <FileText className="w-4 h-4" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"

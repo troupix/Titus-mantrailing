@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -7,7 +8,10 @@ import { ImageWithFallback } from "./figma/ImageWithFallback";
 import DogHomePageIcon from "./DogHomePageIcon";
 import TrailIcon from "./TrailIcon";
 import HikeIcon from "./HikeIcon";
-
+import { getDogs } from '../utils/api';
+import { Dog } from '../utils/types';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface HomePageProps {
   trails: Trail[];
@@ -19,6 +23,19 @@ interface HomePageProps {
 
 export function HomePage({ trails, onViewTrails, onCreateNew, onViewStatistics, onViewBadges }: HomePageProps) {
   const isAllowedToCreate = localStorage.getItem("isAllowedToCreate") === "true";
+  const [dogs, setDogs] = useState<Dog[]>([]);
+
+  useEffect(() => {
+    const fetchDogs = async () => {
+      try {
+        const fetchedDogs = await getDogs();
+        setDogs(fetchedDogs);
+      } catch (error) {
+        console.error("Failed to fetch dogs:", error);
+      }
+    };
+    fetchDogs();
+  }, []);
 
   // Calculate statistics
   const mantrailingCount = trails.filter(t => t.category === "mantrailing").length;
@@ -44,58 +61,65 @@ export function HomePage({ trails, onViewTrails, onCreateNew, onViewStatistics, 
     <div className="h-full overflow-auto bg-gradient-to-br from-blue-50 via-white to-green-50">
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Dog Profile Section */}
-        <Card className="border-2 border-blue-200 shadow-xl overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-100 to-green-100">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-2xl text-blue-900">
-                <DogHomePageIcon className="h-6 w-6" />
-                Titus
-              </CardTitle>
-            </CardHeader>
-          </div>
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="aspect-[4/3] rounded-lg overflow-hidden shadow-lg">
-                  <ImageWithFallback
-                  
-                    src="/Photos Titus retouchées -1.jpg?w=600&h=450&fit=crop"
-                    alt="Titus - Épagneul Breton"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground italic text-center">
-                  Crédit photo: Claudia
-                </p>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-xl mb-2 text-blue-900">À propos de Titus</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Titus est notre épagneul breton né le <strong>02/05/2021</strong>. 
-                    Il adore travailler avec son nez et nous accompagner dans nos 
-                    aventures. Inscrit au Mantrailing avec <a href="https://www.lyonk9.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">LyonK9</a>, il progresse 
-                    constamment et nous impressionne à chaque sortie !
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Badge className="bg-blue-100 text-blue-900 hover:bg-blue-200">
-                    <DogHomePageIcon className="h-3 w-3 mr-1" />
-                    Épagneul Breton
-                  </Badge>
-                  <Badge className="bg-green-100 text-green-900 hover:bg-green-200">
-                    <Calendar className="h-3 w-3 mr-1" />
-                    {new Date().getFullYear() - 2021} ans
-                  </Badge>
-                  <Badge className="bg-purple-100 text-purple-900 hover:bg-purple-200">
-                    <Award className="h-3 w-3 mr-1" />
-                    LyonK9
-                  </Badge>
-                </div>
-              </div>
+        {dogs.filter(dog => dog.presentationPhoto || dog.legend || dog.presentation).map(dog => (
+          <Card key={dog._id} className="border-2 border-blue-200 shadow-xl overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-100 to-green-100">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-2xl text-blue-900">
+                  <DogHomePageIcon className="h-6 w-6" />
+                  {dog.name}
+                </CardTitle>
+              </CardHeader>
             </div>
-          </CardContent>
-        </Card>
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {dog.presentationPhoto && (
+                  <div className="space-y-4">
+                    <div className="aspect-[4/3] rounded-lg overflow-hidden shadow-lg">
+                      <ImageWithFallback
+                        src={dog.presentationPhoto}
+                        alt={dog.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    {dog.legend && (
+                      <p className="text-sm text-muted-foreground italic text-center">
+                        {dog.legend}
+                      </p>
+                    )}
+                  </div>
+                )}
+                <div className="space-y-4">
+                  {dog.presentation && (
+                    <div>
+                      <h3 className="text-xl mb-2 text-blue-900">À propos de {dog.name}</h3>
+                      <div className="prose prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none text-muted-foreground leading-relaxed">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {dog.presentation}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex flex-wrap gap-2">
+                    {dog.breed && (
+                      <Badge className="bg-blue-100 text-blue-900 hover:bg-blue-200">
+                        <DogHomePageIcon className="h-3 w-3 mr-1" />
+                        {dog.breed}
+                      </Badge>
+                    )}
+                    {dog.birthDate && (
+                      <Badge className="bg-green-100 text-green-900 hover:bg-green-200">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        {new Date().getFullYear() - new Date(dog.birthDate).getFullYear()} ans
+                      </Badge>
+                    )}
+                    {/* Add more badges as needed, e.g., for trainer info */}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

@@ -30,7 +30,7 @@ router.post('/', checkAuthToken, upload.single('photo'), async (req, res) => {
 
         if (req.file) {
             const uploadedImage = await uploadFile(req.file);
-            dog.photo = uploadedImage.Location;
+            dog.profilePhoto = uploadedImage.Location;
             fs.unlinkSync(req.file.path); // Delete the temporary file
         }
 
@@ -50,12 +50,18 @@ router.get('/', checkAuthToken, async (req, res) => {
         const dogs = await Dog.find({ ownerIds: req.user.id });
 
         const dogsWithSignedUrls = await Promise.all(dogs.map(async (dog) => {
-            if (dog.photo) {
-                const fileName = dog.photo.split('/').pop();
+            let dogObject = dog.toObject();
+            if (dog.profilePhoto) {
+                const fileName = dog.profilePhoto.split('/').pop();
                 const signedUrl = await generateSignedUrl(fileName);
-                return { ...dog.toObject(), photo: signedUrl };
+                dogObject.profilePhoto = signedUrl;
             }
-            return dog.toObject();
+            if (dog.presentationPhoto) {
+                const fileName = dog.presentationPhoto.split('/').pop();
+                const signedUrl = await generateSignedUrl(fileName);
+                dogObject.presentationPhoto = signedUrl;
+            }
+            return dogObject;
         }));
 
         res.send(dogsWithSignedUrls);
@@ -72,15 +78,67 @@ router.get('/:id', checkAuthToken, async (req, res) => {
             return res.status(404).send();
         }
 
-        if (dog.photo) {
-            const fileName = dog.photo.split('/').pop();
+        let dogObject = dog.toObject();
+        if (dog.profilePhoto) {
+            const fileName = dog.profilePhoto.split('/').pop();
             const signedUrl = await generateSignedUrl(fileName);
-            return res.send({ ...dog.toObject(), photo: signedUrl });
+            dogObject.profilePhoto = signedUrl;
+        }
+        if (dog.presentationPhoto) {
+            const fileName = dog.presentationPhoto.split('/').pop();
+            const signedUrl = await generateSignedUrl(fileName);
+            dogObject.presentationPhoto = signedUrl;
         }
 
-        res.send(dog);
+        res.send(dogObject);
     } catch (error) {
         res.status(500).send(error);
+    }
+});
+
+router.put('/:id/presentation', checkAuthToken, upload.single('photo'), async (req, res) => {
+    try {
+        const { legend, presentation } = req.body;
+        const dogId = req.params.id;
+
+        const updateFields = { legend, presentation };
+
+        if (req.file) {
+            const uploadedImage = await uploadFile(req.file);
+            updateFields.presentationPhoto = uploadedImage.Location;
+            fs.unlinkSync(req.file.path); // Delete the temporary file
+        }
+
+        const dog = await Dog.findOneAndUpdate(
+            { _id: dogId, ownerIds: req.user.id },
+            { $set: updateFields },
+            { new: true, runValidators: true }
+        );
+
+        if (!dog) {
+            return res.status(404).send({ message: 'Dog not found or user not authorized.' });
+        }
+
+        // Generate signed URL for the updated photo if it exists
+        let dogResponse = dog.toObject();
+        if (dog.profilePhoto) {
+            const fileName = dog.profilePhoto.split('/').pop();
+            const signedUrl = await generateSignedUrl(fileName);
+            dogResponse.profilePhoto = signedUrl;
+        }
+        if (dog.presentationPhoto) {
+            const fileName = dog.presentationPhoto.split('/').pop();
+            const signedUrl = await generateSignedUrl(fileName);
+            dogResponse.presentationPhoto = signedUrl;
+        }
+
+        res.send(dogResponse);
+    } catch (error) {
+        console.error('Error updating dog presentation:', error);
+        if (req.file) {
+            fs.unlinkSync(req.file.path); // Ensure temporary file is deleted on error
+        }
+        res.status(400).send({ message: 'Failed to update dog presentation.', error: error.message });
     }
 });
 
@@ -110,7 +168,7 @@ router.delete('/:id', checkAuthToken, async (req, res) => {
     }
 });
 
-router.post('/upload-photo', checkAuthToken, upload.single('photo'), async (req, res) => {
+router.post('/upload-profile-photo', checkAuthToken, upload.single('photo'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ message: 'No file uploaded.' });

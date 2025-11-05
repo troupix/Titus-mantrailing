@@ -16,7 +16,10 @@ export interface Dog {
   name: string;
   breed?: string;
   birthDate?: Date;
-  photo?: string;
+  profilePhoto?: string;
+  presentationPhoto?: string;
+  legend?: string;
+  presentation?: string;
   ownerIds: string[];
   trainerIds: string[];
   createdAt: Date;

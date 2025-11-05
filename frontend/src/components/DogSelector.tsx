@@ -34,7 +34,7 @@ export function DogSelector({ value, onChange, required = false }: DogSelectorPr
               <SelectItem key={dog._id} value={dog._id}>
                 <div className="flex items-center gap-2">
                   <Avatar className="h-6 w-6">
-                    <AvatarImage src={dog.photo} alt={dog.name} />
+                    <AvatarImage src={dog.profilePhoto} alt={dog.name} />
                     <AvatarFallback className="text-xs">
                       <Dog className="w-3 h-3" />
                     </AvatarFallback>

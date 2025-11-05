@@ -11,8 +11,17 @@ const dogSchema = new mongoose.Schema({
   birthDate: {
     type: Date,
   },
-  photo: {
-    type: String, // URL to photo
+  profilePhoto: {
+    type: String, // URL to profile photo
+  },
+  presentationPhoto: {
+    type: String, // URL to presentation photo
+  },
+  legend: {
+    type: String,
+  },
+  presentation: {
+    type: String,
   },
   ownerIds: [{
     type: mongoose.Schema.Types.ObjectId,
