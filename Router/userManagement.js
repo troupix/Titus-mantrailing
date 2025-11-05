@@ -45,7 +45,6 @@ router.post('/create', (req, res) => {
         username: req.body.username,
         password: bcrypt.hashSync('password', 10), // Set a default password
         email: req.body.email,
-        color: req.body.color,
         role: req.body.role ? (Array.isArray(req.body.role) ? req.body.role : [req.body.role]) : ['user']
     });
     newUser.save({ password: 0 }) // Exclude the password field from the response

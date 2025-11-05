@@ -167,16 +167,6 @@ export const deleteDog = async (id: string): Promise<void> => {
     await api.delete(`/api/dogs/${id}`);
 };
 
-export const checkEmailRoles = async (email: string): Promise<string[]> => {
-    const response = await api.post('/api/user/check-email-roles', { email });
-    return response.data;
-};
-
-export const getTrainers = async (): Promise<{ id: string, name: string }[]> => {
-    const response = await api.get('/api/user/trainers');
-    return response.data;
-};
-
 export const uploadHikePhotos = async (id: string, formData: FormData): Promise<string[]> => {
     const response = await api.post(`/api/hike/${id}/photos`, formData, {
         headers: {

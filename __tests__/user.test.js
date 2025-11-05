@@ -8,7 +8,10 @@ const mongoose = require('mongoose');
 
 jest.mock('../Model/user');
 jest.mock('../utils/createAuthToken');
-jest.mock('../utils/checkAuthToken', () => jest.fn((req, res, next) => next())); // Mock the middleware to just call next()
+jest.mock('../utils/checkAuthToken', () => jest.fn((req, res, next) => {
+    req.user = { id: 'some-user-id', email: 'test@test.com', username: 'testuser' };
+    next();
+}));
 jest.mock('bcrypt');
 
 describe('User API', () => {
@@ -22,7 +25,7 @@ describe('User API', () => {
 
     describe('POST /api/user/login', () => {
         it('should login a user and return a token', async () => {
-            const mockUser = { email: 'test@test.com', password: 'hashedpassword' };
+            const mockUser = { _id: 'someid', email: 'test@test.com', password: 'hashedpassword', username: 'testuser' };
             User.findOne.mockResolvedValue(mockUser);
             bcrypt.compare.mockImplementation((password, hash, callback) => callback(null, true));
             createAuthToken.mockReturnValue('test-token');
@@ -32,7 +35,7 @@ describe('User API', () => {
                 .send({ email: 'test@test.com', password: 'password' });
 
             expect(res.statusCode).toEqual(200);
-            expect(res.body).toEqual({ token: 'test-token' });
+            expect(res.body).toEqual({ token: 'test-token', user: { _id: 'someid', email: 'test@test.com', username: 'testuser' } });
             expect(User.findOne).toHaveBeenCalledWith({ email: 'test@test.com' });
             expect(bcrypt.compare).toHaveBeenCalledWith('password', 'hashedpassword', expect.any(Function));
             expect(createAuthToken).toHaveBeenCalledWith(mockUser);
@@ -84,11 +87,11 @@ describe('User API', () => {
     });
 
     describe('GET /api/user/check', () => {
-        it('should return "Check endpoint" and call checkAuthToken middleware', async () => {
+        it('should return the user and call checkAuthToken middleware', async () => {
             const res = await request(app).get('/api/user/check');
 
             expect(res.statusCode).toEqual(200);
-            expect(res.text).toBe('Check endpoint');
+            expect(res.body).toEqual({ id: 'some-user-id', email: 'test@test.com', username: 'testuser' });
             expect(checkAuthToken).toHaveBeenCalledTimes(1);
         });
     });

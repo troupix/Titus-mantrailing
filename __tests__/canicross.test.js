@@ -1,6 +1,7 @@
 
 const request = require('supertest');
 const express = require('express');
+const mongoose = require('mongoose');
 const Canicross = require('../Model/canicross');
 const canicrossRouter = require('../Router/canicross');
 const checkAuthToken = require('../utils/checkAuthToken');
@@ -23,7 +24,10 @@ describe('Canicross API', () => {
   describe('GET /api/canicross', () => {
     it('should return all canicross activities for a user', async () => {
       const mockActivities = [{ distance: 5000 }, { distance: 3000 }];
-      Canicross.find.mockReturnValue({ sort: jest.fn().mockResolvedValue(mockActivities) });
+      Canicross.find.mockImplementation(() => ({
+        populate: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockResolvedValue(mockActivities)
+      }));
 
       const res = await request(app).get('/api/canicross');
 
@@ -53,7 +57,11 @@ describe('Canicross API', () => {
   describe('GET /api/canicross/:id', () => {
     it('should return a canicross activity by id', async () => {
       const mockActivity = { distance: 5000, userId: 'some-user-id' };
-      Canicross.findOne.mockResolvedValue(mockActivity);
+      Canicross.findOne.mockImplementation(() => ({
+        populate: jest.fn().mockImplementation(() => ({
+          populate: jest.fn().mockResolvedValue(mockActivity)
+        }))
+      }));
 
       const res = await request(app).get('/api/canicross/some-id');
 
@@ -98,5 +106,9 @@ describe('Canicross API', () => {
       expect(res.statusCode).toEqual(200);
       expect(res.body).toEqual({ message: 'Canicross activity successfully deleted.' });
     });
+  });
+
+  afterAll(async () => {
+    await mongoose.connection.close();
   });
 });

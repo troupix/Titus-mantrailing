@@ -25,7 +25,6 @@ export interface Dog {
 export interface LoginCredentials {
   email?: string;
   password?: string;
-  role?: "handler" | "trainer";
 }
 
 export interface RegisterData {
@@ -34,6 +33,4 @@ export interface RegisterData {
   username: string;
   firstName: string;
   lastName: string;
-  role: "handler" | "trainer";
-  trainerId?: string;
 }

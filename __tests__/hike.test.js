@@ -4,6 +4,11 @@ const Hike = require('../Model/hike');
 const mongoose = require('mongoose');
 
 jest.mock('../Model/hike'); // Mock the Hike model
+const checkAuthToken = require('../utils/checkAuthToken');
+jest.mock('../utils/checkAuthToken', () => jest.fn((req, res, next) => {
+    req.user = { id: 'some-user-id' };
+    next();
+}));
 
 jest.setTimeout(10000);
 
@@ -16,7 +21,6 @@ describe('Hike API', () => {
         it('should return all hikes for a user', async () => {
             const mockHikes = [{ name: 'Hike 1' }, { name: 'Hike 2' }];
             Hike.find.mockReturnValue({ sort: jest.fn().mockResolvedValue(mockHikes) });
-
             const res = await request(app).get('/api/hike/some-user-id');
 
             expect(res.statusCode).toEqual(200);

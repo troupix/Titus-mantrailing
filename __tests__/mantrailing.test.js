@@ -4,6 +4,11 @@ const Trail = require('../Model/trail');
 const mongoose = require('mongoose');
 
 jest.mock('../Model/trail'); // Mock the Trail model
+const checkAuthToken = require('../utils/checkAuthToken');
+jest.mock('../utils/checkAuthToken', () => jest.fn((req, res, next) => {
+    req.user = { id: 'some-user-id' };
+    next();
+}));
 
 jest.setTimeout(10000);
 
@@ -16,7 +21,6 @@ describe('Mantrailing API', () => {
         it('should return all trails for a user', async () => {
             const mockTrails = [{ dogId: 'some-dog-id' }, { dogId: 'some-other-dog-id' }];
             Trail.find.mockResolvedValue(mockTrails);
-
             const res = await request(app).get('/api/mantrailing/some-user-id');
 
             expect(res.statusCode).toEqual(200);
@@ -68,8 +72,6 @@ describe('Mantrailing API', () => {
 
     describe('POST /api/mantrailing/delete', () => {
         it('should delete a trail', async () => {
-            Trail.deleteOne.mockResolvedValue({ n: 1 });
-
             const res = await request(app)
                 .post('/api/mantrailing/delete')
                 .send({ id: 'some-id' });
