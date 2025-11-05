@@ -15,5 +15,7 @@ rules: {
         'breaking',
         'update',
         'temp'
-    ]]
-}}
+    ]],
+    'header-max-length': [2, 'always', 500]
+    }
+};
