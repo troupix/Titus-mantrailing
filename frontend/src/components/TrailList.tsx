@@ -48,10 +48,12 @@ export function TrailList({
 
   const [filter, setFilter] = useState<"all" | "mantrailing" | "hiking">("all");
 
-  const filteredTrails = trails.filter((trail) => {
-    if (filter === "all") return true;
-    return trail.category === filter;
-  });
+  const filteredTrails = trails
+    .filter((trail) => {
+      if (filter === "all") return true;
+      return trail.category === filter;
+    })
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const groupedTrails = filteredTrails.reduce((acc, trail) => {
     const month = new Date(trail.date).toLocaleDateString("fr-FR", {
@@ -64,6 +66,21 @@ export function TrailList({
     acc[month].push(trail);
     return acc;
   }, {} as Record<string, Trail[]>);
+
+  const monthToNumber: { [key: string]: number } = {
+    janvier: 0,
+    février: 1,
+    mars: 2,
+    avril: 3,
+    mai: 4,
+    juin: 5,
+    juillet: 6,
+    août: 7,
+    septembre: 8,
+    octobre: 9,
+    novembre: 10,
+    décembre: 11,
+  };
 
   const handleFilterClick = (category: "mantrailing" | "hiking") => {
     setFilter((prevFilter) => (prevFilter === category ? "all" : category));
@@ -244,7 +261,21 @@ export function TrailList({
       {/* Scrollable Trail List */}
       <ScrollArea className="flex-1 overflow-auto">
         <div className="px-4 py-4 space-y-4">
-          {Object.entries(groupedTrails).map(([month, monthTrails]) => (
+          {Object.entries(groupedTrails)
+            .sort(([monthA], [monthB]) => {
+              const [monthStrA, yearA] = monthA.split(" ");
+              const [monthStrB, yearB] = monthB.split(" ");
+              const dateA = new Date(
+                parseInt(yearA),
+                monthToNumber[monthStrA.toLowerCase()]
+              );
+              const dateB = new Date(
+                parseInt(yearB),
+                monthToNumber[monthStrB.toLowerCase()]
+              );
+              return dateB.getTime() - dateA.getTime();
+            })
+            .map(([month, monthTrails]) => (
             <Collapsible
               key={month}
               open={expandedMonths[month]}

@@ -1,28 +1,23 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Alert, AlertDescription } from "./ui/alert";
 import { Tabs, TabsContent } from "./ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { useAuth } from "../contexts/AuthContext";
-import { AlertCircle, GraduationCap, User } from "lucide-react";
-import { checkEmailRoles } from "../utils/api";
-import { Switch } from "./ui/switch";
+import { AlertCircle } from "lucide-react";
 import DogHomePageIcon from "./DogHomePageIcon";
 import HikeIcon from "./HikeIcon";
 
 export function LoginPage() {
-  const { login, register, trainers } = useAuth();
+  const { login, register } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   // Login form state
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [availableRoles, setAvailableRoles] = useState<("handler" | "trainer")[]>([]);
-  const [selectedLoginRole, setSelectedLoginRole] = useState<"handler" | "trainer">("handler");
 
   // Register form state
   const [registerEmail, setRegisterEmail] = useState("");
@@ -30,33 +25,6 @@ export function LoginPage() {
   const [registerConfirmPassword, setRegisterConfirmPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [role, setRole] = useState<"handler" | "trainer">("handler");
-  const [selectedTrainerId, setSelectedTrainerId] = useState<string>("");
-
-  // Check available roles when email changes
-  useEffect(() => {
-    const checkRoles = async () => {
-      if (loginEmail && loginEmail.includes("@")) {
-        try {
-          const roles = await checkEmailRoles(loginEmail);
-          setAvailableRoles(roles as ("handler" | "trainer")[]);
-          if (roles.length > 0 && !roles.includes(selectedLoginRole)) {
-            setSelectedLoginRole(roles[0] as "handler" | "trainer");
-          }
-        } catch (err) {
-          setAvailableRoles([]);
-        }
-      } else {
-        setAvailableRoles([]);
-      }
-    };
-
-    const debounce = setTimeout(() => {
-      checkRoles();
-    }, 300);
-
-    return () => clearTimeout(debounce);
-  }, [loginEmail, selectedLoginRole]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +35,6 @@ export function LoginPage() {
       const credentials = {
         email: loginEmail,
         password: loginPassword,
-        role: availableRoles.length > 1 ? selectedLoginRole : undefined,
       };
       await login(credentials);
     } catch (err) {
@@ -106,8 +73,6 @@ export function LoginPage() {
         username: `${firstName} ${lastName}`,
         firstName,
         lastName,
-        role,
-        trainerId: role === "handler" ? selectedTrainerId : undefined,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur d'inscription");
@@ -168,38 +133,6 @@ export function LoginPage() {
                     required
                   />
                 </div>
-
-                {availableRoles.length > 1 && (
-                  <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
-                    <CardContent className="pt-4 pb-4">
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                          {selectedLoginRole === "handler" ? (
-                            <User className="h-5 w-5 text-blue-600" />
-                          ) : (
-                            <GraduationCap className="h-5 w-5 text-purple-600" />
-                          )}
-                          <div>
-                            <Label className="text-sm">
-                              {selectedLoginRole === "handler" 
-                                ? "Me connecter en tant que Handler" 
-                                : "Me connecter en tant qu'Éducateur"}
-                            </Label>
-                            <p className="text-xs text-muted-foreground mt-0.5">
-                              Vous avez plusieurs comptes avec cet email
-                            </p>
-                          </div>
-                        </div>
-                        <Switch
-                          checked={selectedLoginRole === "trainer"}
-                          onCheckedChange={(checked) => 
-                            setSelectedLoginRole(checked ? "trainer" : "handler")
-                          }
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
 
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Connexion..." : "Se connecter"}
@@ -276,38 +209,6 @@ export function LoginPage() {
                     required
                   />
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="role">Rôle</Label>
-                  <Select value={role} onValueChange={(value: "handler" | "trainer") => setRole(value)}>
-                    <SelectTrigger id="role">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="handler">Handler (Conducteur)</SelectItem>
-                      <SelectItem value="trainer">Éducateur</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {role === "handler" && trainers.length > 0 && (
-                  <div className="space-y-2">
-                    <Label htmlFor="trainer">Éducateur (optionnel)</Label>
-                    <Select value={selectedTrainerId} onValueChange={setSelectedTrainerId}>
-                      <SelectTrigger id="trainer">
-                        <SelectValue placeholder="Sélectionner un éducateur" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">Aucun</SelectItem>
-                        {trainers.map((trainer) => (
-                          <SelectItem key={trainer.id} value={trainer.id}>
-                            {trainer.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
 
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Inscription..." : "S'inscrire"}

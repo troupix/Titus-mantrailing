@@ -1,12 +1,11 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { User, Dog, LoginCredentials, RegisterData } from "../utils/types";
-import { login as apiLogin, register as apiRegister, logout as apiLogout, getCurrentUser, getDogs, updateUser, getTrainers } from "../utils/api";
+import { login as apiLogin, register as apiRegister, logout as apiLogout, getCurrentUser, getDogs, updateUser } from "../utils/api";
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   dogs: Dog[];
-  trainers: { id: string, name: string }[];
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
@@ -20,11 +19,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [dogs, setDogs] = useState<Dog[]>([]);
-  const [trainers, setTrainers] = useState<{ id: string, name: string }[]>([]);
 
   useEffect(() => {
     checkAuth();
-    fetchTrainers();
   }, []);
 
   useEffect(() => {
@@ -32,15 +29,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       refreshDogs();
     }
   }, [user]);
-
-  const fetchTrainers = async () => {
-    try {
-      const trainerList = await getTrainers();
-      setTrainers(trainerList);
-    } catch (error) {
-      console.error("Failed to fetch trainers:", error);
-    }
-  };
 
   const checkAuth = async () => {
     try {
@@ -109,7 +97,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     loading,
     dogs,
-    trainers,
     login,
     register,
     logout,
