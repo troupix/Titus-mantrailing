@@ -52,7 +52,12 @@ router.post('/save', checkAuthToken, async (req, res) => {
         let weather = {};
         if (req.body.locationCoordinate && req.body.date) {
             const date = new Date(req.body.date);
-            const hour = date.getHours();
+            let hour = date.getHours();
+            if((req.body.dogTrace && req.body.dogTrace?.features.length > 0) || (req.body.runnerTrace && req.body.runnerTrace?.features.length > 0)) {
+                const track = req.body.dogTrace && req.body.dogTrace?.features.length > 0 ? req.body.dogTrace : req.body.runnerTrace;
+                const trackStartTime = new Date(track.features[0].properties.timestamps[0]);
+                hour = trackStartTime.getHours();
+            }
             weather = await getWeather(req.body.locationCoordinate[0], req.body.locationCoordinate[1], date.toISOString().split('T')[0], hour);
         }
 
@@ -124,7 +129,13 @@ router.post('/update', checkAuthToken, async (req, res) => {
 
     if (weatherIsMissing && trail.locationCoordinate && trail.date) {
         const date = new Date(trail.date);
-        const hour = date.getHours();
+        let hour = date.getHours();
+        if((trail.dogTrace && trail.dogTrace?.features.length > 0) || (trail.runnerTrace && trail.runnerTrace?.features.length > 0)) {
+            const track = trail.dogTrace && trail.dogTrace?.features.length > 0 ? trail.dogTrace : trail.runnerTrace;
+            const trackStartTime = new Date(track.features[0].properties.timestamps[0]);
+            hour = trackStartTime.getHours();
+        }
+
         const weatherData = await getWeather(trail.locationCoordinate[0], trail.locationCoordinate[1], date.toISOString().split('T')[0], hour);
         if (weatherData && Object.values(weatherData).some(v => v !== undefined)) {
             trail.weather = weatherData;

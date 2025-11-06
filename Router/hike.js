@@ -52,7 +52,13 @@ router.post('/', checkAuthToken, async (req, res) => {
 
     if (req.body.startLocation && req.body.date) {
         const date = new Date(req.body.date);
-        const hour = date.getHours();
+        let hour = date.getHours();
+        if((req.body.dogTrack && req.body.dogTrack?.features.length > 0) || (req.body.userTrack && req.body.userTrack?.features.length > 0)) {
+            const track = req.body.dogTrack && req.body.dogTrack?.features.length > 0 ? req.body.dogTrack : req.body.userTrack;
+            const trackStartTime = new Date(track.features[0].properties.timestamps[0]);
+            hour = trackStartTime.getHours(); 
+        }
+
         const weatherData = await getWeather(req.body.startLocation.coordinates[0], req.body.startLocation.coordinates[1], date.toISOString().split('T')[0], hour);
         if (weatherData && Object.values(weatherData).some(v => v !== undefined)) {
             hikeData.weather = weatherData;
