@@ -141,20 +141,6 @@ export function AppHeader({
                 <Award className="h-4 w-4" />
                 <span className="hidden sm:inline">Badges</span>
               </Button>
-              {/* Management Section */}
-              <Button
-                onClick={() => onNavigate("management")}
-                variant={currentView === "management" ? "secondary" : "ghost"}
-                className={
-                  currentView === "management"
-                    ? "gap-2 bg-white text-blue-700 hover:bg-blue-50"
-                    : "gap-2 text-white hover:bg-white/10"
-                }
-              >
-                {" "}
-                <Settings className="h-4 w-4" />
-                <span className="hidden sm:inline">Gestion</span>
-              </Button>
               {/* User Menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -186,7 +172,7 @@ export function AppHeader({
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onNavigate("management")}>
                     <Settings className="mr-2 h-4 w-4" />
-                    Gestion (Chiens, Handlers, Éducateurs)
+                    Gestion (Chiens)
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
