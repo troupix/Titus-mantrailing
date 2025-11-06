@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { MantrailingTrail } from "../types/trail";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { MapPin, Clock, Ruler, User, Award } from "lucide-react";
+import { WeatherDetails } from "./WeatherDetails";
 import { MapContainer, Marker, TileLayer, Polyline, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import markerIconPng from "leaflet/dist/images/marker-icon.png"
@@ -213,6 +214,8 @@ export function MantrailingDetails({ trail }: MantrailingDetailsProps) {
           </CardContent>
         </Card>
       </div>
+
+      {trail.weather && <WeatherDetails weather={trail.weather} />}
     </div>
   );
 }

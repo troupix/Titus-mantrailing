@@ -51,7 +51,9 @@ router.post('/save', checkAuthToken, async (req, res) => {
 
         let weather = {};
         if (req.body.locationCoordinate && req.body.date) {
-            weather = await getWeather(req.body.locationCoordinate[0], req.body.locationCoordinate[1], new Date(req.body.date).toISOString().split('T')[0]);
+            const date = new Date(req.body.date);
+            const hour = date.getHours();
+            weather = await getWeather(req.body.locationCoordinate[0], req.body.locationCoordinate[1], date.toISOString().split('T')[0], hour);
         }
 
         const newTrailData = {
@@ -117,12 +119,19 @@ router.post('/update', checkAuthToken, async (req, res) => {
             return res.status(404).json({ success: false, message: "Trail not found" });
         }
 
-        let weather = trail.weather;
-        if (!weather && req.body.trail.locationCoordinate && req.body.trail.date) {
-            weather = await getWeather(req.body.trail.locationCoordinate[0], req.body.trail.locationCoordinate[1], new Date(req.body.trail.date).toISOString().split('T')[0]);
-        }
+    const weatherObject = trail.weather ? trail.weather.toObject() : null;
+    const weatherIsMissing = !weatherObject || Object.keys(weatherObject).filter(k => weatherObject[k] !== undefined && weatherObject[k] !== null).length === 0;
 
-        const updateData = { ...req.body.trail, weather };
+    if (weatherIsMissing && trail.locationCoordinate && trail.date) {
+        const date = new Date(trail.date);
+        const hour = date.getHours();
+        const weatherData = await getWeather(trail.locationCoordinate[0], trail.locationCoordinate[1], date.toISOString().split('T')[0], hour);
+        if (weatherData && Object.values(weatherData).some(v => v !== undefined)) {
+            trail.weather = weatherData;
+        }
+    }
+
+        const updateData = { ...req.body.trail, weather: trail.weather };
 
         if (!isTrainer) {
             delete updateData.trainerComment;

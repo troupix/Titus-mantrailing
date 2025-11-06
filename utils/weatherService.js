@@ -1,4 +1,4 @@
-const getWeather = async (lat, lon, date) => {
+const getWeather = async (lon, lat, date, hour = 12) => {
   const { fetchWeatherApi } = await import('openmeteo');
   const params = {
     "latitude": lat,
@@ -17,12 +17,12 @@ const getWeather = async (lat, lon, date) => {
 
   // Note: The order of weather variables in the URL query and the indices below need to match!
   const weatherData = {
-    temperature: hourly.variables(0).valuesArray()[0],
-    conditions: hourly.variables(2).valuesArray()[0], // weather_code
-    windSpeed: hourly.variables(3).valuesArray()[0],
-    windDirection: hourly.variables(4).valuesArray()[0],
-    humidity: hourly.variables(5).valuesArray()[0],
-    precipitation: hourly.variables(1).valuesArray()[0],
+    temperature: hourly.variables(0).valuesArray()[hour],
+    conditions: hourly.variables(2).valuesArray()[hour], // weather_code
+    windSpeed: hourly.variables(3).valuesArray()[hour],
+    windDirection: hourly.variables(4).valuesArray()[hour],
+    humidity: hourly.variables(5).valuesArray()[hour],
+    precipitation: hourly.variables(1).valuesArray()[hour],
   };
 
   return weatherData;

@@ -47,11 +47,19 @@ router.post('/', checkAuthToken, async (req, res) => {
   try {
     // Ideally, userId should come from an authentication middleware
     // Create a new instance of Hike with all provided data
-    let weather = {};
-    if (req.body.locationCoordinate && req.body.date) {
-        weather = await getWeather(req.body.locationCoordinate[0], req.body.locationCoordinate[1], new Date(req.body.date).toISOString().split('T')[0]);
+    const hikeData = { ...req.body, userId: req.user.id };
+    delete hikeData.weather; // Remove weather from req.body to be safe
+
+    if (req.body.startLocation && req.body.date) {
+        const date = new Date(req.body.date);
+        const hour = date.getHours();
+        const weatherData = await getWeather(req.body.startLocation.coordinates[0], req.body.startLocation.coordinates[1], date.toISOString().split('T')[0], hour);
+        if (weatherData && Object.values(weatherData).some(v => v !== undefined)) {
+            hikeData.weather = weatherData;
+        }
     }
-    const hike = new Hike({ ...req.body, weather, userId: req.user.id });
+
+    const hike = new Hike(hikeData);
 
     const savedHike = await hike.save();
     res.status(201).json(savedHike);
@@ -157,8 +165,22 @@ router.put('/:id', checkAuthToken, async (req, res) => {
       }
     });
 
-    if (!hike.weather && hike.locationCoordinate && hike.date) {
-        hike.weather = await getWeather(hike.locationCoordinate[0], hike.locationCoordinate[1], new Date(hike.date).toISOString().split('T')[0]);
+    const weatherObject = hike.weather ? hike.weather.toObject() : null;
+    const weatherIsMissing = !weatherObject || Object.keys(weatherObject).filter(k => weatherObject[k] !== undefined && weatherObject[k] !== null).length === 0;
+
+    if (weatherIsMissing && hike.startLocation && hike.date) {
+        const date = new Date(hike.date);
+        let hour = 12;
+        if((hike.dogTrack && hike.dogTrack?.features.length > 0) || (hike.userTrack && hike.userTrack?.features.length > 0)) {
+            const track = hike.dogTrack && hike.dogTrack?.features.length > 0 ? hike.dogTrack : hike.userTrack;
+            const trackStartTime = new Date(track.features[0].properties.timestamps[0]);
+            hour = trackStartTime.getHours(); 
+        }
+
+        const weatherData = await getWeather(hike.startLocation.coordinates[0], hike.startLocation.coordinates[1], date.toISOString().split('T')[0], hour);
+        if (weatherData && Object.values(weatherData).some(v => v !== undefined)) {
+            hike.weather = weatherData;
+        }
     }
 
     await hike.save();

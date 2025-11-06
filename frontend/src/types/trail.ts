@@ -26,6 +26,13 @@ export interface MantrailingTrail extends BaseTrail {
   dogTrace?: any;
   delay?: number; // in seconds
   trainerComment?: string;
+  weather?: {
+    temperature?: number;
+    conditions?: string;
+    windDirection?: string;
+    windSpeed?: number;
+    humidity?: number;
+  };
 }
 
 export interface MantrailingTrailPayload extends Omit<MantrailingTrail, 'dog'> {
@@ -63,6 +70,13 @@ export interface HikingTrail extends BaseTrail {
   } | null; // Allow null for dogTrack
   userId?: string;
   photos?: string[];
+  weather?: {
+    temperature?: number;
+    conditions?: string;
+    windDirection?: string;
+    windSpeed?: number;
+    humidity?: number;
+  };
 }
 
 // Union type for both trail types

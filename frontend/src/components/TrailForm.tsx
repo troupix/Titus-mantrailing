@@ -423,7 +423,7 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
           await saveTrail(mantrailingData as MantrailingTrailPayload);
         }
       } else { // hiking
-        const hikingData: Omit<HikingTrail, "id" | "_id"> & { id?: string } = {
+        const hikingData: Partial<HikingTrail> = {
           category: "hiking",
           name,
           description,
@@ -443,13 +443,18 @@ export function TrailForm({ trail, onSaveSuccess, onCancel }: TrailFormProps) {
               : undefined,
           userTrack: createGeoJSONFeatureCollection(userGpxData),
           dogTrack: createGeoJSONFeatureCollection(dogGpxData),
-          photos: existingPhotos, // This line was missing or incorrectly placed
+          photos: existingPhotos,
         };
 
         let currentHikeId = trail?.id || trail?._id;
         let savedHike;
 
         if (currentHikeId) {
+          const initialPhotos =
+            trail && isHikingTrail(trail) && trail.photos ? trail.photos : [];
+          if (JSON.stringify(existingPhotos) === JSON.stringify(initialPhotos)) {
+            delete hikingData.photos;
+          }
           // Update existing hike with potentially modified existingPhotos
           savedHike = await updateHike(
             currentHikeId,

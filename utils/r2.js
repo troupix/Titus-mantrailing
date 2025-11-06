@@ -49,7 +49,7 @@ const generateSignedUrl = async (fileName) => {
     Key: fileName,
   });
   try {
-    const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 }); // URL expires in 1 hour
+    const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 84600 }); // URL expires in 24 hours
     return signedUrl;
   } catch (err) {
     console.error("Error generating signed URL", err);

@@ -11,6 +11,7 @@ import {
 } from "./ui/select";
 import { X } from "lucide-react";
 import { Button } from "./ui/button";
+import { useEffect, useState } from "react";
 
 interface HikingFormProps {
   name: string;
@@ -41,6 +42,18 @@ export function HikingForm({
   existingPhotos,
   setExistingPhotos,
 }: HikingFormProps) {
+  const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
+
+  useEffect(() => {
+    const newPhotoPreviews = selectedPhotos.map((file) =>
+      URL.createObjectURL(file)
+    );
+    setPhotoPreviews(newPhotoPreviews);
+
+    return () => {
+      newPhotoPreviews.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [selectedPhotos]);
   return (
     <>
       <div className="space-y-2">
@@ -66,7 +79,10 @@ export function HikingForm({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="difficulty">Difficulté</Label>
-          <Select value={difficulty} onValueChange={(v) => setDifficulty(v as any)}>
+          <Select
+            value={difficulty}
+            onValueChange={(v) => setDifficulty(v as any)}
+          >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -109,11 +125,11 @@ export function HikingForm({
         {/* Display selected new photos */}
         {selectedPhotos.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-            {selectedPhotos.map((file, index) => (
-              <div key={file.name + index} className="relative">
+            {photoPreviews.map((photoUrl, index) => (
+              <div key={photoUrl + index} className="relative">
                 <img
-                  src={URL.createObjectURL(file)}
-                  alt={`Preview ${file.name}`}
+                  src={photoUrl}
+                  alt={`Preview ${index}`}
                   className="w-full h-32 object-cover rounded-md"
                 />
                 <Button

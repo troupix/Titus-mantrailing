@@ -30,7 +30,7 @@ export const getHikeById = async (id: string): Promise<HikingTrail> => {
     return response.data;
 };
 
-export const updateHike = async (id: string, hikeData: HikingTrail) => {
+export const updateHike = async (id: string, hikeData: Partial<HikingTrail>) => {
     const payload = { ...hikeData };
     if (payload.userTrack === undefined) payload.userTrack = null;
     if (payload.dogTrack === undefined) payload.dogTrack = null;

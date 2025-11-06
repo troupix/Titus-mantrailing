@@ -20,7 +20,7 @@ function createAuthToken(user) {
     const secret = process.env.ACCESS_TOKEN_SECRET; // Replace with your actual secret key
 
     const options = {
-        expiresIn: '1h' // Token will expire in 1 hour
+        expiresIn: '36h' // Token will expire in 36 hours
     };
 
     return jwt.sign(payload, secret, options);

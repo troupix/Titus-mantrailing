@@ -3,6 +3,7 @@ import { HikingTrail } from "../types/trail";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Dialog, DialogContent, DialogOverlay } from "./ui/dialog";
 import { MapPin, Clock, Ruler, TrendingUp, Award, FileText } from "lucide-react";
+import { WeatherDetails } from "./WeatherDetails";
 import { TrailMap } from "./TrailMap";
 import DogHomePageIcon from "./DogHomePageIcon";
 import { formatDuration, formatDistance } from "../utils/utils";
@@ -189,6 +190,8 @@ export function HikingDetails({ trail, maxDogMasterDistance }: HikingDetailsProp
           </CardContent>
         </Card>
       </div>
+
+      {trail.weather && <WeatherDetails weather={trail.weather} />}
 
       {/* Photos Section */}
       {trail.photos && trail.photos.length > 0 && (
