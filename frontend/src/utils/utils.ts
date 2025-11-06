@@ -15,11 +15,31 @@ interface Coordinates {
  * @param duration - The duration in seconds.
  * @returns A string representation of the duration in the format "X minutes Y seconds".
  */
-export const durationInMinutesSeconds = (duration: number) => {
+export const formatDurationInMinutesSeconds = (duration: number) => {
     const minutes = Math.floor(duration / 60);
     const seconds = duration % 60;
     return `${minutes} minutes ${seconds} secondes`;
 }
+
+export const formatDuration = (seconds: number) => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  
+  if (hours > 0) {
+    return `${hours}h ${minutes}min`;
+  } else if (minutes > 0) {
+    return `${minutes}min ${secs}s`;
+  }
+  return `${secs}s`;
+};
+
+export const formatDistance = (meters: number) => {
+  if (meters >= 1000) {
+    return `${(meters / 1000).toFixed(2)} km`;
+  }
+  return `${Math.round(meters)} m`;
+};
 
 /**
  * Converts degrees to radians.

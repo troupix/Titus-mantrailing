@@ -1,55 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Trail, isMantrailingTrail, isHikingTrail } from "../types/trail";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
-import { Dialog, DialogContent, DialogOverlay } from "./ui/dialog";
-import { Edit, MapPin, Clock, Ruler, User, TrendingUp, Award, Calendar, FileText, Trash2 } from "lucide-react";
-import { TrailMap } from "./TrailMap";
+import { Trail, isMantrailingTrail, isHikingTrail, HikingTrail } from "../types/trail";
 import { deleteTrail, deleteHike } from "../utils/api";
+import { TrailDetailHeader } from "./TrailDetailHeader";
+import { MantrailingDetails } from "./MantrailingDetails";
+import { HikingDetails } from "./HikingDetails";
 
-import { MapContainer, Marker, TileLayer, Polyline, useMap } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import markerIconPng from "leaflet/dist/images/marker-icon.png"
-import { Icon, LatLngBounds } from 'leaflet';
-import DogHomePageIcon from "./DogHomePageIcon";
-import TrailIcon from "./TrailIcon";
-import HikeIcon from "./HikeIcon";
-import { useAuth } from "../contexts/AuthContext";
-
-interface TrailDetailProps {
+export function TrailDetail({ trail, onEdit, onDeleteSuccess }: {
   trail: Trail;
   onEdit: (trail: Trail) => void;
   onDeleteSuccess: () => void;
-}
-
-// A new component to handle fitting the map to the bounds of the traces
-const FitBounds = ({ dogTrace, runnerTrace }: { dogTrace?: [number, number][], runnerTrace?: [number, number][] }) => {
-  const map = useMap();
-
-  useEffect(() => {
-    if (!dogTrace && !runnerTrace) return;
-
-    const allPoints = [
-      ...(dogTrace || []),
-      ...(runnerTrace || []),
-    ];
-
-    if (allPoints.length > 0) {
-      map.fitBounds(new LatLngBounds(allPoints as L.LatLngExpression[]), { padding: [50, 50] });
-    }
-  }, [map, dogTrace, runnerTrace]);
-
-  return null;
-};
-
-export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps) {
-  const { user } = useAuth();
-  const isTrainer = user?.role.includes("trainer");
-  const isAllowedToCreate = localStorage.getItem('isAllowedToCreate') === 'true';
+}) {
   const [maxDogMasterDistance, setMaxDogMasterDistance] = useState<number | null>(null);
-  const [showModal, setShowModal] = useState(false);
-  const [currentImage, setCurrentImage] = useState('');
 
   useEffect(() => {
     if (isHikingTrail(trail) && trail.dogTrack && trail.userTrack) {
@@ -115,7 +76,6 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
               };
             }
           }
-          console.log(dogPoint, userPosition, calculateDistance(dogPoint, userPosition));
           const distance = calculateDistance(dogPoint, userPosition);
           if (distance > maxDist) {
             maxDist = distance;
@@ -126,7 +86,6 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
       }
     }
   }, [trail]);
-
 
   const handleDelete = async () => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cette piste ?")) {
@@ -143,415 +102,26 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: TrailDetailProps
     }
   };
 
-  const formatDuration = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    
-    if (hours > 0) {
-      return `${hours}h ${minutes}min`;
-    } else if (minutes > 0) {
-      return `${minutes}min ${secs}s`;
-    }
-    return `${secs}s`;
-  };
-
-  const formatDistance = (meters: number) => {
-    if (meters >= 1000) {
-      return `${(meters / 1000).toFixed(2)} km`;
-    }
-    return `${Math.round(meters)} m`;
-  };
-
-  // Get display title based on trail type
-  const getTitle = () => {
-    if (isMantrailingTrail(trail)) {
-      return `${typeof trail.dog === "object" ? trail.dog.name : ""} - ${new Date(trail.date).toLocaleDateString('fr-FR')}`;
-    } else {
-      return trail.name;
-    }
-  };
-
-  // Extract map data from trail
-  const getMapData = () => {
-    let dogPath: [number, number][] | undefined;
-    let victimPath: [number, number][] | undefined;
-    let center: [number, number] = [46.2044, 6.1432]; // Default center
-
-    const getCoordinatesFromTrack = (featureCollection: any) => {
-      if (!featureCollection || featureCollection.type !== 'FeatureCollection' || !featureCollection.features?.[0]) return undefined;
-      const feature = featureCollection.features[0];
-      if (feature.geometry && feature.geometry.type === 'LineString') {
-        return feature.geometry.coordinates.map(([lon, lat]: [number, number]) => [lat, lon]);
-      }
-      return undefined;
-    };
-
-    if (isHikingTrail(trail)) {
-      victimPath = getCoordinatesFromTrack(trail.userTrack);
-      dogPath = getCoordinatesFromTrack(trail.dogTrack);
-
-      if (trail.startLocation) {
-        center = [trail.startLocation.coordinates[1], trail.startLocation.coordinates[0]]; // Convert lon,lat to lat,lon
-      } else if (victimPath && victimPath.length > 0) {
-        const avgLat = victimPath.reduce((sum, p) => sum + p[0], 0) / victimPath.length;
-        const avgLon = victimPath.reduce((sum, p) => sum + p[1], 0) / victimPath.length;
-        center = [avgLat, avgLon];
-      }
-    } else if (isMantrailingTrail(trail)) {
-      victimPath = getCoordinatesFromTrack(trail.runnerTrace);
-      dogPath = getCoordinatesFromTrack(trail.dogTrace);
-
-      if (trail.locationCoordinate) {
-        center = trail.locationCoordinate;
-      } else if (victimPath && victimPath.length > 0) {
-        const avgLat = victimPath.reduce((sum, p) => sum + p[0], 0) / victimPath.length;
-        const avgLon = victimPath.reduce((sum, p) => sum + p[1], 0) / victimPath.length;
-        center = [avgLat, avgLon];
-      }
-    }
-
-    return { center, zoom: 15, dogPath, victimPath };
-  };
-
-  const mapData = getMapData();
-  
   return (
     <div className="h-full overflow-auto bg-gradient-to-br from-blue-50 to-white">
       <div className="max-w-7xl mx-auto p-6 space-y-6">
-        {/* Header */}
-        <Card className={`bg-gradient-to-r ${
-          trail.category === "mantrailing" 
-            ? "from-blue-600 to-blue-700" 
-            : "from-green-600 to-green-700"
-        } text-white border-0 shadow-xl`}>
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
-              <div className="space-y-2 flex-1">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <CardTitle className="text-3xl">{getTitle()}</CardTitle>
-                  <Badge className="bg-white/20 hover:bg-white/30 text-white border-white/30">
-                    {trail.category === "mantrailing" ? (
-                      <>
-                        <TrailIcon className="h-3 w-3 mr-1" />
-                        Mantrailing
-                      </>
-                    ) : (
-                      <>
-                        <HikeIcon className="h-3 w-3 mr-1" />
-                        Randonnée
-                      </>
-                    )}
-                  </Badge>
-                </div>
-                {trail.location && (
-                  <div className="flex items-center gap-2 text-blue-100">
-                    <MapPin className="h-4 w-4" />
-                    <span>{trail.location}</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-2 text-blue-100">
-                  <Calendar className="h-4 w-4" />
-                  <span>{new Date(trail.date).toLocaleDateString('fr-FR', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                  })}</span>
-                </div>
-              </div>
-              {isAllowedToCreate && (
-                <div className="flex gap-2 self-start sm:self-auto">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => onEdit(trail)}
-                    className="gap-2 flex-shrink-0"
-                  >
-                    <Edit className="h-4 w-4" />
-                    <span className="hidden xs:inline">Modifier</span>
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={handleDelete}
-                    className="gap-2 flex-shrink-0"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span className="hidden xs:inline">Supprimer</span>
-                  </Button>
-                </div>
-              )}
-            </div>
-          </CardHeader>
-        </Card>
+        <TrailDetailHeader
+          trail={trail}
+          onEdit={onEdit}
+          onDelete={handleDelete}
+          isMantrailing={isMantrailingTrail(trail)}
+        />
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="border-2 border-blue-200 shadow-md">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="bg-blue-100 p-3 rounded-full">
-                  <Ruler className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Distance</p>
-                  <p className="text-xl text-blue-900">{trail.distance ? formatDistance(trail.distance) : 'N/A'}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 border-orange-200 shadow-md">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="bg-orange-100 p-3 rounded-full">
-                  <Clock className="h-5 w-5 text-orange-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Durée</p>
-                  <p className="text-xl text-orange-900">{trail.duration ? formatDuration(trail.duration) : 'N/A'}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {isHikingTrail(trail) && trail.elevationGain !== undefined && (
-            <Card className="border-2 border-green-200 shadow-md">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="bg-green-100 p-3 rounded-full">
-                    <TrendingUp className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Dénivelé +</p>
-                    <p className="text-xl text-green-900">{trail.elevationGain} m</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {isHikingTrail(trail) && trail.difficulty && (
-            <Card className="border-2 border-purple-200 shadow-md">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="bg-purple-100 p-3 rounded-full">
-                    <Award className="h-5 w-5 text-purple-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Difficulté</p>
-                    <p className="text-xl text-purple-900">
-                      {trail.difficulty === "Easy" ? "Facile" :
-                       trail.difficulty === "Moderate" ? "Modérée" :
-                       trail.difficulty === "Hard" ? "Difficile" : "Expert"}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-
-        </div>
-
-        {/* Details Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Information Card */}
-          <Card className="border-2 border-blue-200 shadow-lg">
-            <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100">
-              <CardTitle className="text-blue-900">
-                {trail.category === "mantrailing" ? "Informations de la piste" : "Détails de la randonnée"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 space-y-4">
-              {isMantrailingTrail(trail) && (
-                <>
-                  <div className="flex items-start gap-3">
-                    <DogHomePageIcon className="h-5 w-5 text-blue-600 mt-0.5" />
-                    <div className="flex-1">
-                      <p className="text-sm text-muted-foreground">Chien</p>
-                      <p className="text-blue-900">{typeof trail.dog === "object" ? trail.dog.name : ""}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <User className="h-5 w-5 text-blue-600 mt-0.5" />
-                    <div className="flex-1">
-                      <p className="text-sm text-muted-foreground">Conducteur</p>
-                      <p className="text-blue-900">{trail.handlerName}</p>
-                    </div>
-                  </div>
-                  {trail.trainer && (
-                    <div className="flex items-start gap-3">
-                      <User className="h-5 w-5 text-blue-600 mt-0.5" />
-                      <div className="flex-1">
-                        <p className="text-sm text-muted-foreground">Maître / Formateur</p>
-                        <p className="text-blue-900">{trail.trainer}</p>
-                      </div>
-                    </div>
-                  )}
-                  {trail.trailType && (
-                    <div className="flex items-start gap-3">
-                      <MapPin className="h-5 w-5 text-blue-600 mt-0.5" />
-                      <div className="flex-1">
-                        <p className="text-sm text-muted-foreground">Type de piste</p>
-                        <p className="text-blue-900">{trail.trailType}</p>
-                      </div>
-                    </div>
-                  )}
-                  {trail.startType && (
-                    <div className="flex items-start gap-3">
-                      <Award className="h-5 w-5 text-blue-600 mt-0.5" />
-                      <div className="flex-1">
-                        <p className="text-sm text-muted-foreground">Type de départ</p>
-                        <p className="text-blue-900">
-                          {trail.startType === "knowing" ? "Départ visuel / Knowing" : 
-                           trail.startType === "blind" ? "Départ à l'aveugle / Blind" : 
-                           trail.startType}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  {trail.delay !== undefined && (
-                    <div className="flex items-start gap-3">
-                      <Clock className="h-5 w-5 text-blue-600 mt-0.5" />
-                      <div className="flex-1">
-                        <p className="text-sm text-muted-foreground">Délai</p>
-                        <p className="text-blue-900">{formatDuration(trail.delay)}</p>
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-
-              {isHikingTrail(trail) && trail.description && (
-                <div className="flex items-start gap-3">
-                  <FileText className="h-5 w-5 text-green-600 mt-0.5" />
-                  <div className="flex-1">
-                    <p className="text-sm text-muted-foreground">Description</p>
-                    <p className="text-green-900">{trail.description}</p>
-                  </div>
-                </div>
-              )}
-
-              {isHikingTrail(trail) && maxDogMasterDistance !== null && (
-                <div className="flex items-start gap-3">
-                  <DogHomePageIcon className="h-5 w-5 text-green-600 mt-0.5" />
-                  <div className="flex-1">
-                    <p className="text-sm text-muted-foreground">Éloignement max. du chien</p>
-                    <p className="text-green-900">{formatDistance(maxDogMasterDistance)}</p>
-                  </div>
-                </div>
-              )}
-
-              {trail.notes && (
-                <div className="border-t pt-4">
-                  <p className="text-sm text-muted-foreground mb-2">Notes</p>
-                  <p className="text-gray-700 whitespace-pre-wrap">{trail.notes}</p>
-                </div>
-              )}
-
-              {isMantrailingTrail(trail) && isTrainer && trail.trainerComment && (
-                <div className="border-t pt-4">
-                  <p className="text-sm text-muted-foreground mb-2">Commentaire du formateur (privé)</p>
-                  <p className="text-gray-700 whitespace-pre-wrap">{trail.trainerComment}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Map Card */}
-          <Card className="border-2 border-blue-200 shadow-lg">
-            <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100">
-              <CardTitle className="text-blue-900 flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                Carte du parcours
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              {isMantrailingTrail(trail) ? (
-                <div className="h-96 relative z-0">
-                  {mapData.center &&
-                    <MapContainer 
-                      key={trail.id || trail._id} // Force re-render when trail changes
-                      style={{ height: "100%", width: "100%" }} 
-                      center={mapData.center} 
-                      zoom={mapData.zoom} 
-                      scrollWheelZoom={true}
-                    >
-                      <TileLayer
-                          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                          url={process.env.REACT_APP_TILE_PROVIDER_URL!}
-                      />
-                      <FitBounds dogTrace={mapData.dogPath} runnerTrace={mapData.victimPath} />
-                      {mapData.dogPath && <Polyline pathOptions={{ color: 'red' }} positions={mapData.dogPath} />}
-                      {mapData.victimPath && <Marker position={mapData.victimPath[mapData.victimPath.length - 1]} icon={new Icon({ iconUrl: require('../assets/flag.png'), iconAnchor: [8, 16] })} />}
-                      {mapData.victimPath && <Polyline pathOptions={{ color: 'blue' }} positions={mapData.victimPath} />}
-                      {trail.locationCoordinate && <Marker position={trail.locationCoordinate} icon={new Icon({ iconUrl: markerIconPng, iconSize: [25, 41], iconAnchor: [12, 41] })} />}
-                    </MapContainer>
-                  }
-                </div>
-              ) : (
-                <>
-                  <div className="h-96">
-                    <TrailMap key={trail.id || trail._id} mapData={mapData} />
-                  </div>
-                  {(mapData.dogPath || mapData.victimPath) && (
-                    <div className="p-4 bg-gray-50 border-t flex gap-6 text-sm relative z-0">
-                      {mapData.dogPath && (
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-1 bg-blue-600 rounded"></div>
-                          <span className="text-gray-700">
-                            Trace du chien
-                          </span>
-                        </div>
-                      )}
-                      {mapData.victimPath && (
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-1 bg-orange-600 rounded"></div>
-                          <span className="text-gray-700">
-                            Votre trace
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Photos Section */}
-        {isHikingTrail(trail) && trail.photos && trail.photos.length > 0 && (
-          <Card className="border-2 border-green-200 shadow-lg">
-            <CardHeader className="bg-gradient-to-r from-green-50 to-green-100">
-              <CardTitle className="text-green-900">Photos</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {trail.photos.map((photoUrl, index) => (
-                <img
-                  key={index}
-                  src={photoUrl}
-                  alt={`Hike ${index + 1}`}
-                  className="w-full h-48 object-cover rounded-md shadow-md cursor-pointer transform transition-transform duration-200 hover:scale-105"
-                  onClick={() => {
-                    setCurrentImage(photoUrl);
-                    setShowModal(true);
-                  }}
-                />
-              ))}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Image Modal */}
-        <Dialog open={showModal} onOpenChange={setShowModal}>
-          <DialogOverlay />
-          <DialogContent className="w-[80vw] max-w-none p-0 max-h-[90vh]">
-            <img src={currentImage} alt="Enlarged" className="w-full h-full object-contain" />
-          </DialogContent>
-        </Dialog>
+        {isMantrailingTrail(trail) ? (
+          <MantrailingDetails
+            trail={trail}
+          />
+        ) : isHikingTrail(trail) ? (
+          <HikingDetails
+            trail={trail as HikingTrail}
+            maxDogMasterDistance={maxDogMasterDistance}
+          />
+        ) : null}
       </div>
     </div>
   );
