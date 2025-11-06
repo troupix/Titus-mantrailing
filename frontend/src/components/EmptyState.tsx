@@ -21,7 +21,7 @@ export function EmptyState({ onCreateNew }: EmptyStateProps) {
         </div>
         <h2 className="mb-3 text-blue-900">Bienvenue dans votre carnet de pistes</h2>
         <p className="text-muted-foreground mb-6">
-          Commencez à documenter vos sessions de mantrailing et de randonnée. 
+          Commencez à documenter vos pistes de mantrailing et de randonnée. 
           Créez votre première piste pour suivre vos progrès et ceux de votre chien.
         </p>
         <Button

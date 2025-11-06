@@ -1,5 +1,5 @@
 const express = require('express');
-const Trail = require('../Model/trail');
+const Trails = require('../Model/trail');
 const User = require('../Model/user');
 const { getWeather } = require('../utils/weatherService');
 const checkAuthToken = require('../utils/checkAuthToken');
@@ -21,7 +21,7 @@ router.get('/', checkAuthToken, async (req, res) => {
 
         const isTrainer = user.role.includes('trainer');
 
-        let trails = await Trail.find({ userId: req.user.id }).populate('dog', '-ownerIds -__v').sort({ date: -1 }).lean();
+        let trails = await Trails.find({ userId: req.user.id }).populate('dog', '-ownerIds -__v').sort({ date: -1 }).lean();
 
         if (!isTrainer) {
             trails = trails.map(trail => {
@@ -84,7 +84,7 @@ router.post('/save', checkAuthToken, async (req, res) => {
             newTrailData.trainerComment = req.body.trainerComment;
         }
 
-        const newTrail = new Trail(newTrailData);
+        const newTrail = new Trails(newTrailData);
 
         const trail = await newTrail.save();
         res.status(201).json(trail);
@@ -102,7 +102,7 @@ router.post('/save', checkAuthToken, async (req, res) => {
  * @access Private
  */
 router.post('/delete', checkAuthToken, (req, res) => {
-    Trail.deleteOne({ _id: req.body.id, userId: req.user.id }).then(() => res.json({ success: true }))
+    Trails.deleteOne({ _id: req.body.id, userId: req.user.id }).then(() => res.json({ success: true }))
         .catch(() => res.status(404).json({ success: false }));
 });
 
@@ -119,7 +119,7 @@ router.post('/update', checkAuthToken, async (req, res) => {
         }
         const isTrainer = user.role.includes('trainer');
 
-        const trail = await Trail.findOne({ _id: req.body.id, userId: req.user.id });
+        const trail = await Trails.findOne({ _id: req.body.id, userId: req.user.id });
         if (!trail) {
             return res.status(404).json({ success: false, message: "Trail not found" });
         }
@@ -148,7 +148,7 @@ router.post('/update', checkAuthToken, async (req, res) => {
             delete updateData.trainerComment;
         }
 
-        await Trail.updateOne({ _id: req.body.id, userId: req.user.id }, updateData);
+        await Trails.updateOne({ _id: req.body.id, userId: req.user.id }, updateData);
         res.json({ success: true });
     } catch (err) {
         res.status(400).json({ message: err.message });

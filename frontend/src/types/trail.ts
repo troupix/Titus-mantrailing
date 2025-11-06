@@ -13,7 +13,7 @@ interface BaseTrail {
   createdAt?: string;
 }
 
-// Mantrailing specific fields (Session schema)
+// Mantrailing specific fields (Trail schema)
 export interface MantrailingTrail extends BaseTrail {
   category: "mantrailing";
   trainer?: string;

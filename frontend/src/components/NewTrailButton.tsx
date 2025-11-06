@@ -2,11 +2,11 @@ import React from 'react';
 import { Button } from "./ui/button";
 import { Plus } from "lucide-react";
 
-interface NewSessionButtonProps {
+interface NewTrailButtonProps {
     onClick: () => void;
 }
 
-const NewSessionButton: React.FC<NewSessionButtonProps> = ({ onClick }) => {
+const NewTrailButton: React.FC<NewTrailButtonProps> = ({ onClick }) => {
     return (
         <Button onClick={onClick}>
             <Plus className="mr-2 h-4 w-4" />
@@ -15,4 +15,4 @@ const NewSessionButton: React.FC<NewSessionButtonProps> = ({ onClick }) => {
     );
 }
 
-export default NewSessionButton;
+export default NewTrailButton;

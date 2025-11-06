@@ -1,9 +1,11 @@
 const request = require('supertest');
 const app = require('../index'); // The express app
 const Trail = require('../Model/trail');
+const User = require('../Model/user');
 const mongoose = require('mongoose');
 
 jest.mock('../Model/trail'); // Mock the Trail model
+jest.mock('../Model/user'); // Mock the User model
 const checkAuthToken = require('../utils/checkAuthToken');
 jest.mock('../utils/checkAuthToken', () => jest.fn((req, res, next) => {
     req.user = { id: 'some-user-id' };
@@ -17,11 +19,22 @@ describe('Mantrailing API', () => {
         jest.clearAllMocks();
     });
 
-    describe('GET /api/mantrailing/:userId', () => {
+    beforeEach(() => {
+        const mockUser = { _id: 'some-user-id', role: ['user'] };
+        User.findById.mockResolvedValue(mockUser);
+    });
+
+    describe('GET /api/mantrailing', () => {
         it('should return all trails for a user', async () => {
             const mockTrails = [{ dogId: 'some-dog-id' }, { dogId: 'some-other-dog-id' }];
-            Trail.find.mockResolvedValue(mockTrails);
-            const res = await request(app).get('/api/mantrailing/some-user-id');
+            Trail.find.mockReturnValue({
+                populate: jest.fn().mockReturnValue({
+                    sort: jest.fn().mockReturnValue({
+                        lean: jest.fn().mockResolvedValue(mockTrails)
+                    })
+                })
+            });
+            const res = await request(app).get('/api/mantrailing');
 
             expect(res.statusCode).toEqual(200);
             expect(res.body).toEqual(mockTrails);
@@ -30,9 +43,11 @@ describe('Mantrailing API', () => {
 
         it('should handle errors', async () => {
             const error = new Error('Something went wrong');
-            Trail.find.mockRejectedValue(new Error('Something went wrong'));
+            Trail.find.mockImplementation(() => {
+                throw error;
+            });
 
-            const res = await request(app).get('/api/mantrailing/some-user-id');
+            const res = await request(app).get('/api/mantrailing');
 
             expect(res.statusCode).toEqual(500);
             expect(res.body).toHaveProperty('message');
@@ -41,10 +56,9 @@ describe('Mantrailing API', () => {
 
     describe('POST /api/mantrailing/save', () => {
         it('should save a new trail', async () => {
-            const mockTrail = { userId: 'some-user-id', dogId: 'some-dog-id', handlerId: 'some-handler-id' };
+            const mockTrail = { userId: 'some-user-id', dogId: 'some-dog-id', handlerName: 'some-handler-id' };
             const newTrail = { ...mockTrail };
             
-            // Mock the save method on the Trail model\'s prototype
             Trail.prototype.save = jest.fn().mockResolvedValue(newTrail);
 
             const res = await request(app)
@@ -63,7 +77,7 @@ describe('Mantrailing API', () => {
 
             const res = await request(app)
                 .post('/api/mantrailing/save')
-                .send({ userId: 'some-user-id', dogId: 'some-dog-id', handlerId: 'some-handler-id' });
+                .send({ userId: 'some-user-id', dogId: 'some-dog-id', handlerName: 'some-handler-id' });
 
             expect(res.statusCode).toEqual(400);
             expect(res.body).toHaveProperty('message');
@@ -72,13 +86,14 @@ describe('Mantrailing API', () => {
 
     describe('POST /api/mantrailing/delete', () => {
         it('should delete a trail', async () => {
+            Trail.deleteOne.mockResolvedValue({ deletedCount: 1 });
             const res = await request(app)
                 .post('/api/mantrailing/delete')
                 .send({ id: 'some-id' });
 
             expect(res.statusCode).toEqual(200);
             expect(res.body).toEqual({ success: true });
-            expect(Trail.deleteOne).toHaveBeenCalledWith({ _id: 'some-id' });
+            expect(Trail.deleteOne).toHaveBeenCalledWith({ _id: 'some-id', userId: 'some-user-id' });
         });
 
         it('should handle errors on delete', async () => {
@@ -95,8 +110,8 @@ describe('Mantrailing API', () => {
 
     describe('POST /api/mantrailing/update', () => {
         it('should update a trail', async () => {
-            const mockTrail = { _id: 'some-id', dogId: 'some-dog-id' };
-            Trail.findById.mockResolvedValue(mockTrail);
+            const mockTrail = { _id: 'some-id', dogId: 'some-dog-id', save: jest.fn() };
+            Trail.findOne.mockResolvedValue(mockTrail);
             Trail.updateOne.mockResolvedValue({ nModified: 1 });
             const updatedTrail = {
                 dogId: 'some-dog-id',
@@ -119,12 +134,12 @@ describe('Mantrailing API', () => {
 
             expect(res.statusCode).toEqual(200);
             expect(res.body).toEqual({ success: true });
-            expect(Trail.updateOne).toHaveBeenCalledWith({ _id: 'some-id' }, updatedTrail);
+            expect(Trail.updateOne).toHaveBeenCalledWith({ _id: 'some-id', userId: 'some-user-id' }, expect.any(Object));
         });
 
         it('should handle errors on update', async () => {
             const mockTrail = { _id: 'some-id', dogId: 'some-dog-id' };
-            Trail.findById.mockResolvedValue(mockTrail);
+            Trail.findOne.mockResolvedValue(mockTrail);
             Trail.updateOne.mockRejectedValue(new Error('Something went wrong'));
 
             const res = await request(app)

@@ -2,9 +2,9 @@ const mongoose = require('mongoose');
 
 /**
  * @module models/trail
- * @description Defines the Mongoose schema for a mantrailing trail session.
+ * @description Defines the Mongoose schema for a mantrailing trail.
  * @property {mongoose.Schema.Types.ObjectId} _id - Unique identifier for the trail.
- * @property {string} [trainer] - The name of the trainer for the session.
+ * @property {string} [trainer] - The name of the trainer for the trail.
  * @property {string} dogName - The name of the dog.
  * @property {string} handlerName - The name of the handler.
  * @property {number} [distance] - The distance of the trail in meters.
@@ -104,4 +104,4 @@ const TrailSchema = new mongoose.Schema({
 
 });
 
-module.exports = mongoose.model('Session', TrailSchema);
+module.exports = mongoose.model('Trails', TrailSchema);

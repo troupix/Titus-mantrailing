@@ -4,20 +4,20 @@ This document provides a comprehensive overview of the Mantrailing feature, incl
 
 ## Feature Description
 
-The Mantrailing feature allows users to record, view, and manage their mantrailing sessions. It captures detailed information about each session, such as the dog, handler, trainer, location, and various trail parameters.
+The Mantrailing feature allows users to record, view, and manage their mantrailing trails. It captures detailed information about each trail, such as the dog, handler, trainer, location, and various trail parameters.
 
-The frontend provides a user-friendly interface to display mantrailing session details, including an interactive map showing the runner's and dog's tracks, and a form to create or edit sessions.
+The frontend provides a user-friendly interface to display mantrailing trail details, including an interactive map showing the runner's and dog's tracks, and a form to create or edit trails.
 
 ## Data Model
 
-The Mantrailing feature uses the `Trail` model (also referred to as `Session` in the code). Here is the schema:
+The Mantrailing feature uses the `Trail` model. Here is the schema:
 
 | Field | Type | Description | Required | Default |
 | :--- | :--- | :--- | :--- | :--- |
 | `_id` | ObjectId | The unique identifier of the trail. | Yes | auto |
-| `userId` | ObjectId | The ID of the user who created the session. | Yes | |
-| `trainer` | String | The name of the trainer for the session. | No | |
-| `dog` | ObjectId | The ID of the dog used for the session. | Yes | |
+| `userId` | ObjectId | The ID of the user who created the trail. | Yes | |
+| `trainer` | String | The name of the trainer for the trail. | No | |
+| `dog` | ObjectId | The ID of the dog used for the trail. | Yes | |
 | `handlerName` | String | The name of the handler. | Yes | |
 | `distance` | Number | The distance of the trail in meters. | No | |
 | `location` | String | A description of the trail's location. | No | |
@@ -31,11 +31,11 @@ The Mantrailing feature uses the `Trail` model (also referred to as `Session` in
 | `locationCoordinate` | Array | The geographical coordinates of the start. | No | |
 | `runnerTrace` | Object | GeoJSON object for the runner's path. | No | |
 | `dogTrace` | Object | GeoJSON object for the dog's path. | No | |
-| `weather` | Object | Weather conditions during the session. | No | |
+| `weather` | Object | Weather conditions during the trail. | No | |
 
 ## API Endpoints
 
-The following API endpoints are available for managing mantrailing sessions.
+The following API endpoints are available for managing mantrailing trails.
 
 ### Get all trails for a user
 
@@ -76,7 +76,7 @@ The following API endpoints are available for managing mantrailing sessions.
 
 ### MantrailingDetails.tsx
 
-This component is responsible for displaying the details of a specific mantrailing session. It shows:
+This component is responsible for displaying the details of a specific mantrailing trail. It shows:
 - Quick stats: distance and duration.
 - A map with the runner's and dog's tracks.
 - Information about the dog, handler, trainer, trail type, start type, and delay.
@@ -85,7 +85,7 @@ This component is responsible for displaying the details of a specific mantraili
 
 ### MantrailingForm.tsx
 
-This component provides a form for creating and editing mantrailing sessions. It includes fields for:
+This component provides a form for creating and editing mantrailing trails. It includes fields for:
 - Selecting a dog.
 - Handler's name.
 - Trainer's name.

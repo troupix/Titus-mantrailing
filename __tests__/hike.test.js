@@ -4,6 +4,8 @@ const Hike = require('../Model/hike');
 const mongoose = require('mongoose');
 
 jest.mock('../Model/hike'); // Mock the Hike model
+jest.mock('../utils/r2'); // Mock the r2 utility
+const { generateSignedUrl } = require('../utils/r2');
 const checkAuthToken = require('../utils/checkAuthToken');
 jest.mock('../utils/checkAuthToken', () => jest.fn((req, res, next) => {
     req.user = { id: 'some-user-id' };
@@ -19,20 +21,23 @@ describe('Hike API', () => {
 
     describe('GET /api/hike/:userId', () => {
         it('should return all hikes for a user', async () => {
-            const mockHikes = [{ name: 'Hike 1' }, { name: 'Hike 2' }];
+            const mockHikes = [{ name: 'Hike 1', toObject: () => ({name: 'Hike 1'}) }, { name: 'Hike 2', toObject: () => ({name: 'Hike 2'}) }];
             Hike.find.mockReturnValue({ sort: jest.fn().mockResolvedValue(mockHikes) });
-            const res = await request(app).get('/api/hike/some-user-id');
+            generateSignedUrl.mockResolvedValue('http://some-signed-url.com');
+            const res = await request(app).get('/api/hike');
 
             expect(res.statusCode).toEqual(200);
-            expect(res.body).toEqual(mockHikes);
+            expect(res.body).toEqual([{name: 'Hike 1'}, {name: 'Hike 2'}]);
             expect(Hike.find).toHaveBeenCalledWith({ userId: 'some-user-id' });
         });
 
         it('should handle errors', async () => {
             const error = new Error('Something went wrong');
-            Hike.find.mockImplementation(() => { throw new Error('Something went wrong') });
+            Hike.find.mockImplementation(() => {
+                throw error;
+            });
 
-            const res = await request(app).get('/api/hike/some-user-id');
+            const res = await request(app).get('/api/hike');
 
             expect(res.statusCode).toEqual(500);
             expect(res.body).toHaveProperty('message');

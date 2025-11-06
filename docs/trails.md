@@ -4,11 +4,11 @@ This document provides a comprehensive overview of how activities (referred to a
 
 ## Feature Description
 
-The application allows users to record, view, and manage two types of activities: Mantrailing sessions and Hikes. While these activities have distinct properties, they share a common set of features for creation, editing, and display.
+The application allows users to record, view, and manage two types of activities: Mantrailing trails and Hikes. While these activities have distinct properties, they share a common set of features for creation, editing, and display.
 
 ## Data Models
 
-Both Mantrailing and Hiking activities are stored in the database using a common `Trail` model (also referred to as `Session` in the code), with a `category` field to differentiate between them. Here is a unified schema:
+Both Mantrailing and Hiking activities are stored in the database using a common `Trail` model, with a `category` field to differentiate between them. Here is a unified schema:
 
 ### Common Fields
 
@@ -29,9 +29,9 @@ Both Mantrailing and Hiking activities are stored in the database using a common
 
 | Field | Type | Description |
 | :--- | :--- | :--- |
-| `dog` | ObjectId | The ID of the dog used for the session. |
+| `dog` | ObjectId | The ID of the dog used for the trail. |
 | `handlerName` | String | The name of the handler. |
-| `trainer` | String | The name of the trainer for the session. |
+| `trainer` | String | The name of the trainer for the trail. |
 | `trainerComment` | String | A private comment from the trainer. |
 | `trailType` | String | The type of trail (e.g., urban, rural). |
 | `startType` | String | The type of start for the trail. |
