@@ -1,4 +1,4 @@
-import { Dog } from "../utils/types";
+import { Dog } from ".";
 
 // Common fields for both trail types
 interface BaseTrail {

@@ -2,6 +2,7 @@ const fs = require('fs');
 const express = require('express');
 const router = express.Router();
 const Dog = require('../Model/dog');
+const DogShareLink = require('../Model/dogShareLink');
 const checkAuthToken = require('../utils/checkAuthToken');
 const multer = require('multer');
 const { uploadFile, generateSignedUrl } = require('../utils/r2');
@@ -44,10 +45,51 @@ router.post('/', checkAuthToken, upload.single('photo'), async (req, res) => {
     }
 });
 
+// Generate a time-limited, activity-specific share token for a dog
+router.post('/:dogId/share', checkAuthToken, async (req, res) => {
+  try {
+    const { dogId } = req.params;
+    const { activities, expiresInHours = 24 } = req.body; // Default to 24 hours
+
+    const dog = await Dog.findOne({ _id: dogId, ownerIds: req.user.id });
+    if (!dog) {
+      return res.status(404).send({ message: 'Dog not found or user not authorized.' });
+    }
+
+    if (!activities || !Array.isArray(activities) || activities.length === 0) {
+      return res.status(400).send({ message: 'Activities are required for sharing.' });
+    }
+
+    // Validate activities against enum in DogShareLink schema
+    const validActivities = ['mantrailing', 'hiking', 'canicross']; // Should match schema enum
+    const invalidActivities = activities.filter(activity => !validActivities.includes(activity));
+    if (invalidActivities.length > 0) {
+      return res.status(400).send({ message: `Invalid activities: ${invalidActivities.join(', ')}` });
+    }
+
+    const token = crypto.randomBytes(16).toString('hex'); // Generate a random token
+    const expiresAt = new Date(Date.now() + expiresInHours * 60 * 60 * 1000);
+
+    const dogShareLink = new DogShareLink({
+      dogId,
+      ownerId: req.user.id,
+      token,
+      activities,
+      expiresAt,
+    });
+
+    await dogShareLink.save();
+    res.status(201).send({ token });
+  } catch (error) {
+    console.error('Error generating dog share link:', error);
+    res.status(500).send({ message: 'Failed to generate share link.', error: error.message });
+  }
+});
+
 // Get all dogs for a user
 router.get('/', checkAuthToken, async (req, res) => {
     try {
-        const dogs = await Dog.find({ ownerIds: req.user.id });
+        const dogs = await Dog.find({ ownerIds: req.user.id }).populate('trainers.trainerId', 'username'); // Populate trainer username
 
         const dogsWithSignedUrls = await Promise.all(dogs.map(async (dog) => {
             let dogObject = dog.toObject();

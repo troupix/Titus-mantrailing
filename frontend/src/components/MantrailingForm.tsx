@@ -2,6 +2,7 @@
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
+import { SelectWithFreeInput } from "./SelectWithFreeInput"; // Import the new component
 import {
   Select,
   SelectContent,
@@ -10,7 +11,10 @@ import {
   SelectValue,
 } from "./ui/select";
 import { DogSelector } from "./DogSelector";
-import { User } from "../utils/types";
+import { useMemo } from "react";
+import { User } from "../types/entities";
+import { ActivityType } from "../types/activityConfig";
+import { useAuth } from "../contexts/AuthContext";
 
 interface MantrailingFormProps {
   selectedDogId: string;
@@ -48,6 +52,29 @@ export function MantrailingForm({
   setTrainerComment,
 }: MantrailingFormProps) {
   const isTrainer = user?.role.includes("trainer");
+  const { dogs } = useAuth(); // Get dogs from AuthContext
+
+  // Use useMemo to filter trainers from the selected dog's populated trainers array
+  const availableTrainersForDogOptions = useMemo(() => {
+    if (!selectedDogId || !dogs || dogs.length === 0) {
+      return [];
+    }
+    const currentDog = dogs.find((d) => d._id === selectedDogId);
+    if (!currentDog || !currentDog.trainers) {
+      return [];
+    }
+
+    // Filter trainers who are assigned for 'mantrailing' activity
+    // Assuming trainerId is populated as a User object due to backend changes
+    const mantrailingTrainers = currentDog.trainers
+      .filter(assignedTrainer => assignedTrainer.activities.includes("mantrailing" as ActivityType))
+      .map(assignedTrainer => assignedTrainer.trainerId as User);
+
+    return mantrailingTrainers.map(trainerUser => ({
+      value: trainerUser._id,
+      label: trainerUser.username,
+    }));
+  }, [selectedDogId, dogs]);
 
   return (
     <>
@@ -68,15 +95,15 @@ export function MantrailingForm({
           />
         </div>
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="trainer">Formateur</Label>
-        <Input
-          id="trainer"
-          value={trainer}
-          onChange={(e) => setTrainer(e.target.value)}
-          placeholder="Ex: Claudia"
-        />
-      </div>
+      <SelectWithFreeInput
+        id="trainer"
+        label="Formateur"
+        options={availableTrainersForDogOptions}
+        value={trainer}
+        onChange={setTrainer}
+        placeholder="Sélectionnez un formateur"
+        freeInputPlaceholder="Saisissez le nom du formateur"
+      />
       {isTrainer && (
         <div className="space-y-2">
           <Label htmlFor="trainerComment">Commentaire du formateur</Label>

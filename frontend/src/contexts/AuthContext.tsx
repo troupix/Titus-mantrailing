@@ -1,6 +1,20 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { User, Dog, LoginCredentials, RegisterData } from "../utils/types";
-import { login as apiLogin, register as apiRegister, logout as apiLogout, getCurrentUser, getDogs, updateUser } from "../utils/api";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { User, LoginCredentials, RegisterData } from "../types/entities";
+import { Dog } from "../types";
+import {
+  login as apiLogin,
+  register as apiRegister,
+  logout as apiLogout,
+  getCurrentUser,
+  getDogs,
+  updateUser,
+} from "../utils/api";
 
 interface AuthContextType {
   user: User | null;
@@ -33,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const checkAuth = async () => {
     try {
       const currentUser = await getCurrentUser();
-      setUser(currentUser);
+      setUser(currentUser as User | null);
     } catch (error) {
       console.error("Auth check failed:", error);
       setUser(null);
@@ -45,11 +59,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (credentials: LoginCredentials) => {
     try {
       const newUser = (await apiLogin(credentials)).user;
+      console.log("AuthContext Login: User received", newUser);
       if (!newUser) {
         throw new Error("Login failed: No user returned");
       }
-      setUser(newUser);
-      await checkAuth();
+      localStorage.setItem("viewMode", "user");
+      setUser(newUser as User);
     } catch (error) {
       console.error("Login failed:", error);
       throw error;
@@ -75,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshDogs = async () => {
     try {
       const allDogs = await getDogs();
-      setDogs(allDogs);
+      setDogs(allDogs as Dog[]);
     } catch (error) {
       console.error("Failed to refresh dogs:", error);
     }
@@ -86,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       const updatedUser = await updateUser(user._id, updates);
-      setUser(updatedUser);
+      setUser(updatedUser as User);
     } catch (error) {
       console.error("Failed to update user profile:", error);
       throw error;

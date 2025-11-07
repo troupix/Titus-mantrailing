@@ -5,6 +5,7 @@ const userRouter = require('./Router/user'); // adjust the path according to you
 const userManagementRouter = require('./Router/userManagement'); // adjust the path according to your project structure
 const mantrailingRouter = require('./Router/mantrailing');
 const hikeRouter = require('./Router/hike');
+const trainerRouter = require('./Router/trainer');
 const dogRouter = require('./Router/dog');
 require('dotenv').config();
 
@@ -37,7 +38,9 @@ app.use('/api/user', userRouter);
 app.use('/api/mantrailing', mantrailingRouter);
 app.use('/api/hike', hikeRouter);
 app.use('/api/users', userManagementRouter);
+app.use('/api/trainer', trainerRouter);
 app.use('/api/dogs', dogRouter);
+
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend', 'build', 'index.html'));

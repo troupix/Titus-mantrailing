@@ -15,7 +15,6 @@ interface TrailDetailHeaderProps {
 }
 
 export function TrailDetailHeader({ trail, onEdit, onDelete, isMantrailing }: TrailDetailHeaderProps) {
-  const isAllowedToCreate = localStorage.getItem('isAllowedToCreate') === 'true';
 
   const getTitle = () => {
     if (isMantrailing) {
@@ -68,7 +67,6 @@ export function TrailDetailHeader({ trail, onEdit, onDelete, isMantrailing }: Tr
               })}</span>
             </div>
           </div>
-          {isAllowedToCreate && (
             <div className="flex gap-2 self-start sm:self-auto">
               <Button
                 variant="secondary"
@@ -89,7 +87,6 @@ export function TrailDetailHeader({ trail, onEdit, onDelete, isMantrailing }: Tr
                 <span className="hidden xs:inline">Supprimer</span>
               </Button>
             </div>
-          )}
         </div>
       </CardHeader>
     </Card>

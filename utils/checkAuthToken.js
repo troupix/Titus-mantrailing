@@ -13,6 +13,7 @@ function checkAuthToken(req, res, next) {
         req.user = verified;
         next();
     } catch (err) {
+        console.error('JWT verification error:', err);
         res.status(403).send('Invalid Token');
     }
 }

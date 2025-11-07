@@ -9,7 +9,7 @@ import DogHomePageIcon from "./DogHomePageIcon";
 import TrailIcon from "./TrailIcon";
 import HikeIcon from "./HikeIcon";
 import { getDogs } from '../utils/api';
-import { Dog } from '../utils/types';
+import { Dog } from '../types';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -22,14 +22,13 @@ interface HomePageProps {
 }
 
 export function HomePage({ trails, onViewTrails, onCreateNew, onViewStatistics, onViewBadges }: HomePageProps) {
-  const isAllowedToCreate = localStorage.getItem("isAllowedToCreate") === "true";
   const [dogs, setDogs] = useState<Dog[]>([]);
 
   useEffect(() => {
     const fetchDogs = async () => {
       try {
         const fetchedDogs = await getDogs();
-        setDogs(fetchedDogs);
+        setDogs(fetchedDogs); // No longer needs casting
       } catch (error) {
         console.error("Failed to fetch dogs:", error);
       }
@@ -228,7 +227,6 @@ export function HomePage({ trails, onViewTrails, onCreateNew, onViewStatistics, 
                 développe ses capacités naturelles de pistage.
               </p>
               <div className="flex gap-2">
-                {isAllowedToCreate && (
                   <Button
                     onClick={onCreateNew}
                     className="bg-blue-600 hover:bg-blue-700 gap-2"
@@ -236,7 +234,6 @@ export function HomePage({ trails, onViewTrails, onCreateNew, onViewStatistics, 
                     <TrailIcon className="h-4 w-4" />
                     Nouvelle piste
                   </Button>
-                )}
                 <Button 
                   onClick={onViewTrails}
                   variant="outline"
@@ -264,7 +261,6 @@ export function HomePage({ trails, onViewTrails, onCreateNew, onViewStatistics, 
                 profite pleinement de la nature.
               </p>
               <div className="flex gap-2">
-                {isAllowedToCreate && (
                   <Button
                     onClick={onCreateNew}
                     className="bg-green-600 hover:bg-green-700 gap-2"
@@ -272,7 +268,6 @@ export function HomePage({ trails, onViewTrails, onCreateNew, onViewStatistics, 
                     <HikeIcon className="h-4 w-4" />
                     Nouvelle randonnée
                   </Button>
-                )}
                 <Button 
                   onClick={onViewTrails}
                   variant="outline"

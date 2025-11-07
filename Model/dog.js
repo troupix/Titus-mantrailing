@@ -28,9 +28,17 @@ const dogSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   }],
-  trainerIds: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+  trainers: [{
+    trainerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    activities: [{
+      type: String,
+      enum: ['mantrailing', 'hiking', 'canicross'],
+      required: true
+    }]
   }],
   createdAt: {
     type: Date,

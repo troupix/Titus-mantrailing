@@ -3,8 +3,12 @@ const User = require('../Model/user');
 const createAuthToken = require('../utils/createAuthToken');
 const checkAuthToken = require('../utils/checkAuthToken');
 const bcrypt = require('bcrypt');
+const multer = require('multer');
+const { uploadFile } = require('../utils/r2');
+const Dog = require('../Model/dog'); // Import the Dog model
 
 const router = express.Router();
+const upload = multer({ dest: 'uploads/' });
 
 /**
  * @route POST /api/user/login
@@ -107,12 +111,36 @@ router.get('/check', checkAuthToken, (req, res) => {
     res.send(req.user);
 });
 
+/**
+ * @route GET /api/user/dog-trainers/:dogId
+ * @description Retrieves all trainers assigned to a specific dog.
+ * @access Private
+ * @middleware checkAuthToken
+ * @param {string} req.params.dogId - The ID of the dog.
+ * @returns {User[]} An array of trainer user objects.
+ */
+router.get('/dog-trainers/:dogId', checkAuthToken, async (req, res) => {
+  try {
+    const { dogId } = req.params;
+    const dog = await Dog.findById(dogId);
+
+    if (!dog) {
+      return res.status(404).send({ message: 'Dog not found.' });
+    }
+
+    const trainerIds = dog.trainers.map(t => t.trainerId);
+    
+    const trainers = await User.find({ '_id': { $in: trainerIds } }).select('-password');
+    res.status(200).send(trainers);
+  } catch (error) {
+    console.error('Error fetching trainers for dog:', error);
+    res.status(500).send({ message: 'Failed to fetch trainers.', error: error.message });
+  }
+});
 
 
-const multer = require('multer');
-const { uploadFile } = require('../utils/r2');
 
-const upload = multer({ dest: 'uploads/' });
+
 
 router.post('/picture', checkAuthToken, upload.single('picture'), async (req, res) => {
     try {

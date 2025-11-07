@@ -257,7 +257,8 @@ export const compareTime = (dogTrace: GPXSegment[], runnerTrace: GPXSegment[]) =
     return (dogStartTime - runnerStartTime) / 1000;
 }
 
-export function calculateAge(birthDate: string): number {
+export function calculateAge(birthDate?: string): number | null {
+  if (!birthDate) return null;
   const birth = new Date(birthDate);
   const today = new Date();
   let age = today.getFullYear() - birth.getFullYear();
@@ -269,7 +270,8 @@ export function calculateAge(birthDate: string): number {
 }
 
 // Helper to format age
-export function formatAge(birthDate: string): string {
+export function formatAge(birthDate?: string): string {
   const age = calculateAge(birthDate);
+  if (age === null) return "N/A";
   return age === 1 ? "1 an" : `${age} ans`;
 }

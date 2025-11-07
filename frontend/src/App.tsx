@@ -1,3 +1,9 @@
+/**
+ * @file App.tsx
+ * @description The main application component, responsible for routing, authentication,
+ * and managing the overall application layout and view modes.
+ */
+
 import React, { useContext, useEffect, useState } from "react";
 import "./App.css";
 import { LocationContext, LocationProvider } from "./components/context/Location";
@@ -15,10 +21,20 @@ import { ManagementPage } from "./components/ManagementPage";
 import { useAuth } from "./contexts/AuthContext";
 import { LoginPage } from "./components/LoginPage";
 import { ProfilePage } from "./components/ProfilePage";
+import { ViewModeProvider, useViewMode } from "./contexts/ViewModeContext";
+import { TrainerDashboard } from "./components/TrainerDashboard";
 
+/**
+ * @typedef {"home" | "list" | "detail" | "form" | "statistics" | "badges" | "management" | "profile"} View
+ * @description Defines the possible views within the user's classic application mode.
+ */
 type View = "home" | "list" | "detail" | "form" | "statistics" | "badges" | "management" | "profile";
 
-
+/**
+ * @function App
+ * @description The root component of the application. Handles initial loading, authentication,
+ * and sets up the `LocationProvider` and `ViewModeProvider` for the rest of the app.
+ */
 function App() {
   const { user, loading } = useAuth();
 
@@ -31,18 +47,31 @@ function App() {
   }
 
   if (!user) {
-    return <LoginPage />;
+    return (
+      <ViewModeProvider>
+        <LoginPage />
+      </ViewModeProvider>
+    );
   }
 
   return (
     <LocationProvider>
-      <MainApp />
+      {/* ViewModeProvider wraps MainApp to provide context for switching between user and trainer modes */}
+      <ViewModeProvider>
+        <MainApp />
+      </ViewModeProvider>
     </LocationProvider>
   );
 }
 
+/**
+ * @function MainApp
+ * @description The core application logic and layout, rendered after authentication.
+ * It uses `useViewMode` to conditionally render either the `TrainerDashboard` or the classic user interface.
+ */
 function MainApp() {
   const { user } = useAuth();
+  const { isTrainerMode } = useViewMode(); // Determine if the app is in trainer mode
   const [view, setView] = useState<View>("home");
   const [editingTrail, setEditingTrail] = useState<Trail | undefined>();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -51,6 +80,7 @@ function MainApp() {
   const [selectedTrailId, setSelectedTrailId] = useState<string | null>(
     trails.length > 0 ? trails[0]._id || null : null
   );
+
   const handleCreateNew = () => {
     setEditingTrail(undefined);
     setView("form");
@@ -139,59 +169,67 @@ function MainApp() {
         trailCount={trails.length}
       />
       <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar - only show when viewing/editing trails */}
-        {showSidebar && (
-          <div
-            className={`flex-shrink-0 border-r border-border shadow-lg transition-all duration-300 ${ 
-              isSidebarCollapsed ? "w-16" : "w-80"
-            }`}
-          >
-            <TrailList
-              trails={trails}
-              selectedTrailId={selectedTrailId}
-              onSelectTrail={handleSelectTrail}
-              onCreateNew={handleCreateNew}
-              isCollapsed={isSidebarCollapsed}
-              onToggleCollapse={() =>
-                setIsSidebarCollapsed(!isSidebarCollapsed)
-              }
-            />
-          </div>
-        )}
+        {/* Conditionally render TrainerDashboard or the regular user interface */}
+        {isTrainerMode ? (
+          <TrainerDashboard />
+        ) : (
+          <>
+            {/* Sidebar - only show when viewing/editing trails */}
+            {showSidebar && (
+              <div
+                className={`flex-shrink-0 border-r border-border shadow-lg transition-all duration-300 ${
+                  isSidebarCollapsed ? "w-16" : "w-80"
+                }`}
+              >
+                <TrailList
+                  trails={trails}
+                  selectedTrailId={selectedTrailId}
+                  onSelectTrail={handleSelectTrail}
+                  onCreateNew={handleCreateNew}
+                  isCollapsed={isSidebarCollapsed}
+                  onToggleCollapse={() =>
+                    setIsSidebarCollapsed(!isSidebarCollapsed)
+                  }
+                />
+              </div>
+            )}
 
-        {/* Main Content */}
-        <div className="flex-1">
-          {view === "home" ? (
-            <HomePage
-              trails={trails}
-              onViewTrails={handleViewTrails}
-              onCreateNew={handleCreateNew}
-              onViewStatistics={() => handleNavigate("statistics")}
-              onViewBadges={() => handleNavigate("badges")}
-            />
-          ) : view === "statistics" ? (
-            <StatisticsPage trails={trails} />
-          ) : view === "badges" ? (
-            <BadgesPage trails={trails} />
-          ) : view === "form" ? (
-            <TrailForm
-              trail={editingTrail}
-              onSaveSuccess={handleSaveSuccess}
-              onCancel={handleCancel}
-            />
-          ) : view === "detail" && selectedTrail ? (
-            <TrailDetail trail={selectedTrail} onEdit={handleEdit} onDeleteSuccess={handleSaveSuccess} />
-          ) : view === "management" ? (
-            <ManagementPage />
-          ) : view === "profile" ? (
-            <ProfilePage />
-          ) : (
-            <EmptyState onCreateNew={handleCreateNew} />
-          )}
-        </div>
+            {/* Main Content */}
+            <div className="flex-1">
+              {view === "home" ? (
+                <HomePage
+                  trails={trails}
+                  onViewTrails={handleViewTrails}
+                  onCreateNew={handleCreateNew}
+                  onViewStatistics={() => handleNavigate("statistics")}
+                  onViewBadges={() => handleNavigate("badges")}
+                />
+              ) : view === "statistics" ? (
+                <StatisticsPage trails={trails} />
+              ) : view === "badges" ? (
+                <BadgesPage trails={trails} />
+              ) : view === "form" ? (
+                <TrailForm
+                  trail={editingTrail}
+                  onSaveSuccess={handleSaveSuccess}
+                  onCancel={handleCancel}
+                />
+              ) : view === "detail" && selectedTrail ? (
+                <TrailDetail trail={selectedTrail} onEdit={handleEdit} onDeleteSuccess={handleSaveSuccess} />
+              ) : view === "management" ? (
+                <ManagementPage />
+              ) : view === "profile" ? (
+                <ProfilePage />
+              ) : (
+                <EmptyState onCreateNew={handleCreateNew} />
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
 }
 
 export default App;
+

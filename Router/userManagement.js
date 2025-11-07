@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const user = require('../Model/user'); // adjust the path according to your project structure
 const bcrypt = require('bcrypt');
+const checkAuthToken = require('../utils/checkAuthToken'); // Import checkAuthToken
 
 /**
  * Retrieves all users.
@@ -12,6 +13,21 @@ router.get('/', (req, res) => {
     user.find({}, { password: 0 }) // Exclude the password field from the response
         .then(users => res.json(users))
         .catch(err => res.status(400).json({ message: err }));
+});
+
+/**
+ * Retrieves all users with the 'trainer' role.
+ *
+ * @returns {user[]} The list of all trainers.
+ */
+router.get('/trainers', checkAuthToken, async (req, res) => {
+  try {
+    const trainers = await user.find({ role: 'trainer' }).select('-password'); // Exclude password
+    res.status(200).send(trainers);
+  } catch (error) {
+    console.error('Error fetching trainers:', error);
+    res.status(500).send({ message: 'Failed to fetch trainers.', error: error.message });
+  }
 });
 
 /**

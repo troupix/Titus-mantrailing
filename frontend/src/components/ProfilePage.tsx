@@ -5,10 +5,12 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Alert, AlertDescription } from "./ui/alert";
-import { User, Mail, CheckCircle2, AlertCircle } from "lucide-react";
+import { User, Mail, CheckCircle2, AlertCircle, Copy, GraduationCap } from "lucide-react";
+import { useViewMode } from "../contexts/ViewModeContext";
 
 export function ProfilePage() {
   const { user, updateUserProfile } = useAuth();
+  const { setViewMode } = useViewMode();
   const [editing, setEditing] = useState(false);
   const [firstName, setFirstName] = useState(user?.username.split(" ")[0] || "");
   const [lastName, setLastName] = useState(user?.username.split(" ")[1] || "");
@@ -50,6 +52,15 @@ export function ProfilePage() {
     setError("");
   };
 
+  const getUserFullName = (user: any) => {
+    if (!user || (!user.firstName && !user.lastName)) return "Utilisateur Inconnu";
+    return `${user.firstName || ""} ${user.lastName || ""}`.trim().toUpperCase();
+  };
+
+  const handleCopyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    // Optionally, show a toast notification
+  };
 
   return (
     <div className="h-full overflow-auto p-6 md:p-8">
@@ -153,6 +164,50 @@ export function ProfilePage() {
           </CardContent>
         </Card>
 
+        {user.role.includes("trainer") && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Profil Éducateur</CardTitle>
+              <CardDescription>
+                Informations spécifiques à votre rôle d'éducateur
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Nom du Trainer</span>
+                <span className="font-semibold">{getUserFullName(user)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Spécialités</span>
+                <span>Mantrailing, Randonnée (à définir)</span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">ID Trainer</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-sm">{user._id}</span>
+                  <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(user._id)}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Chiens en formation</span>
+                <span>X chiens (à calculer)</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Élèves</span>
+                <span>Y élèves (à calculer)</span>
+              </div>
+              <div className="pt-4 border-t mt-4">
+                <Button className="w-full" onClick={() => setViewMode("trainer")}>
+                  <GraduationCap className="mr-2 h-4 w-4" />
+                  Accéder au Tableau de Bord Éducateur
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardHeader>
             <CardTitle>Informations du compte</CardTitle>
@@ -167,7 +222,7 @@ export function ProfilePage() {
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Membre depuis</span>
-              <span>{new Date(user.createdAt).toLocaleDateString("fr-FR")}</span>
+              <span>{user.createdAt && new Date(user.createdAt).toLocaleDateString("fr-FR")}</span>
             </div>
           </CardContent>
         </Card>

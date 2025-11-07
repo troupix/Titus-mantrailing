@@ -1,9 +1,32 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { Dog } from "../utils/types";
+import { Dog } from "../types";
 import { formatAge } from "../utils/utils";
-import { createDog, updateDog, deleteDog, uploadDogProfilePhoto, updateDogPresentation } from "../utils/api";
+import { createDog, updateDog, deleteDog, uploadDogProfilePhoto, updateDogPresentation, generateDogShareLink } from "../utils/api";
+import { ActivityType } from "../types/activityConfig";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Calendar,
+  Bone,
+  FileText,
+  Share2,
+} from "lucide-react";
+import { GraduationCap } from "lucide-react";
+import { toast } from "sonner";
+import { ImageCropUpload } from "./ImageCropUpload";
+import { MultiSelect } from "./ui/multi-select";
+import DogHomePageIcon from "./DogHomePageIcon"; // Ensure this import is correct
 import { Button } from "./ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import {
@@ -13,26 +36,7 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "./ui/dialog";
 import { Badge } from "./ui/badge";
-import {
-  Plus,
-  Pencil,
-  Trash2,
-  Calendar,
-  Bone,
-  FileText,
-} from "lucide-react";
-import { toast } from "sonner";
-import { ImageCropUpload } from "./ImageCropUpload";
-import DogHomePageIcon from "./DogHomePageIcon";
 
 export function ManagementPage() {
   const { user, dogs, refreshDogs } = useAuth();
@@ -48,6 +52,13 @@ export function ManagementPage() {
   const [presentationPhoto, setPresentationPhoto] = useState<Blob | null>(null);
   const [presentationPhotoPreview, setPresentationPhotoPreview] = useState<string | undefined>(undefined);
   const [presentationLoading, setPresentationLoading] = useState(false);
+
+  // Share link management state
+  const [isShareLinkDialogOpen, setIsShareLinkDialogOpen] = useState(false);
+  const [sharingDog, setSharingDog] = useState<Dog | null>(null);
+  const [selectedActivities, setSelectedActivities] = useState<ActivityType[]>([]);
+  const [generatedShareLink, setGeneratedShareLink] = useState("");
+  const [shareLinkLoading, setShareLinkLoading] = useState(false);
 
   useEffect(() => {
     console.log(dogs);
@@ -103,6 +114,44 @@ export function ManagementPage() {
     setPresentationPhotoPreview(undefined);
   };
 
+  const handleOpenShareLinkDialog = (dog: Dog) => {
+    setSharingDog(dog);
+    setSelectedActivities([]); // Reset selected activities
+    setGeneratedShareLink(""); // Clear previous link
+    setIsShareLinkDialogOpen(true);
+  };
+
+  const handleCloseShareLinkDialog = () => {
+    setIsShareLinkDialogOpen(false);
+    setSharingDog(null);
+    setSelectedActivities([]);
+    setGeneratedShareLink("");
+  };
+
+  const handleGenerateShareLink = async () => {
+    if (!sharingDog || selectedActivities.length === 0) {
+      toast.error("Please select at least one activity.");
+      return;
+    }
+
+    setShareLinkLoading(true);
+    try {
+      const response = await generateDogShareLink(sharingDog._id, selectedActivities);
+      setGeneratedShareLink(response.token);
+      toast.success("Share link generated successfully!");
+    } catch (error) {
+      console.error("Error generating share link:", error);
+      toast.error("Failed to generate share link.");
+    } finally {
+      setShareLinkLoading(false);
+    }
+  };
+
+  const handleCopyShareLink = () => {
+    navigator.clipboard.writeText(generatedShareLink);
+    toast.success("Share link copied to clipboard!");
+  };
+
   const handleOpenDogsDialog = (dog?: Dog) => {
     if (dog) {
       setEditingDog(dog);
@@ -155,7 +204,7 @@ export function ManagementPage() {
         await updateDog(editingDog._id, {
           name: dogName,
           breed: dogBreed || undefined,
-          birthDate: dogBirthDate ? new Date(dogBirthDate) : undefined,
+          birthDate: dogBirthDate || undefined,
           profilePhoto: profilePhotoUrl || undefined,
         });
         toast.success("Chien mis à jour avec succès");
@@ -164,8 +213,8 @@ export function ManagementPage() {
           name: dogName,
           ownerIds: [user._id],
           breed: dogBreed || undefined,
-          birthDate: dogBirthDate ? new Date(dogBirthDate) : undefined,
-          trainerIds: [],
+          birthDate: dogBirthDate || undefined,
+          trainers: [], // Initialize with an empty array of trainers
         };
         const createdDog = await createDog(newDogData);
 
@@ -397,7 +446,7 @@ export function ManagementPage() {
                       id="presentation-legend"
                       placeholder="Ex: Titus en pleine action !"
                       value={presentationLegend}
-                      onChange={(e) => setPresentationLegend(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPresentationLegend(e.target.value)}
                     />
                   </div>
 
@@ -428,6 +477,62 @@ export function ManagementPage() {
                   </Button>
                 </DialogFooter>
               </form>
+            </DialogContent>
+          </Dialog>
+
+          {/* Share Link Dialog */}
+          <Dialog open={isShareLinkDialogOpen} onOpenChange={handleCloseShareLinkDialog}>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Partager {sharingDog?.name}</DialogTitle>
+                <DialogDescription>
+                  Générez un lien de partage pour permettre à un éducateur de se connecter à ce chien pour des activités spécifiques.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="activities">Activités à partager</Label>
+                  <MultiSelect
+                    options={[
+                      { label: "Mantrailing", value: "mantrailing" },
+                      { label: "Randonnée", value: "hiking" },
+                      { label: "Canicross", value: "canicross" },
+                    ]}
+                    value={selectedActivities}
+                    onChange={(value) => setSelectedActivities(value as ActivityType[])}
+                    placeholder="Sélectionnez les activités"
+                  />
+                </div>
+                {generatedShareLink && (
+                  <div className="space-y-2">
+                    <Label htmlFor="share-link">Lien de partage</Label>
+                    <div className="flex space-x-2">
+                      <Input id="share-link" value={generatedShareLink} readOnly />
+                      <Button onClick={handleCopyShareLink} type="button">
+                        Copier
+                      </Button>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Ce lien est valide pendant 24 heures et ne peut être utilisé qu'une seule fois.
+                    </p>
+                  </div>
+                )}
+              </div>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCloseShareLinkDialog}
+                  disabled={shareLinkLoading}
+                >
+                  Fermer
+                </Button>
+                {!generatedShareLink && (
+                  <Button onClick={handleGenerateShareLink} disabled={shareLinkLoading || selectedActivities.length === 0}>
+                    {shareLinkLoading ? "Génération..." : "Générer le lien"}
+                  </Button>
+                )}
+              </DialogFooter>
             </DialogContent>
           </Dialog>
 
@@ -491,6 +596,13 @@ export function ManagementPage() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          onClick={() => handleOpenShareLinkDialog(dog)}
+                        >
+                          <Share2 className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleOpenDogsDialog(dog)}
                         >
                           <Pencil className="w-4 h-4" />
@@ -522,6 +634,22 @@ export function ManagementPage() {
                         Partagé avec {dog.ownerIds.length - 1} autre
                         {dog.ownerIds.length > 2 ? "s" : ""}
                       </Badge>
+                    )}
+
+                    {dog.trainers && dog.trainers.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm">
+                          <GraduationCap className="w-4 h-4 text-muted-foreground" />
+                          <span className="font-medium">Éducateurs</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {dog.trainers.map((trainerAssignment) => (
+                            <Badge key={trainerAssignment.trainerId.toString()} variant="outline">
+                              {typeof trainerAssignment.trainerId === 'object' ? trainerAssignment.trainerId.username : 'Unknown Trainer'} ({trainerAssignment.activities.join(', ')})
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
                     )}
                   </CardContent>
                 </Card>

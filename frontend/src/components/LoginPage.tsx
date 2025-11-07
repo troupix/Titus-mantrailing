@@ -6,12 +6,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import { Alert, AlertDescription } from "./ui/alert";
 import { Tabs, TabsContent } from "./ui/tabs";
 import { useAuth } from "../contexts/AuthContext";
+
 import { AlertCircle } from "lucide-react";
 import DogHomePageIcon from "./DogHomePageIcon";
 import HikeIcon from "./HikeIcon";
 
 export function LoginPage() {
   const { login, register } = useAuth();
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -36,6 +38,7 @@ export function LoginPage() {
         email: loginEmail,
         password: loginPassword,
       };
+      localStorage.setItem("viewMode", "user");
       await login(credentials);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur de connexion");
@@ -67,12 +70,13 @@ export function LoginPage() {
     setLoading(true);
 
     try {
+      localStorage.setItem("viewMode", "user");
       await register({
         email: registerEmail,
         password: registerPassword,
         username: `${firstName} ${lastName}`,
-        firstName,
-        lastName,
+        firstName: firstName, // Explicitly assign firstName
+        lastName: lastName,   // Explicitly assign lastName
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur d'inscription");

@@ -43,9 +43,6 @@ export function TrailList({
   isCollapsed,
   onToggleCollapse,
 }: TrailListProps) {
-  const isAllowedToCreate =
-    localStorage.getItem("isAllowedToCreate") === "true";
-
   const [filter, setFilter] = useState<"all" | "mantrailing" | "hiking">("all");
 
   const filteredTrails = trails
@@ -109,7 +106,6 @@ export function TrailList({
         {/* Fixed Header - Collapsed */}
         <div className="flex-shrink-0 p-2 flex flex-col items-center gap-3 border-b border-white/10">
           <div style={{ height: "40px" }}>
-            {isAllowedToCreate && (
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -126,7 +122,6 @@ export function TrailList({
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-            )}
           </div>
 
           <Button
@@ -209,7 +204,6 @@ export function TrailList({
       {/* Fixed Header */}
       <div className="flex-shrink-0 p-4 border-b border-white/10">
         <div className="flex items-center gap-2">
-          {isAllowedToCreate && (
             <Button
               onClick={onCreateNew}
               className="flex-1 bg-white text-blue-600 hover:bg-blue-50 shadow-md gap-2"
@@ -217,7 +211,6 @@ export function TrailList({
               <Plus className="h-4 w-4" />
               Créer une nouvelle piste
             </Button>
-          )}
           <div className="ml-auto">
             <Button
               onClick={onToggleCollapse}
