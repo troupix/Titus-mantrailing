@@ -18,33 +18,39 @@ jobs:
           port: ${{ secrets.PORT }}
           command_timeout: 20m
           script: |
-            echo '--> Set env variable...'
-            export ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}
-            export PORT=${{ vars.PORT }}
-            export DB_NAME=${{ vars.DB_NAME }}
-            export MONGODB_URI=${{ secrets.MONGODB_URI }}
-            export CORS_ORIGIN=${{ vars.CORS_ORIGIN }}
-            export R2_ACCESS_KEY_ID=${{ secrets.R2_ACCESS_KEY_ID }}
-            export R2_SECRET_ACCESS_KEY=${{ secrets.R2_SECRET_ACCESS_KEY }}
-            export R2_BUCKET_NAME=${{ vars.R2_BUCKET_NAME }}
-            export R2_ENDPOINT=${{ vars.R2_ENDPOINT }}
-            echo '--> Git pull...'
             set -e
-            echo '--> Git operations...'
+            sudo apt-get install ca-certificates -y
             cd maximilien
-            git fetch origin                 # Fetch the latest changes from the remote repository
-            git reset --hard origin/master   # Forcefully reset the local master branch to match origin/master, discarding local changes
-            git clean -df                    # Remove any untracked files and directories (e.g., old node_modules, build artifacts)
-            echo '--> Install dependencies...'
-            npm i
-            echo '--> Install frontend dependencies...'
-            npm i --prefix frontend
-            echo '--> Build frontend...'
-            npm run build --prefix frontend
-            echo '--> Restarting application with PM2...'
-            pm2 startOrRestart ecosystem.config.js --env production
-            echo '--> done.'
-            exit
+            echo "--> Pulling latest code..."
+            git fetch origin
+            git reset --hard origin/master
+            git clean -df
+            echo "--> Creating .env file..."
+            echo "ACCESS_TOKEN_SECRET='${{ secrets.ACCESS_TOKEN_SECRET }}'" > .env
+            echo "PORT='${{ vars.PORT }}'" >> .env
+            echo "DB_NAME='${{ vars.DB_NAME }}'" >> .env
+            echo "MONGODB_URI='${{ secrets.MONGODB_URI }}'" >> .env
+            echo "CORS_ORIGIN='${{ vars.CORS_ORIGIN }}'" >> .env
+            echo "R2_ACCESS_KEY_ID='${{ secrets.R2_ACCESS_KEY_ID }}'" >> .env
+            echo "R2_SECRET_ACCESS_KEY='${{ secrets.R2_SECRET_ACCESS_KEY }}'" >> .env
+            echo "R2_BUCKET_NAME='${{ vars.R2_BUCKET_NAME }}'" >> .env
+            echo "R2_ENDPOINT='${{ vars.R2_ENDPOINT }}'" >> .env
+            echo "--> Creating frontend .env file..."
+            echo "REACT_APP_API_URL='https://maliemaxtitus.fr/'" > frontend/.env
+            echo "REACT_APP_NOMINATIM_API_URL='https://nominatim.openstreetmap.org/search'" >> frontend/.env
+            echo "REACT_APP_TILE_PROVIDER_URL='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'" >> frontend/.env
+            echo "--> Installing dependencies..."
+            npm i;
+            echo "--> Installing frontend dependencies..."
+            npm i --prefix frontend;
+            echo "--> Building frontend..."
+            npm run build --prefix frontend;
+            echo "--> Restarting application with PM2..."
+            # Ensure the app is started, then restart it to apply changes.
+            # The '|| true' ensures the script doesn't fail if the app doesn't exist yet.
+            pm2 delete maximilien-api || true
+            pm2 start ecosystem.config.js --env production
+            echo "--> Deployment complete."
 
   release:
     name: Release
@@ -64,13 +70,18 @@ jobs:
           major_pattern: "${{vars.GIT_SEMANTIC_VERSION_MAJOR_PATTERN}}"
           minor_pattern: "${{vars.GIT_SEMANTIC_VERSION_MINOR_PATTERN}}"
           version_format: "${major}.${minor}.${patch}"
-          tag_prefix: ""
-      - name: git tag ${{steps.version.outputs.version}}
+          tag_prefix: "v" # It's a good practice to prefix tags with 'v'
+      - name: Check if release already exists
+        id: check_release
         run: |
-          git tag ${{steps.version.outputs.version}}
-          git push origin ${{steps.version.outputs.version}}
-      - name: create a new release and push
+          if gh release view ${{ steps.version.outputs.version }} > /dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release and Tag
+        if: steps.version.outputs.changed == 'true' && steps.check_release.outputs.exists != 'true'
         run: |
-          gh release create ${{steps.version.outputs.version}} -t ${{steps.version.outputs.version}} -n ${{steps.version.outputs.version}}
+          gh release create ${{steps.version.outputs.version}} --generate-notes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
