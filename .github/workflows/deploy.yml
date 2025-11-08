@@ -18,6 +18,9 @@ jobs:
           port: ${{ secrets.PORT }}
           command_timeout: 20m
           script: |
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm use 22
             set -e
             sudo apt-get install ca-certificates -y
             cd maximilien
