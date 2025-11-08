@@ -27,18 +27,18 @@ jobs:
             git clean -df
             echo "--> Creating .env file..."
             echo "ACCESS_TOKEN_SECRET='${{ secrets.ACCESS_TOKEN_SECRET }}'" > .env
-            echo "PORT='${{ vars.PORT }}'" >> .env
-            echo "DB_NAME='${{ vars.DB_NAME }}'" >> .env
-            echo "MONGODB_URI='${{ secrets.MONGODB_URI }}'" >> .env
-            echo "CORS_ORIGIN='${{ vars.CORS_ORIGIN }}'" >> .env
-            echo "R2_ACCESS_KEY_ID='${{ secrets.R2_ACCESS_KEY_ID }}'" >> .env
-            echo "R2_SECRET_ACCESS_KEY='${{ secrets.R2_SECRET_ACCESS_KEY }}'" >> .env
-            echo "R2_BUCKET_NAME='${{ vars.R2_BUCKET_NAME }}'" >> .env
-            echo "R2_ENDPOINT='${{ vars.R2_ENDPOINT }}'" >> .env
+            echo "PORT=${{ vars.PORT }}" >> .env
+            echo "DB_NAME=${{ vars.DB_NAME }}" >> .env
+            echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> .env
+            echo "CORS_ORIGIN=${{ vars.CORS_ORIGIN }}" >> .env
+            echo "R2_ACCESS_KEY_ID=${{ secrets.R2_ACCESS_KEY_ID }}" >> .env
+            echo "R2_SECRET_ACCESS_KEY=${{ secrets.R2_SECRET_ACCESS_KEY }}" >> .env
+            echo "R2_BUCKET_NAME=${{ vars.R2_BUCKET_NAME }}" >> .env
+            echo "R2_ENDPOINT=${{ vars.R2_ENDPOINT }}" >> .env
             echo "--> Creating frontend .env file..."
-            echo "REACT_APP_API_URL='https://maliemaxtitus.fr/'" > frontend/.env
-            echo "REACT_APP_NOMINATIM_API_URL='https://nominatim.openstreetmap.org/search'" >> frontend/.env
-            echo "REACT_APP_TILE_PROVIDER_URL='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'" >> frontend/.env
+            echo "REACT_APP_API_URL=${{ vars.REACT_APP_API_URL }}" > frontend/.env
+            echo "REACT_APP_NOMINATIM_API_URL=${{ vars.REACT_APP_NOMINATIM_API_URL }}" >> frontend/.env
+            echo "REACT_APP_TILE_PROVIDER_URL=${{ vars.REACT_APP_TILE_PROVIDER_URL }}" >> frontend/.env
             echo "--> Installing dependencies..."
             npm i;
             echo "--> Installing frontend dependencies..."
