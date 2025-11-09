@@ -179,15 +179,80 @@ router.get('/dogs/:dogId/trails', checkAuthToken, async (req, res) => {
 
     // Sort all trails by date in descending order
     allTrails.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    // Note: This implementation does not generate signed URLs for photos within trails (e.g., hike photos).
-    // This can be added if needed by the frontend.
-
     res.status(200).send(allTrails);
 
   } catch (error) {
     console.error('Error fetching trails for dog:', error);
     res.status(500).send({ message: 'Failed to fetch trails.', error: error.message });
+  }
+});
+
+/**
+ * @route   GET /api/trainer/trails/:trailId
+ * @desc    Get a single trail by its ID, verifying trainer access.
+ * @access  Private (Trainer only)
+ */
+router.get('/trails/:trailId', checkAuthToken, async (req, res) => {
+  try {
+    if (!req.user.role.includes('trainer')) {
+      return res.status(403).send({ message: 'Unauthorized access. Only trainers can perform this action.' });
+    }
+
+    const { trailId } = req.params;
+    const trainerId = req.user.id;
+
+    // We need to find which kind of trail it is. We can query all trail models.
+    let trail = await MantrailingTrail.findById(trailId).lean();
+    let trailCategory = 'mantrailing';
+
+    if (!trail) {
+      trail = await HikingTrail.findById(trailId).lean();
+      trailCategory = 'hiking';
+    }
+
+    if (!trail) {
+      trail = await CanicrossTrail.findById(trailId).lean();
+      trailCategory = 'canicross';
+    }
+
+    if (!trail) {
+      return res.status(404).send({ message: 'Trail not found.' });
+    }
+
+    // Now, verify trainer access to the dog associated with this trail.
+    const dogId = trail.dog || (trail.userId ? (await Dog.findOne({ ownerIds: trail.userId }))._id : null);
+    if (!dogId) {
+        return res.status(404).send({ message: 'Could not determine the dog associated with this trail.' });
+    }
+
+    const dog = await Dog.findById(dogId);
+    if (!dog) {
+      return res.status(404).send({ message: 'Associated dog not found.' });
+    }
+
+    const trainerAssignment = dog.trainers.find(t => t.trainerId.toString() === trainerId);
+    if (!trainerAssignment || !trainerAssignment.activities.includes(trailCategory)) {
+      return res.status(403).send({ message: `You are not assigned to this dog for the '${trailCategory}' activity.` });
+    }
+
+    // Add category for the frontend
+    trail.category = trailCategory;
+
+    // If the trail is a hike and has photos, generate signed URLs
+    if (trailCategory === 'hiking' && trail.photos && trail.photos.length > 0) {
+      trail.photos = await Promise.all(
+        trail.photos.map(async (photoUrl) => {
+          const fileName = photoUrl.split('/').pop();
+          return await generateSignedUrl(fileName);
+        })
+      );
+    }
+
+    res.status(200).send(trail);
+
+  } catch (error) {
+    console.error('Error fetching single trail for trainer:', error);
+    res.status(500).send({ message: 'Failed to fetch trail.', error: error.message });
   }
 });
 
