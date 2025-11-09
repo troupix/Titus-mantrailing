@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Trail, isMantrailingTrail, isHikingTrail, HikingTrail } from "../types/trail";
 import { deleteTrail, deleteHike } from "../utils/api";
-import { TrailDetailHeader } from "./TrailDetailHeader";
 import { MantrailingDetails } from "./MantrailingDetails";
 import { HikingDetails } from "./HikingDetails";
+import { Button } from "./ui/button";
+import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 
-export function TrailDetail({ trail, onEdit, onDeleteSuccess }: {
+export function TrailDetail({ trail, onEdit, onDeleteSuccess, onBack, dogName }: {
   trail: Trail;
-  onEdit: (trail: Trail) => void;
-  onDeleteSuccess: () => void;
+  onEdit?: (trail: Trail) => void;
+  onDeleteSuccess?: () => void;
+  onBack?: () => void; // New prop for trainer dashboard navigation
+  dogName?: string; // To display in the back button
 }) {
   const [maxDogMasterDistance, setMaxDogMasterDistance] = useState<number | null>(null);
 
@@ -90,27 +93,42 @@ export function TrailDetail({ trail, onEdit, onDeleteSuccess }: {
   const handleDelete = async () => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cette piste ?")) {
       try {
+        const trailId = trail.id || trail._id;
+        if (!trailId) throw new Error("Trail ID is missing");
+
         if (isMantrailingTrail(trail)) {
-          await deleteTrail(trail.id || trail._id || '');
+          await deleteTrail(trailId);
         } else {
-          await deleteHike(trail.id || trail._id || '');
+          await deleteHike(trailId);
         }
-        onDeleteSuccess();
+        onDeleteSuccess?.();
       } catch (error) {
         console.error("Failed to delete trail:", error);
       }
     }
   };
 
+  const trailName = isMantrailingTrail(trail) ? trail.location : (trail as HikingTrail).name;
+
   return (
     <div className="h-full overflow-auto bg-gradient-to-br from-blue-50 to-white">
       <div className="max-w-7xl mx-auto p-6 space-y-6">
-        <TrailDetailHeader
-          trail={trail}
-          onEdit={onEdit}
-          onDelete={handleDelete}
-          isMantrailing={isMantrailingTrail(trail)}
-        />
+        {/* Header */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            {onBack && (
+              <Button variant="outline" onClick={onBack}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Retour à {dogName || "la fiche"}
+              </Button>
+            )}
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">{trailName || "Détail de la piste"}</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            {onEdit && <Button variant="outline" size="icon" onClick={() => onEdit(trail)}><Edit className="h-4 w-4" /></Button>}
+            {onDeleteSuccess && <Button variant="destructive" size="icon" onClick={handleDelete}><Trash2 className="h-4 w-4" /></Button>}
+          </div>
+        </div>
 
         {isMantrailingTrail(trail) ? (
           <MantrailingDetails

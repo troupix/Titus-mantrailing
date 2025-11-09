@@ -4,10 +4,10 @@ import { User } from "../types/entities";
 import { Dog } from "../types";
 import { Trail } from "../types/trail";
 import { TrainerDogCard, DogStats } from "./TrainerDogCard";
-import { DogDetailView } from "./DogDetailView";
-import { ActivityDetailView } from "./ActivityDetailView";
+import { DogDetailView } from "./DogDetailView"; 
+import { TrailDetail } from "./TrailDetail";
 import { useAuth } from "../contexts/AuthContext";
-import { getDogsByTrainer, claimDogWithShareToken } from "../utils/api";
+import { getDogsByTrainer, claimDogWithShareToken, getTrailByIdForTrainer } from "../utils/api";
 import {
   Dialog,
   DialogContent,
@@ -66,7 +66,7 @@ interface TrainerDashboardState {
 
   selectedActivityType: string | null; // Assuming ActivityType is a string for now
 
-  selectedTrailId: string | null;
+  selectedTrail: Trail | null;
 }
 
 /**
@@ -93,12 +93,10 @@ export const TrainerDashboard: React.FC<TrainerDashboardProps> = () => {
 
     selectedActivityType: null,
 
-    selectedTrailId: null,
+    selectedTrail: null,
   });
 
   const [trainerDogs, setTrainerDogs] = useState<Dog[]>([]);
-
-  const [trainerTrails, setTrainerTrails] = useState<Trail[]>([]);
 
   const [loading, setLoading] = useState(true);
 
@@ -133,8 +131,6 @@ export const TrainerDashboard: React.FC<TrainerDashboardProps> = () => {
         console.error("getDogsByTrainer did not return an array:", fetchedDogs);
         setTrainerDogs([]); // Fallback to empty array to prevent further errors
       }
-
-      setTrainerTrails([]); // Placeholder for now, real trails will be fetched later
     } catch (err) {
       console.error("Error fetching trainer data:", err);
 
@@ -190,7 +186,7 @@ export const TrainerDashboard: React.FC<TrainerDashboardProps> = () => {
       ...dashboardState,
       viewMode: "overview",
       selectedDogId: null,
-      selectedTrailId: null,
+      selectedTrail: null,
     });
   };
 
@@ -199,12 +195,21 @@ export const TrainerDashboard: React.FC<TrainerDashboardProps> = () => {
    * @description Navigates to the 'activity-detail' view for the selected trail.
    * @param {string} trailId - The ID of the trail to view.
    */
-  const handleSelectTrail = (trailId: string) => {
-    setDashboardState({
-      ...dashboardState,
-      viewMode: "activity-detail",
-      selectedTrailId: trailId,
-    });
+  const handleSelectTrail = async (trailId: string) => {
+    try {
+      setLoading(true);
+      const trail = await getTrailByIdForTrainer(trailId);
+      setDashboardState({
+        ...dashboardState,
+        viewMode: "activity-detail",
+        selectedTrail: trail,
+      });
+    } catch (error) {
+      console.error("Failed to fetch trail details:", error);
+      toast.error("Could not load trail details.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   /**
@@ -215,7 +220,7 @@ export const TrainerDashboard: React.FC<TrainerDashboardProps> = () => {
     setDashboardState({
       ...dashboardState,
       viewMode: "dog-detail",
-      selectedTrailId: null,
+      selectedTrail: null,
     });
   };
 
@@ -293,9 +298,6 @@ export const TrainerDashboard: React.FC<TrainerDashboardProps> = () => {
   const selectedDog = trainerDogs.find(
     (dog) => dog._id === dashboardState.selectedDogId
   );
-  const selectedTrail = trainerTrails.find(
-    (trail) => trail._id === dashboardState.selectedTrailId
-  ); // This will always be null for now
 
   return (
     <div className="h-full w-full flex flex-col">
@@ -368,10 +370,15 @@ export const TrainerDashboard: React.FC<TrainerDashboardProps> = () => {
             onSelectTrail={handleSelectTrail}
           />
         )}
-        {dashboardState.viewMode === "activity-detail" && selectedTrail && (
-          <ActivityDetailView
-            trail={selectedTrail}
-            onBack={handleBackToDogDetail}
+        {dashboardState.viewMode === "activity-detail" && dashboardState.selectedTrail && (
+          <TrailDetail
+            trail={dashboardState.selectedTrail}
+            dogName={selectedDog?.name}
+            onEdit={() => {
+              /* Implement edit functionality if needed */
+            }}
+            onDeleteSuccess={handleBackToDogDetail}
+            onBack={handleBackToDogDetail} // Pass the back handler
           />
         )}
       </div>
