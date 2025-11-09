@@ -1,8 +1,8 @@
 module.exports = {
   apps : [{
-    name   : "maximilien-api",
+    name   : "titus-mantrailing",
     script : "server.js",
-    cwd    : "/home/ubuntu/maximilien/", // Set the correct working directory
+    cwd    : "/home/ubuntu/titus-mantrailing/", // Set the correct working directory
     watch: false, // Explicitly disable file watching
     env_production: {
       NODE_ENV: "production"

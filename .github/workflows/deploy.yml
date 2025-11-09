@@ -22,8 +22,9 @@ jobs:
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm use 22
             set -e
-            sudo apt-get install ca-certificates -y
-            cd maximilien
+            echo "--> Navigating to application directory..."
+            cd /home/ubuntu/titus-mantrailing/
+
             echo "--> Pulling latest code..."
             git fetch origin
             git reset --hard origin/master
@@ -50,8 +51,7 @@ jobs:
             npm run build --prefix frontend;
             echo "--> Restarting application with PM2..."
             # Ensure the app is started, then restart it to apply changes.
-            # The '|| true' ensures the script doesn't fail if the app doesn't exist yet.
-            pm2 delete maximilien-api || true
+            pm2 delete titus-mantrailing || true
             pm2 start ecosystem.config.js --env production
             echo "--> Deployment complete."
 
@@ -73,6 +73,7 @@ jobs:
           major_pattern: "${{vars.GIT_SEMANTIC_VERSION_MAJOR_PATTERN}}"
           minor_pattern: "${{vars.GIT_SEMANTIC_VERSION_MINOR_PATTERN}}"
           version_format: "${major}.${minor}.${patch}"
+          bump_each_commit: "true"
           tag_prefix: "v" # It's a good practice to prefix tags with 'v'
       - name: Check if release already exists
         id: check_release
