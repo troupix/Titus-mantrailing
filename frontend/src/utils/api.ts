@@ -279,9 +279,19 @@ export const uploadHikePhotos = async (
   return response.data;
 };
 
-export const getDogTrailsForTrainer = async (
-  dogId: string
-): Promise<Trail[]> => {
+export const getTrailByIdForTrainer = async (
+  trailId: string
+): Promise<Trail> => {
+  const response = await api.get<Trail>(`/api/trainer/trails/${trailId}`);
+  return response.data;
+};
+
+/**
+ * Fetches all trails for a specific dog for the logged-in trainer.
+ * @param dogId The ID of the dog whose trails are to be fetched.
+ * @returns A promise that resolves to an array of trails.
+ */
+export const getTrailsByDogIdForTrainer = async (dogId: string): Promise<Trail[]> => {
   const response = await api.get<Trail[]>(`/api/trainer/dogs/${dogId}/trails`);
   return response.data;
 };

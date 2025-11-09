@@ -15,11 +15,11 @@ import {
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
-import { ArrowLeft, Calendar, Clock, MapPin, Users, MessageSquare, Target, TrendingUp, Award } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, MapPin, Users, MessageSquare, Target, TrendingUp, Award, RefreshCw } from "lucide-react";
 import { ActivityTypeStatsDisplay } from "./ActivityStatsCard";
 import { formatAge } from "../utils/utils";
 import { ActivityType } from "../types/activityConfig";
-import { getDogTrailsForTrainer } from "../utils/api";
+import { getTrailsByDogIdForTrainer } from "../utils/api";
 import { Card, CardContent } from "./ui/card";
 
 /**
@@ -51,11 +51,26 @@ export const DogDetailView: React.FC<DogDetailViewProps> = ({
 }) => {
   // State to manage the active tab for activity types
   const [activeTab, setActiveTab] = useState<ActivityType>("mantrailing");
-  const [trails, setTrails] = useState<Trail[]>([]); // Assuming dog has a trails property
+  const [trails, setTrails] = useState<Trail[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  useMemo(() => {
-    getDogTrailsForTrainer(dog._id!).then(setTrails);
-  }, [dog]);
+  const fetchTrails = React.useCallback(async () => {
+    if (!dog._id) return;
+    setIsLoading(true);
+    try {
+      const fetchedTrails = await getTrailsByDogIdForTrainer(dog._id);
+      setTrails(fetchedTrails);
+    } catch (error) {
+      console.error("Failed to fetch trails for dog:", error);
+      // Optionally, show a toast notification here
+    } finally {
+      setIsLoading(false);
+    }
+  }, [dog._id]);
+
+  React.useEffect(() => {
+    fetchTrails();
+  }, [fetchTrails]);
 
   // Filter trails based on the active activity tab
   const filteredTrails = trails.filter((trail) => {
@@ -132,9 +147,15 @@ export const DogDetailView: React.FC<DogDetailViewProps> = ({
             trails={filteredTrails}
           />
 
-          <h4 className="text-lg font-semibold mb-2 mt-4">
-            Pistes Mantrailing ({filteredTrails.length})
-          </h4>
+          <div className="flex items-center justify-between mb-2 mt-4">
+            <h4 className="text-lg font-semibold">
+              Pistes Mantrailing ({filteredTrails.length})
+            </h4>
+            <Button variant="ghost" size="icon" onClick={fetchTrails} disabled={isLoading}>
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
+
           <div className="space-y-2">
             {filteredTrails.length > 0 ? (
               filteredTrails.map((trail) => {
@@ -225,9 +246,15 @@ export const DogDetailView: React.FC<DogDetailViewProps> = ({
             trails={filteredTrails}
           />
 
-          <h4 className="text-lg font-semibold mb-2 mt-4">
-            Pistes Randonnée ({filteredTrails.length})
-          </h4>
+          <div className="flex items-center justify-between mb-2 mt-4">
+            <h4 className="text-lg font-semibold">
+              Pistes Randonnée ({filteredTrails.length})
+            </h4>
+             <Button variant="ghost" size="icon" onClick={fetchTrails} disabled={isLoading}>
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
+
           <div className="space-y-2">
             {filteredTrails.length > 0 ? (
               filteredTrails.map((trail) => {
