@@ -4,7 +4,7 @@
  * It includes dog's profile, activity-specific statistics, and a list of trails filtered by activity type.
  */
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Dog } from "../types";
 import {
   Trail, HikingTrail,

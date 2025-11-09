@@ -5,12 +5,15 @@ const mongoose = require('mongoose');
 
 jest.mock('../Model/hike'); // Mock the Hike model
 jest.mock('../utils/r2'); // Mock the r2 utility
-const { generateSignedUrl } = require('../utils/r2');
-const checkAuthToken = require('../utils/checkAuthToken');
+jest.mock('../utils/weatherService');
 jest.mock('../utils/checkAuthToken', () => jest.fn((req, res, next) => {
     req.user = { id: 'some-user-id' };
     next();
 }));
+
+const { generateSignedUrl } = require('../utils/r2');
+const { getWeather } = require('../utils/weatherService');
+const checkAuthToken = require('../utils/checkAuthToken');
 
 jest.setTimeout(10000);
 
@@ -58,6 +61,61 @@ describe('Hike API', () => {
             expect(res.statusCode).toEqual(201);
             expect(res.body).toMatchObject(newHike);
             expect(Hike.prototype.save).toHaveBeenCalledTimes(1);
+        });
+
+        it('should use track timestamp for weather when available', async () => {
+            const mockWeather = { temperature: 20, condition: 'sunny' };
+            getWeather.mockResolvedValue(mockWeather);
+
+            const mockHike = {
+                name: 'Track Hike',
+                userId: 'some-user-id',
+                date: '2024-01-15T12:00:00Z',
+                startLocation: { type: 'Point', coordinates: [5.0, 45.0] },
+                dogTrack: {
+                    features: [{
+                        properties: {
+                            timestamps: ['2024-01-15T08:30:00Z']
+                        }
+                    }]
+                }
+            };
+
+            Hike.prototype.save = jest.fn().mockResolvedValue(mockHike);
+
+            const res = await request(app)
+                .post('/api/hike')
+                .send(mockHike);
+
+            expect(res.statusCode).toEqual(201);
+            expect(getWeather).toHaveBeenCalledWith(5.0, 45.0, '2024-01-15', expect.any(Number));
+        });
+
+        it('should use userTrack timestamp if dogTrack unavailable', async () => {
+            const mockWeather = { temperature: 15, condition: 'cloudy' };
+            getWeather.mockResolvedValue(mockWeather);
+
+            const mockHike = {
+                name: 'User Track Hike',
+                date: '2024-01-15T12:00:00Z',
+                startLocation: { type: 'Point', coordinates: [5.0, 45.0] },
+                userTrack: {
+                    features: [{
+                        properties: {
+                            timestamps: ['2024-01-15T14:45:00Z']
+                        }
+                    }]
+                }
+            };
+
+            Hike.prototype.save = jest.fn().mockResolvedValue(mockHike);
+
+            const res = await request(app)
+                .post('/api/hike')
+                .send(mockHike);
+
+            expect(res.statusCode).toEqual(201);
+            expect(getWeather).toHaveBeenCalledWith(5.0, 45.0, '2024-01-15', expect.any(Number));
         });
 
         it('should handle errors on save', async () => {

@@ -6,6 +6,10 @@ const mongoose = require('mongoose');
 
 jest.mock('../Model/user');
 jest.mock('bcrypt');
+jest.mock('../utils/checkAuthToken', () => jest.fn((req, res, next) => {
+    req.user = { id: 'some-user-id' };
+    next();
+}));
 
 describe('User Management API', () => {
     afterEach(() => {
@@ -127,6 +131,49 @@ describe('User Management API', () => {
             expect(res.statusCode).toEqual(200);
             expect(res.body).toEqual({ message: 'User deleted' });
             expect(User.findByIdAndDelete).toHaveBeenCalledWith('some-id');
+        });
+
+        it('should handle errors on delete', async () => {
+            User.findByIdAndDelete.mockRejectedValue(new Error('Database error'));
+
+            const res = await request(app).delete('/api/users/some-id');
+
+            expect(res.statusCode).toEqual(400);
+            expect(res.body).toHaveProperty('message');
+        });
+    });
+
+    describe('GET /api/users/trainers', () => {
+        it('should return all trainers without passwords', async () => {
+            const mockTrainers = [
+                { username: 'trainer1', role: 'trainer' },
+                { username: 'trainer2', role: 'trainer' }
+            ];
+
+            User.find.mockReturnValue({
+                select: jest.fn().mockResolvedValue(mockTrainers)
+            });
+
+            const res = await request(app).get('/api/users/trainers');
+
+            expect(res.statusCode).toEqual(200);
+            expect(res.body).toEqual(mockTrainers);
+            expect(User.find).toHaveBeenCalledWith({ role: 'trainer' });
+        });
+
+        it('should handle errors', async () => {
+            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+            
+            User.find.mockReturnValue({
+                select: jest.fn().mockRejectedValue(new Error('Database error'))
+            });
+
+            const res = await request(app).get('/api/users/trainers');
+
+            expect(res.statusCode).toEqual(500);
+            expect(res.body).toHaveProperty('message');
+            
+            consoleErrorSpy.mockRestore();
         });
     });
 });

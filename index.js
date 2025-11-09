@@ -8,6 +8,7 @@ const mantrailingRouter = require('./Router/mantrailing');
 const hikeRouter = require('./Router/hike');
 const trainerRouter = require('./Router/trainer');
 const dogRouter = require('./Router/dog');
+const canicrossRouter = require('./Router/canicross');
 require('dotenv').config();
 
 
@@ -40,7 +41,8 @@ app.use('/api/mantrailing', mantrailingRouter);
 app.use('/api/hike', hikeRouter);
 app.use('/api/users', userManagementRouter);
 app.use('/api/trainer', trainerRouter);
-app.use('/api/dogs', dogRouter);
+app.use('/api/dog', dogRouter);
+app.use('/api/canicross', canicrossRouter);
 app.use(express.static(path.join(__dirname, 'frontend/build')));
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));

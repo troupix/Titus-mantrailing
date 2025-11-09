@@ -1,3 +1,4 @@
+import { ActivityType } from './activityConfig';
 export interface User {
   // Existing User properties
   // ...
@@ -50,4 +51,3 @@ export interface RegisterData {
 }
 
 // Import ActivityType if it's defined elsewhere, or define it here
-import { ActivityType } from './activityConfig';
