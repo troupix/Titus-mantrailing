@@ -205,14 +205,6 @@ export function LoginPage() {
                   {loading ? "Connexion..." : "Se connecter"}
                 </Button>
 
-                <div className="text-sm text-muted-foreground text-center mt-4">
-                  <p className="mb-2">Comptes de test :</p>
-                  <div className="space-y-1">
-                    <p>Handler: max@example.com</p>
-                    <p className="text-xs">Éducateur/Handler: claudia@example.com</p>
-                    <p className="text-xs text-muted-foreground/70">(mot de passe: n'importe quoi)</p>
-                  </div>
-                </div>
               </form>
             </TabsContent>
 
